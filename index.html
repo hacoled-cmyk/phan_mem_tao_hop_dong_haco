@@ -1,0 +1,3262 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HACO - Phần mềm Soạn thảo Trọn bộ Hợp đồng & Biên bản tự động</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    /* Document preview styling - Authentic Vietnamese Administrative Document Standard */
+    .document-page {
+      font-family: "Times New Roman", Times, serif;
+      font-size: 13pt;
+      line-height: 1.35;
+      color: #000;
+      background: #fff;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
+      width: 210mm;
+      min-height: 297mm;
+      padding: 20mm 20mm 20mm 30mm;
+      margin: 0 auto 30px auto;
+      box-sizing: border-box;
+      position: relative;
+      text-align: justify;
+      text-justify: inter-word;
+    }
+    @media (max-width: 860px) {
+      .document-page {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 15mm 15mm 15mm 20mm !important;
+        font-size: 11.5pt !important;
+      }
+    }
+    .document-page p {
+      margin: 0 0 5pt 0;
+      text-align: justify;
+      line-height: 1.35;
+    }
+    
+    .doc-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 8px 0;
+      font-size: 12pt;
+    }
+    .doc-table th, .doc-table td {
+      border: 1px solid #000;
+      padding: 5px 7px;
+      vertical-align: middle;
+    }
+    .doc-table th {
+      font-weight: bold;
+      text-align: center;
+      background-color: #f8f9fa;
+    }
+
+    .doc-party-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 6px 0;
+      font-size: 12.5pt;
+    }
+    .doc-party-table td {
+      border: none;
+      padding: 2px 4px;
+      vertical-align: top;
+    }
+
+    
+    /* Inline Word Editing Styles */
+    .document-page[contenteditable="true"] {
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .document-page[contenteditable="true"]:focus-within {
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.35), 0 8px 30px rgba(0,0,0,0.18) !important;
+    }
+    .edit-mode-active {
+      border: 2px dashed #3b82f6 !important;
+    }
+    .custom-clause-box {
+      border-left: 3px solid #3b82f6;
+      padding-left: 10px;
+      margin: 10px 0;
+      background: #f8fafc;
+    }
+
+    /* Modal Backdrop */
+    .modal-backdrop {
+      background-color: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(4px);
+    }
+
+    /* Print styles */
+    @media print {
+      body {
+        background: transparent !important;
+        padding: 0 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .document-page {
+        box-shadow: none !important;
+        margin: 0 !important;
+        width: 100% !important;
+        padding: 15mm !important;
+        page-break-after: always;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col font-sans">
+
+  <!-- Header Bar -->
+  <header class="no-print bg-slate-900 text-white border-b border-slate-800 px-6 py-3.5 sticky top-0 z-50 shadow-md">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-lg text-white shadow-inner">
+          HC
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+            HỆ THỐNG TRỌN BỘ HỢP ĐỒNG & BIÊN BẢN HACO
+            <span class="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded-full font-medium">NGUYÊN VĂN 100% ĐIỀU KHOẢN GỐC</span>
+          </h1>
+          <p class="text-xs text-slate-400">Giữ nguyên văn đầy đủ 7 Điều khoản hợp đồng chuẩn pháp lý, hỗ trợ linh hoạt 1 đến 5 đợt thanh toán</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button onclick="openDebtLedgerModal()" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold text-xs rounded-md shadow transition flex items-center gap-1.5 animate-pulse hover:animate-none">
+          <span>📊</span> Sổ Công Nợ Kế Toán <span id="headerLedgerBadge" class="bg-white text-slate-900 px-1.5 py-0.2 rounded-full text-[10px] font-black">2</span>
+        </button>
+        <button onclick="loadSampleToanThang()" class="px-3 py-1.5 bg-blue-700 hover:bg-blue-600 text-white text-xs font-semibold rounded-md shadow-sm transition flex items-center gap-1.5">
+          <span>⭐</span> Mẫu Toàn Thắng (3 Đợt)
+        </button>
+        <button onclick="loadSampleData()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium rounded-md border border-slate-700 transition flex items-center gap-1.5">
+          <span>🔄</span> Mẫu Minh Anh (2 Đợt)
+        </button>
+        <button onclick="clearAllData()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-rose-900/40 text-slate-300 hover:text-rose-200 text-xs font-medium rounded-md border border-slate-700 transition flex items-center gap-1">
+          <span>🗑️</span> Xóa trắng
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+    <!-- Main Workspace: Bố cục Trên - Dưới (Nhập liệu ở trên, Bản xem trước ở dưới) -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 space-y-8">
+
+    <!-- PHẦN 1: KHU VỰC NHẬP LIỆU & THIẾT LẬP HỢP ĐỒNG (Ở TRÊN - RỘNG RÃI, TIỆN DỤNG) -->
+    <section id="inputSection" class="no-print space-y-5">
+
+      <!-- Form Navigation Header -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+            📝
+          </div>
+          <div>
+            <h2 class="font-bold text-base text-slate-900 flex items-center gap-2">
+              1. KHU VỰC NHẬP LIỆU & THIẾT LẬP HỢP ĐỒNG
+              <span class="text-xs bg-blue-50 text-blue-700 border border-blue-200 font-semibold px-2 py-0.5 rounded-full">Bố cục Toàn Màn Hình</span>
+            </h2>
+            <p class="text-xs text-slate-500">Mọi thao tác nhập liệu rộng rãi, thoải mái. Bản xem trước văn bản A4 đặt ngay bên dưới.</p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" onclick="scrollToPreview()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm transition flex items-center gap-2 hover:shadow">
+            <span>👇 Xem trước văn bản bên dưới</span>
+          </button>
+          <button type="button" onclick="confirmAndSaveContractToLedger()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-sm transition flex items-center gap-1.5 hover:shadow">
+            <span>✅ Chốt HĐ & Chuyển Công Nợ</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Smart Paste Box (Full Width) -->
+      <!-- Smart Paste Box -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+        <div class="flex items-center justify-between mb-2">
+          <label class="font-bold text-sm text-slate-800 flex items-center gap-1.5">
+            <span class="text-blue-600">⚡</span> Dán nhanh thông tin Bên Mua (Bên A)
+          </label>
+          <span class="text-xs text-slate-500">Zalo, Email hoặc MST</span>
+        </div>
+        <textarea id="smartPasteInput" rows="3" placeholder="Copy & dán thông tin Bên Mua (Tên cty, địa chỉ, MST, điện thoại, đại diện...) vào đây rồi bấm 'Tự động trích xuất'." class="w-full text-xs p-2.5 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition resize-none"></textarea>
+        <button onclick="parseSmartInput()" class="mt-2 w-full py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition flex items-center justify-center gap-1.5">
+          <span>✨</span> Tự động trích xuất & Sinh số HĐ
+        </button>
+      </div>
+
+      <!-- Grid 2 Cột: Bên A / Bên B (Cột 1) và Thiết lập HĐ / Tiến độ thanh toán (Cột 2) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        
+        <!-- CỘT 1: Thông tin Bên A & Bên B -->
+        <div class="space-y-4">
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 divide-y divide-slate-100">
+            <!-- Section 1: Bên A -->
+        <div class="p-4 space-y-3">
+          <h3 class="font-bold text-sm text-slate-900 flex items-center gap-2">
+            <span class="w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-xs flex items-center justify-center font-bold">1</span>
+            Thông tin Bên Mua (Bên A)
+          </h3>
+
+          <div class="space-y-2 text-xs">
+            <div>
+              <label class="block text-slate-600 font-medium mb-1">Tên công ty / Đơn vị:</label>
+              <input type="text" id="buyerName" oninput="onBuyerNameChange()" class="w-full p-2 border border-slate-200 rounded-md font-medium text-slate-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="CÔNG TY TNHH...">
+            </div>
+            <div>
+              <label class="block text-slate-600 font-medium mb-1">Địa chỉ trụ sở:</label>
+              <input type="text" id="buyerAddress" oninput="updateAll()" class="w-full p-2 border border-slate-200 rounded-md text-slate-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="Số..., Đường..., Tỉnh/TP...">
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-slate-600 font-medium mb-1">Mã số thuế:</label>
+                <input type="text" id="buyerTaxCode" oninput="updateAll()" class="w-full p-2 border border-slate-200 rounded-md text-slate-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="0317300612">
+              </div>
+              <div>
+                <label class="block text-slate-600 font-medium mb-1">Số điện thoại:</label>
+                <input type="text" id="buyerPhone" oninput="updateAll()" class="w-full p-2 border border-slate-200 rounded-md text-slate-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="0944 070 797">
+              </div>
+            </div>
+            <div>
+              <label class="block text-slate-600 font-medium mb-1">Số tài khoản (STK) & Ngân hàng:</label>
+              <input type="text" id="buyerBank" oninput="updateAll()" class="w-full p-2 border border-slate-200 rounded-md text-slate-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="VD: 0317300612 - Ngân hàng ACB (hoặc để trống nếu chưa có)">
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-slate-600 font-medium mb-1">Người đại diện:</label>
+                <input type="text" id="buyerRep" oninput="updateAll()" class="w-full p-2 border border-slate-200 rounded-md text-slate-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="Bà Bùi Bích Ngọc">
+              </div>
+              <div>
+                <label class="block text-slate-600 font-medium mb-1">Chức vụ:</label>
+                <input type="text" id="buyerPosition" oninput="updateAll()" class="w-full p-2 border border-slate-200 rounded-md text-slate-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="Giám đốc">
+              </div>
+            </div>
+          </div>
+        </div>
+            <!-- Section 5: Bên B (HACO) xem thông tin -->
+        <div class="p-4">
+          <details class="text-xs group">
+            <summary class="font-semibold text-slate-700 cursor-pointer flex items-center justify-between py-1">
+              <span class="flex items-center gap-2">
+                <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-700 text-xs flex items-center justify-center font-bold">✓</span>
+                Thông tin Bên Bán (HACO Việt Nam - Đã cố định)
+              </span>
+              <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="mt-2.5 space-y-1.5 text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+              <div><strong>Đơn vị:</strong> CÔNG TY CP CÔNG NGHỆ HACO VIỆT NAM</div>
+              <div><strong>Địa chỉ:</strong> Ngách 57/92 Đường Quang Minh, Thôn Gia Thượng 2, Xã Quang Minh, Hà Nội</div>
+              <div><strong>MST:</strong> 0108701064 | <strong>Điện thoại:</strong> 024.2242.4488</div>
+              <div><strong>Đại diện:</strong> Ông Ngô Đức Hải - Giám đốc</div>
+              <div><strong>Số tài khoản:</strong> 1616.7777 - Techcombank Chi nhánh Hoàng Quốc Việt, Hà Nội</div>
+            </div>
+          </details>
+        </div>
+          </div>
+        </div>
+
+        <!-- CỘT 2: Thiết lập hợp đồng & Cấu hình Đợt thanh toán -->
+        <div class="space-y-4">
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 divide-y divide-slate-100">
+            <!-- Section 2: Thiết lập hợp đồng -->
+        <div class="p-4 space-y-3">
+          <h3 class="font-bold text-sm text-slate-900 flex items-center gap-2">
+            <span class="w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-xs flex items-center justify-center font-bold">2</span>
+            Thiết lập Số HĐ, Ngày & Thuế VAT
+          </h3>
+
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="block text-slate-600 font-medium">Số Hợp đồng:</label>
+                <button type="button" id="btnAutoContractNum" onclick="toggleAutoContractNumber()" class="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 font-semibold hover:bg-blue-200 transition flex items-center gap-0.5" title="Bấm để bật/tắt hoặc làm mới số tự động">
+                  <span id="autoContractNumStatus">⚡ Tự động: BẬT</span>
+                </button>
+              </div>
+              <input type="text" id="contractNumber" oninput="onManualContractNumberInput()" class="w-full p-2 border border-slate-200 rounded-md font-mono font-medium text-slate-800 bg-blue-50/40" placeholder="120626/HĐKT/TOANTHANG-HACO">
+            </div>
+            <div>
+              <label class="block text-slate-600 font-medium mb-1">Ngày ký hợp đồng:</label>
+              <input type="date" id="contractDate" oninput="onDateChange()" class="w-full p-2 border border-slate-200 rounded-md text-slate-800">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <label class="block text-slate-600 font-medium mb-1">Thuế VAT:</label>
+              <select id="vatRate" onchange="updateAll()" class="w-full p-2 border border-slate-200 rounded-md text-slate-800 bg-white">
+                <option value="8" selected>8% (Màn LED)</option>
+                <option value="10">10%</option>
+                <option value="0">0% (Không thuế)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-slate-600 font-medium mb-1">Phát sinh tăng/giảm (Thanh lý):</label>
+              <input type="number" id="adjustedAmount" value="0" oninput="updateAll()" class="w-full p-2 border border-slate-200 rounded-md text-slate-800" placeholder="Ví dụ: -13381200 nếu giảm">
+            </div>
+          </div>
+
+          <div class="text-xs">
+            <label class="block text-slate-600 font-medium mb-1">Tiêu đề hợp đồng (V/v):</label>
+            <input type="text" id="contractSubject" value="Cung cấp & Lắp đặt màn hình LED" oninput="updateAll()" class="w-full p-2 border border-slate-200 rounded-md text-slate-800">
+          </div>
+        </div>
+            <!-- Section 3: Cấu hình các Đợt Thanh toán (Tối đa 5 đợt) -->
+        <div class="p-4 space-y-3 bg-blue-50/30">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-bold text-sm text-slate-900 flex items-center gap-2">
+                <span class="w-5 h-5 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center font-bold">3</span>
+                Các Đợt Thanh toán (Tối đa 5 đợt)
+              </h3>
+              <p class="text-[11px] text-slate-500 mt-0.5">Tự động điền đầy đủ vào Điều 3 của Hợp đồng</p>
+            </div>
+            <button onclick="addPaymentInstallment()" id="btnAddPayment" class="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded shadow-sm transition flex items-center gap-1">
+              <span>➕</span> Thêm đợt
+            </button>
+          </div>
+
+          <!-- Quick presets -->
+          <div class="flex items-center gap-1.5 text-[11px]">
+            <span class="text-slate-500">Mẫu đợt nhanh:</span>
+            <button onclick="applyPaymentPreset([50, 50])" class="px-2 py-0.5 bg-white border border-slate-200 rounded hover:bg-slate-50 text-slate-700">2 đợt (50-50)</button>
+            <button onclick="applyPaymentPreset([40, 40, 20])" class="px-2 py-0.5 bg-white border border-slate-200 rounded hover:bg-slate-50 text-slate-700">3 đợt (40-40-20)</button>
+            <button onclick="applyPaymentPreset([30, 30, 30, 10])" class="px-2 py-0.5 bg-white border border-slate-200 rounded hover:bg-slate-50 text-slate-700">4 đợt (30-30-30-10)</button>
+            <button onclick="applyPaymentPreset([30, 30, 20, 15, 5])" class="px-2 py-0.5 bg-white border border-slate-200 rounded hover:bg-slate-50 text-slate-700">5 đợt</button>
+          </div>
+
+          <!-- Dynamic Payments Container -->
+          <div id="paymentsContainer" class="space-y-2.5">
+            <!-- Rendered via JS -->
+          </div>
+
+          <!-- Payment Total Status -->
+          <div class="flex items-center justify-between p-2.5 rounded-lg border text-xs" id="paymentStatusBox">
+            <span class="font-semibold" id="paymentTotalStatus">Tổng: 100% (Chuẩn)</span>
+            <button onclick="balanceLastPayment()" class="text-blue-600 hover:underline font-medium text-[11px]">⚡ Cân đối đợt cuối</button>
+          </div>
+        </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Section 4: Bảng danh mục hàng hóa & Tổng hợp (Full Width Card) -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-5 space-y-4">
+        <!-- Section 4: Bảng danh mục hàng hóa -->
+        <div class="p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-sm text-slate-900 flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-xs flex items-center justify-center font-bold">4</span>
+              Danh mục Hàng hóa / Dịch vụ
+            </h3>
+            <button onclick="addItemRow()" class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold rounded border border-emerald-200 transition flex items-center gap-1">
+              <span>➕</span> Thêm dòng
+            </button>
+          </div>
+
+          <!-- Dynamic Item Rows -->
+          <div id="itemsContainer" class="space-y-3 max-h-80 overflow-y-auto pr-1">
+            <!-- Items injected via JS -->
+          </div>
+
+          <!-- Quick calculations summary -->
+          <div class="bg-slate-50 rounded-lg p-3 text-xs space-y-1.5 border border-slate-200">
+            <div class="flex justify-between text-slate-600">
+              <span>Tổng tiền trước VAT:</span>
+              <span id="summarySubtotal" class="font-semibold text-slate-800">0 VNĐ</span>
+            </div>
+            <div class="flex justify-between text-slate-600">
+              <span>Tiền thuế VAT (<span id="summaryVatPercent">8</span>%):</span>
+              <span id="summaryVatAmount" class="font-semibold text-slate-800">0 VNĐ</span>
+            </div>
+            <div class="flex justify-between text-slate-900 font-bold border-t border-slate-200 pt-1.5 text-sm">
+              <span>Tổng cộng giá trị HĐ:</span>
+              <span id="summaryGrandTotal" class="text-blue-700">0 VNĐ</span>
+            </div>
+            <div class="text-[11px] text-slate-500 italic mt-1" id="summaryTotalInWords">
+              Bằng chữ: Không đồng
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Action Row under Items -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-200 bg-slate-50/70 -mx-4 -mb-4 md:-mx-5 md:-mb-5 p-4 rounded-b-xl">
+          <div class="text-xs text-slate-600 flex items-center gap-1.5">
+            <span>💡</span> Dữ liệu vừa nhập đã được đồng bộ tự động xuống 6 văn bản bên dưới.
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="scrollToPreview()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow transition flex items-center gap-2">
+              <span>👇 Cuộn xuống xem trước văn bản & Sửa Word</span>
+            </button>
+            <button type="button" onclick="confirmAndSaveContractToLedger()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow transition flex items-center gap-1.5">
+              <span>✅ Chốt HĐ & Chuyển Công Nợ</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- PHẦN 2: BẢN XEM TRƯỚC VĂN BẢN & SỬA TRỰC TIẾP WORD (Ở DƯỚI - CHUẨN KHỔ A4 210mm) -->
+    <section id="previewSection" class="space-y-4 pt-6 border-t-2 border-slate-300">
+
+      <!-- Preview Header Banner -->
+      <div class="no-print bg-slate-900 text-white p-3.5 rounded-xl shadow flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">📄</span>
+          <div>
+            <h2 class="text-sm md:text-base font-bold text-white flex items-center gap-2">
+              2. BẢN XEM TRƯỚC VĂN BẢN & CHỈNH SỬA TRỰC TIẾP (WORD PREVIEW)
+              <span class="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2.5 py-0.5 rounded-full font-medium">Khổ A4 Chuẩn 210mm</span>
+            </h2>
+            <p class="text-xs text-slate-400">Xem trực quan văn bản như trong Word, nhấp trực tiếp vào chữ để sửa hoặc thêm điều khoản</p>
+          </div>
+        </div>
+        <button type="button" onclick="scrollToInput()" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 transition flex items-center gap-1.5 hover:text-white">
+          <span>☝️ Cuộn lên phần nhập liệu</span>
+        </button>
+      </div>
+
+      <!-- Action & Tab Bar (Sticky on scroll) -->
+      <!-- Action & Tab Bar -->
+      <div class="no-print bg-white p-3 rounded-xl shadow-sm border border-slate-200 space-y-2.5 sticky top-16 z-40">
+        <!-- Top Row: Document Tabs & Main Action Buttons -->
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <!-- Document Tabs -->
+          <div class="flex flex-wrap items-center gap-1 bg-slate-100 p-1 rounded-lg">
+            <button id="tabBtn_contract" onclick="switchTab('contract')" class="px-2.5 py-1.5 text-xs font-semibold rounded-md bg-white text-blue-700 shadow-sm transition">
+              1. Hợp đồng
+            </button>
+            <button id="tabBtn_dntt" onclick="switchTab('dntt')" class="px-2.5 py-1.5 text-xs font-medium rounded-md text-slate-600 hover:text-slate-900 transition flex items-center gap-1">
+              <span>💳</span> 2. Giấy ĐNTT
+            </button>
+            <button id="tabBtn_bbnt_kt" onclick="switchTab('bbnt_kt')" class="px-2.5 py-1.5 text-xs font-medium rounded-md text-slate-600 hover:text-slate-900 transition">
+              3. BBNT Kỹ thuật
+            </button>
+            <button id="tabBtn_bbnt" onclick="switchTab('bbnt')" class="px-2.5 py-1.5 text-xs font-medium rounded-md text-slate-600 hover:text-slate-900 transition">
+              4. BBNT Sử dụng
+            </button>
+            <button id="tabBtn_quyet_toan" onclick="switchTab('quyet_toan')" class="px-2.5 py-1.5 text-xs font-medium rounded-md text-slate-600 hover:text-slate-900 transition flex items-center gap-1">
+              <span>📐</span> 5. Bảng Quyết toán
+            </button>
+            <button id="tabBtn_thanhly" onclick="switchTab('thanhly')" class="px-2.5 py-1.5 text-xs font-medium rounded-md text-slate-600 hover:text-slate-900 transition">
+              6. Thanh lý (BBTL)
+            </button>
+          </div>
+
+          <!-- Primary Actions -->
+          <div class="flex flex-wrap items-center gap-1.5">
+            <button onclick="confirmAndSaveContractToLedger()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-sm transition flex items-center gap-1.5 ring-2 ring-emerald-500/30" title="Chốt hợp đồng và chuyển sang Sổ theo dõi công nợ của kế toán">
+              <span>✅</span> Chốt HĐ & Chuyển Công Nợ
+            </button>
+            <button onclick="downloadCurrentDoc()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition flex items-center gap-1.5" title="Tải văn bản hiện tại dạng file Word (.doc)">
+              <span>📥</span> Tải file Word (.doc)
+            </button>
+            <button onclick="printDocument()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-medium rounded-lg shadow-sm transition flex items-center gap-1">
+              <span>🖨️</span> In / PDF
+            </button>
+            <button onclick="downloadAllDocs()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition flex items-center gap-1.5" title="Tải trọn bộ 5 văn bản và tất cả các đợt ĐNTT">
+              <span>📦</span> Tải trọn bộ
+            </button>
+          </div>
+        </div>
+
+        <!-- Bottom Row: Live Word Editor Toolbar (Sửa trực tiếp trên văn bản) -->
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 bg-slate-50/90 -mx-3 -mb-3 px-3 py-2 rounded-b-xl">
+          <div class="flex flex-wrap items-center gap-1.5">
+            <span class="text-xs font-bold text-slate-700 flex items-center gap-1">
+              <span>✍️</span> Sửa trực tiếp Word:
+            </span>
+            <button id="toggleEditModeBtn" onclick="toggleEditMode()" class="px-2 py-0.5 text-[11px] font-semibold rounded bg-blue-100 text-blue-800 border border-blue-300 hover:bg-blue-200 transition">
+              ✓ Đang BẬT
+            </button>
+            <div class="h-4 w-px bg-slate-300 mx-1"></div>
+            <!-- Formatting Buttons -->
+            <button onclick="formatDoc('bold')" class="px-2 py-0.5 text-xs font-black rounded bg-white hover:bg-slate-200 border border-slate-300 shadow-2xs" title="In đậm (Ctrl+B)">
+              B
+            </button>
+            <button onclick="formatDoc('italic')" class="px-2 py-0.5 text-xs italic font-serif rounded bg-white hover:bg-slate-200 border border-slate-300 shadow-2xs" title="In nghiêng (Ctrl+I)">
+              I
+            </button>
+            <button onclick="formatDoc('underline')" class="px-2 py-0.5 text-xs underline rounded bg-white hover:bg-slate-200 border border-slate-300 shadow-2xs" title="Gạch chân (Ctrl+U)">
+              U
+            </button>
+            <div class="h-4 w-px bg-slate-300 mx-1"></div>
+            <!-- Quick Add Custom Clause -->
+            <button onclick="addCustomClause()" class="px-2.5 py-0.5 text-[11px] font-medium rounded-md bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 transition flex items-center gap-1">
+              <span>➕</span> Thêm điều khoản khách yêu cầu
+            </button>
+            <button onclick="resetDocToGenerated()" class="px-2 py-0.5 text-[11px] font-medium rounded-md bg-slate-200 hover:bg-slate-300 text-slate-700 transition" title="Khôi phục lại nội dung gốc được sinh tự động">
+              🔄 Khôi phục mẫu gốc
+            </button>
+          </div>
+
+          <div class="text-[11px] text-slate-500 italic flex items-center gap-1">
+            <span>💡</span> Nhấp chuột vào bất kỳ đoạn chữ nào để gõ sửa như trong Word
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview Container (Full Width background, Centered A4 page, Natural scrolling) -->
+      <div class="w-full bg-slate-300/70 p-4 md:p-8 rounded-2xl flex justify-center overflow-x-auto shadow-inner min-h-[900px]">
+        <!-- DOC 1: HỢP ĐỒNG KINH TẾ (100% NGUYÊN VĂN GỐC TẤT CẢ 7 ĐIỀU KHOẢN) -->
+        <div id="preview_contract" class="document-page" contenteditable="true" spellcheck="false">
+          <div style="text-align: center; margin-bottom: 12px;">
+            <div style="font-weight: bold; font-size: 13pt;">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
+            <div style="font-weight: bold; font-size: 13pt;">Độc Lập – Tự Do – Hạnh Phúc</div>
+            <div style="font-weight: bold; font-size: 13pt; margin-top: 2px;">--------***--------</div>
+          </div>
+
+          <div style="text-align: center; margin-bottom: 15px;">
+            <div style="font-weight: bold; font-size: 16pt;">HỢP ĐỒNG KINH TẾ</div>
+            <div style="font-weight: bold; font-size: 13pt; margin-top: 3px;">Số: <span class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</span></div>
+            <div style="font-size: 13pt; font-style: italic;">(V/v: <span class="val-subject">Cung cấp & Lắp đặt màn hình LED</span>)</div>
+          </div>
+
+          <div style="font-size: 12.5pt; margin-bottom: 12px; text-align: justify;">
+            <p style="margin: 3px 0;">Căn cứ vào Luật Dân sự số 91/2015/QH13, được Quốc Hội Nước Cộng Hòa Xã Hội Chủ Nghĩa Việt Nam thông qua ngày 24/11/2015 tại kỳ họp thứ 7 Quốc Hội khóa XI;</p>
+            <p style="margin: 3px 0;">Căn cứ vào Luật Thương Mại số 36/2005/QH11, được Quốc Hội Nước Cộng Hòa Xã Hội Chủ Nghĩa Việt Nam thông qua ngày 14/06/2005 tại kỳ họp thứ 7 Quốc Hội khóa XI;</p>
+            <p style="margin: 3px 0;">Căn cứ theo nhu cầu và khả năng phục vụ của mỗi bên.</p>
+            <p style="margin: 8px 0 4px 0;">Hôm nay, ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> chúng tôi gồm:</p>
+          </div>
+
+          <table class="doc-party-table">
+            <tr>
+              <td style="width: 110px; font-weight: bold;">BÊN A</td>
+              <td style="width: 15px; font-weight: bold;">:</td>
+              <td style="font-weight: bold;"><span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span></td>
+            </tr>
+            <tr>
+              <td>Địa chỉ</td>
+              <td>:</td>
+              <td><span class="val-buyer-addr">Số 85/8 Nguyễn Đình Chiều, Khu Phố Đông B, phường Đông Hoà, Thành phố Hồ Chí Minh, Việt Nam</span></td>
+            </tr>
+            <tr>
+              <td>Điện thoại</td>
+              <td>:</td>
+              <td><span class="val-buyer-phone">0944 070 797</span></td>
+            </tr>
+            <tr>
+              <td>Mã số thuế</td>
+              <td>:</td>
+              <td><span class="val-buyer-tax">0317300612</span></td>
+            </tr>
+            <tr>
+              <td>Số tài khoản</td>
+              <td>:</td>
+              <td><span class="val-buyer-bank">0317300612 - Ngân hàng TMCP Á Châu (ACB) - Chi nhánh Đông Hoà</span></td>
+            </tr>
+            <tr>
+              <td>Đại diện</td>
+              <td>:</td>
+              <td><span class="val-buyer-rep">Bà Bùi Bích Ngọc</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Chức vụ: <span class="val-buyer-pos">Giám đốc</span></td>
+            </tr>
+            <tr><td colspan="3" style="padding: 4px 0;"></td></tr>
+            <tr>
+              <td style="font-weight: bold;">BÊN B</td>
+              <td style="font-weight: bold;">:</td>
+              <td style="font-weight: bold;">CÔNG TY CP CÔNG NGHỆ HACO VIỆT NAM</td>
+            </tr>
+            <tr>
+              <td>Địa chỉ</td>
+              <td>:</td>
+              <td>Ngách 57/92 Đường Quang Minh, Thôn Gia Thượng 2, Xã Quang Minh, thành phố Hà Nội, Việt Nam</td>
+            </tr>
+            <tr>
+              <td>Điện thoại</td>
+              <td>:</td>
+              <td>024.2242.4488</td>
+            </tr>
+            <tr>
+              <td>Mã số thuế</td>
+              <td>:</td>
+              <td>0108701064</td>
+            </tr>
+            <tr>
+              <td>Đại diện</td>
+              <td>:</td>
+              <td>Ông Ngô Đức Hải &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Chức vụ: Giám đốc</td>
+            </tr>
+            <tr>
+              <td>Tài khoản</td>
+              <td>:</td>
+              <td>1616.7777 - Tại Ngân hàng TMCP Kỹ Thương Việt Nam (Techcombank) – Chi nhánh Hoàng Quốc Việt, Hà Nội</td>
+            </tr>
+          </table>
+
+          <p style="margin: 10px 0; font-style: italic;">Sau khi bàn bạc, hai bên thống nhất ký hợp đồng <span class="val-subject-lower">cung cấp và lắp đặt màn hình LED</span> với các nội dung như sau:</p>
+
+          <!-- ĐIỀU 1 -->
+          <div style="font-weight: bold; margin-top: 14px; font-size: 13pt;">ĐIỀU 1. ĐỐI TƯỢNG & GIÁ TRỊ HỢP ĐỒNG</div>
+          <p style="margin: 4px 0;">Bên A đồng ý mua và Bên B đồng ý cung cấp và lắp đặt màn hình LED cho Bên A với các hạng mục chi tiết như sau:</p>
+
+          <table class="doc-table">
+            <thead>
+              <tr>
+                <th style="width: 35px;">TT</th>
+                <th>Tên vật tư hàng hóa, dịch vụ</th>
+                <th style="width: 50px;">SL</th>
+                <th style="width: 50px;">ĐVT</th>
+                <th style="width: 105px;">Giá tiền</th>
+                <th style="width: 115px;">Thành tiền</th>
+              </tr>
+            </thead>
+            <tbody id="contractItemsTbody"></tbody>
+            <tfoot>
+              <tr>
+                <td colspan="5" style="text-align: right; font-weight: bold;">Tổng cộng (VNĐ):</td>
+                <td style="text-align: right; font-weight: bold;"><span class="val-subtotal">0</span></td>
+              </tr>
+              <tr>
+                <td colspan="5" style="text-align: right; font-weight: bold;">VAT <span class="val-vat-rate">8</span>%:</td>
+                <td style="text-align: right; font-weight: bold;"><span class="val-vat-amt">0</span></td>
+              </tr>
+              <tr>
+                <td colspan="5" style="text-align: right; font-weight: bold;">Tổng cộng bao gồm VAT <span class="val-vat-rate">8</span>%:</td>
+                <td style="text-align: right; font-weight: bold;"><span class="val-grand-total">0</span></td>
+              </tr>
+            </tfoot>
+          </table>
+
+          <p style="margin: 6px 0; font-weight: bold;">(Bằng chữ: <span class="val-grand-words">Không đồng chẵn./.</span>)</p>
+          <p style="margin: 2px 0 10px 0; font-style: italic;">Chi phí trên đã bao gồm thuế GTGT <span class="val-vat-rate">8</span>%.</p>
+
+          <!-- ĐIỀU 2 -->
+          <div style="font-weight: bold; margin-top: 14px;">ĐIỀU 2: THỜI GIAN BÀN GIAO VÀ ĐỊA ĐIỂM THI CÔNG</div>
+          <p style="margin: 3px 0; text-align: justify;">Sau khi Bên A kí hợp đồng với Bên B, Bên B sẽ thi công, cài đặt màn LED trong vòng 05-07 ngày kể từ ngày kí hợp đồng và nhận thanh toán Đợt 1.</p>
+          <p style="margin: 3px 0;">Địa điểm thi công: Theo yêu cầu bên A</p>
+
+          <!-- ĐIỀU 3 -->
+          <div style="font-weight: bold; margin-top: 14px;">ĐIỀU 3: NGHIỆM THU VÀ THANH TOÁN</div>
+          <p style="margin: 3px 0; font-weight: bold;">3.1. Nghiệm thu sản phẩm:</p>
+          <p style="margin: 3px 0;">Bên A phối hợp với Bên B nghiệm thu sản phẩm tại vị trí thi công.</p>
+          
+          <p style="margin: 5px 0 3px 0; font-weight: bold;">3.2. Tiến độ thanh toán và phương thức thanh toán:</p>
+          <p style="margin: 2px 0;">Tổng giá trị hợp đồng: <strong><span class="val-grand-total">0</span> VNĐ</strong></p>
+          <p style="margin: 2px 0;">(Bằng chữ: <i><span class="val-grand-words">Không đồng chẵn./.</span></i>)</p>
+          <p style="margin: 4px 0;">Bên A sẽ tạm ứng và thanh toán cho Bên B bằng hình thức chuyển khoản qua Ngân hàng và chia làm các đợt sau:</p>
+          
+          <!-- Dynamic payment clauses -->
+          <div id="contractPaymentClauses" style="margin: 4px 0;"></div>
+          
+          <p style="margin: 6px 0 2px 0;">Hồ sơ thanh toán gồm:</p>
+          <ul style="margin: 0; padding-left: 25px;">
+            <li>Giấy đề nghị thanh toán;</li>
+            <li>Hóa đơn giá trị gia tăng;</li>
+            <li>Biên bản nghiệm thu;</li>
+            <li>CO, CQ sản phẩm.</li>
+          </ul>
+          <p style="margin: 4px 0;">Đồng tiền thanh toán: Đồng Việt Nam.</p>
+          <p style="margin: 3px 0; text-align: justify;">Trường hợp chậm thanh toán (nguyên nhân không do lỗi của Bên B), Bên A sẽ phải trả lãi đối với số tiền chậm trả theo lãi suất cơ bản do Ngân hàng Nhà nước công bố tương ứng với thời gian chậm trả tại thời điểm thanh toán. Sau thời hạn thanh toán 15 ngày, nếu Bên A không hoàn thành nghĩa vụ thanh toán, Bên B có quyền tháo dỡ và thu hồi hàng hóa, có phải báo trước để tránh ảnh hưởng đến hoạt động của Bên A.</p>
+          <p style="margin: 3px 0; text-align: justify;">Quyền sở hữu đối với toàn bộ hàng hóa/thiết bị nêu trên vẫn thuộc về Bên B (Bên bán) cho đến khi Bên A (Bên mua) hoàn tất 100% nghĩa vụ thanh toán theo Hợp đồng.</p>
+
+          <!-- ĐIỀU 4 (100% NGUYÊN VĂN GỐC) -->
+          <div style="font-weight: bold; margin-top: 14px;">ĐIỀU 4. CAM KẾT VÀ TRÁCH NHIỆM CỦA MỖI BÊN</div>
+          <p style="margin: 4px 0 2px 0; font-weight: bold;">Trách nhiệm của bên A</p>
+          <ul style="margin: 0 0 8px 0; padding-left: 22px; list-style-type: disc; text-align: justify;">
+            <li style="margin: 2px 0;">Cung cấp đầy đủ thông tin cho Bên B để Bên B thi công</li>
+            <li style="margin: 2px 0;">Chịu trách nhiệm về các phát sinh bên ngoài thỏa thuận thi công ban đầu, phát sinh không phải do bên B gây ra như: thay đổi phương án thi công ban đầu, thay đổi kích thước, vị trí lắp đặt, thay đổi màu sắc alumi...</li>
+            <li style="margin: 2px 0;">Cử cán bộ chịu trách nhiệm giám sát thường xuyên theo dõi giải quyết các vấn đề vướng mắc phát sinh trong quá trình thi công.</li>
+            <li style="margin: 2px 0;">Chủ trì, phối hợp cùng Bên B tổ chức nghiệm thu khi công việc được hoàn thành sau 03 ngày làm việc theo đúng các trình tự và quy định của pháp luật. Nếu trong vòng 03 ngày sau khi Bên B đã lắp đặt hoàn thiện thiết bị đúng quy trình kỹ thuật, hàng hóa được giao đúng chủng loại mẫu mã mà Bên A đã chọn, đã gửi biên bản bàn giao thiết bị cho Bên A mà bên A không phản hồi cho bên B thì hợp đồng này mặc nhiên được nghiệm thu và Bên A phải hoàn thành thủ tục thanh toán cho Bên B.</li>
+            <li style="margin: 2px 0;">Thanh toán cho Bên B theo đúng Điều 3 của Hợp đồng. Cử cán bộ chịu trách nhiệm giám sát thường xuyên theo dõi giải quyết các vấn đề vướng mắc phát sinh trong quá trình bàn giao thiết bị.</li>
+            <li style="margin: 2px 0;">Trường hợp chậm thanh toán (nguyên nhân không do lỗi của Bên B), Bên A sẽ phải trả lãi đối với số tiền chậm trả theo lãi suất cơ bản do Ngân hàng Nhà nước công bố tương ứng với thời gian chậm trả tại thời điểm thanh toán.</li>
+          </ul>
+
+          <p style="margin: 6px 0 2px 0; font-weight: bold;">Trách nhiệm của Bên B</p>
+          <ul style="margin: 0 0 8px 0; padding-left: 22px; list-style-type: disc; text-align: justify;">
+            <li style="margin: 2px 0;">Đảm bảo cung cấp đúng chất lượng, mẫu mã, chủng loại, đủ số lượng, đúng quy cách, đúng tính năng kỹ thuật, đúng nhà sản xuất và mới 100%.</li>
+            <li style="margin: 2px 0;">Đảm bảo hoạt động ổn định của thiết bị, tính thẩm mỹ của công trình.</li>
+            <li style="margin: 2px 0;">Đảm bảo thời gian thi công đúng tiến độ.</li>
+            <li style="margin: 2px 0;">Đào tạo hướng dẫn sử dụng đúng quy trình kỹ thuật.</li>
+            <li style="margin: 2px 0;">Chịu trách nhiệm về an toàn lao động trong thời gian thi công.</li>
+            <li style="margin: 2px 0;">Thực hiện các chế độ bảo hành bảo trì theo Điều 5.</li>
+            <li style="margin: 2px 0;">Cử cán bộ kỹ thuật phối hợp với Bên A tiến hành nghiệm thu, hoàn chỉnh hồ sơ thanh toán theo yêu cầu của Bên A và các quy định khác.</li>
+            <li style="margin: 2px 0;">Cung cấp hồ sơ thanh toán cho Bên A khi thanh quyết toán hợp đồng.</li>
+            <li style="margin: 2px 0;">Cam kết giao cung cấp, lắp đặt bàn giao thiết bị đúng thời hạn đã nêu ở Điều 2. Trong trường hợp Bên B bàn giao chậm trễ làm tổn thất cho Bên A thì Bên B cam kết chi trả đầy đủ cho bên A toàn bộ chi phi tổn thất do việc bàn giao chậm mang lại.</li>
+            <li style="margin: 2px 0;">Trường hợp Bên B thi công không đạt chất lượng theo yêu cầu thì Bên B phải làm lại sản phẩm mà Bên A không phải trả thêm bất cứ chi phí nào. Cử cán bộ hỗ trợ việc lắp đặt, bàn giao sản phẩm cùng Bên A. Nếu làm lại mà không đạt yêu cầu thì Bên A có quyền đơn phương chấm dứt hợp đồng và Bên B phải hoàn trả lại số tiền mà Bên A đã tạm ứng cho Bên B.</li>
+            <li style="margin: 2px 0;">Thời gian hoàn thành thi công chậm so quy định của hợp đồng thì Bên B phải chịu phạt một khoản 0.05%/ngày/giá trị hợp đồng nhân với số ngày chậm tiến độ. Thời gian chậm hoàn thành không được quá 15 ngày, nếu thời gian hoàn thi công chậm quá 15 so với thời gian trong hợp đồng thì Bên A có quyền đơn phương chấm dứt hợp đồng và Bên B hoàn trả lại số tiền tạm ứng cho Bên A đồng thời phải trả cho Bên A thêm một khoản phạt tương ứng số tiền Bên A đã tạm ứng trước đó.</li>
+          </ul>
+
+          <!-- ĐIỀU 5 (100% NGUYÊN VĂN GỐC) -->
+          <div style="font-weight: bold; margin-top: 14px;">ĐIỀU 5: CHẾ ĐỘ BẢO HÀNH</div>
+          <p style="margin: 3px 0; text-align: justify;">Sản phẩm được bảo hành 12 tháng tính từ thời gian bàn giao đưa vào sử dụng.</p>
+          <p style="margin: 3px 0; text-align: justify;">Khi nhận được thông báo về bảo hành sản phẩm, Bên B có trách nhiệm cử cán bộ kỹ thuật tiến hành tiếp nhận bảo hành thiết bị cho Bên A, thời gian xử lý bảo hành chậm nhất không quá 24h kể từ khi nhận được thông báo của Bên A qua zalo/sms/điện thoại/mail hoặc bằng các hình thức thông báo tương tự.</p>
+          <p style="margin: 3px 0; text-align: justify;">Nội dung bảo hành bao gồm khắc phục, sửa chữa khiếm khuyết, lỗi, hỏng do việc thi công của Bên B gây ra hoặc do hỏng, khiếm khuyết của sản phẩm do lỗi của nhà sản xuất mà không do Bên A. Bên B chịu toàn bộ chi phí liên quan đến việc bảo hành.</p>
+          <p style="margin: 3px 0; text-align: justify;">Trong thời gian bảo hành, nếu màn hình LED bị hỏng, khiếm khuyết thuộc trách nhiệm của Bên B mà Bên B không tiến hành bảo hành hoặc bảo hành chậm, không đúng thời gian yêu cầu thì Bên A sẽ thuê sửa chữa và có quyền yêu cầu Bên B trả chi phí.</p>
+          <p style="margin: 3px 0; text-align: justify;">Bên B có trách nhiệm thay thế, sửa chữa miễn phí những vật tư, thiết bị theo đúng thông số kỹ thuật trong Hợp đồng trong thời hạn bảo hành. Vật tư sẽ một đổi một sau khi nhận được sản phẩm bảo hành từ Bên A, trừ trường hợp các bên có thỏa thuận khác.</p>
+          <p style="margin: 3px 0; text-align: justify;">Bên B từ chối bảo hành sản phẩm trong những trường hợp sau: Điều khoản thanh toán không được thực hiện đúng, chập cháy do nguồn điện, thiên tai lũ lụt gây hỏng hóc, cài đặt mật khẩu hoặc tự ý tháo lắp thay đổi kết cấu của thiết bị mà không có sự đồng ý bằng văn bản của Bên B.</p>
+
+          <!-- ĐIỀU 6 (100% NGUYÊN VĂN GỐC) -->
+          <div style="font-weight: bold; margin-top: 14px;">ĐIỀU 6: TRÁCH NHIỆM THỰC HIỆN HỢP ĐỒNG VÀ PHẠT VI PHẠM</div>
+          <p style="margin: 3px 0; text-align: justify;">Hai Bên cam kết thực hiện đầy đủ, thiện chí các nghĩa vụ tại Hợp đồng này. Nếu Bên nào không thực hiện một hoặc một số trách nhiệm đã cam kết và/hoặc cố tình kéo dài thời gian, gây thiệt hại cho Bên kia trong quá trình thực hiện Hợp đồng thì phải bồi thường thiệt hại cho Bên kia theo quy định của pháp luật và chịu mức phạt vi phạm là 8% phần giá trị Hợp đồng.</p>
+
+          <!-- ĐIỀU 7 (100% NGUYÊN VĂN GỐC) -->
+          <div style="font-weight: bold; margin-top: 14px;">ĐIỀU 7: ĐIỀU KHOẢN CHUNG</div>
+          <p style="margin: 3px 0; text-align: justify;">Mọi bất đồng, tranh chấp liên quan đến Hợp đồng này hai bên sẽ giải quyết trên cơ sở thương lượng với tinh thần thiện chí, tôn trọng quyền và nghĩa vụ hợp pháp của mỗi bên. Trong trường hợp hai bên không đạt được sự thống nhất, một trong hai bên hoặc cả hai bên đều có quyền làm đơn khởi kiện yêu cầu Tòa án có thẩm quyền giải quyết. Phán quyết của Tòa án là phán quyết cuối cùng các bên phải tuân theo. Mọi chi phí cho việc giải quyết tranh chấp tại Tòa án sẽ do bên thua kiện chịu, trừ khi có thỏa thuận khác.</p>
+          <p style="margin: 3px 0; text-align: justify;">Những bổ sung điều chỉnh hợp đồng phải được sự đồng ý của hai bên bằng văn bản hoặc phụ lục hợp đồng (được coi là bộ phận không tách rời của Hợp đồng).</p>
+          <p style="margin: 3px 0; text-align: justify;">Hợp đồng này có hiệu lực kể từ ngày bên A chuyển tiền tạm ứng đợt 1 cho bên B, và hết hiệu lực khi hai bên hoàn thành tất cả nghĩa vụ đối với bên còn lại.</p>
+          <p style="margin: 3px 0; text-align: justify;">Hợp đồng này gồm 07 Điều, được lập thành 04 (bốn) bản có nội dung và giá trị pháp lý như nhau, mỗi bên giữ 02 (hai) bản.</p>
+
+          <!-- Chữ ký 2 bên -->
+          <table style="width: 100%; border: none; border-collapse: collapse; margin-top: 30px;" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+              <td style="width: 50%; text-align: center; vertical-align: top; border: none; padding: 0;">
+                <div style="font-weight: bold; font-size: 13pt;">ĐẠI DIỆN BÊN A</div>
+                <div style="font-style: italic; font-size: 11pt; color: #555;">(Ký, ghi rõ họ tên và đóng dấu)</div>
+                <div style="height: 75px;">&nbsp;</div>
+                <div style="font-weight: bold; font-size: 13pt;"><span class="val-buyer-rep">Bà Bùi Bích Ngọc</span></div>
+              </td>
+              <td style="width: 50%; text-align: center; vertical-align: top; border: none; padding: 0;">
+                <div style="font-weight: bold; font-size: 13pt;">ĐẠI DIỆN BÊN B</div>
+                <div style="font-style: italic; font-size: 11pt; color: #555;">(Ký, ghi rõ họ tên và đóng dấu)</div>
+                <div style="height: 75px;">&nbsp;</div>
+                <div style="font-weight: bold; font-size: 13pt;">Ông Ngô Đức Hải</div>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- DOC 2: GIẤY ĐỀ NGHỊ THANH TOÁN / TẠM ỨNG (CHO PHÉP CHỌN ĐỢT 1 -> 5) -->
+        <div id="preview_dntt" class="document-page" contenteditable="true" spellcheck="false" style="display: none;">
+          <!-- Installment Selector Pills -->
+          <div class="no-print bg-blue-50 border border-blue-200 rounded-lg p-2.5 mb-4 flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs font-bold text-blue-900">👉 Đang xem Đợt:</span>
+              <div id="previewPaymentPills" class="flex flex-wrap items-center gap-1"></div>
+            </div>
+            <span class="text-[11px] text-blue-700 italic">Chọn đợt để xem và tải đúng Giấy ĐNTT của đợt đó</span>
+          </div>
+
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+            <tr>
+              <td style="width: 50%; vertical-align: top; text-align: center;">
+                <div style="font-weight: bold; font-size: 12pt;">CÔNG TY CỔ PHẦN CÔNG NGHỆ</div>
+                <div style="font-weight: bold; font-size: 12pt;">HACO VIỆT NAM</div>
+                <div style="font-size: 11pt; margin-top: 3px;" id="dnttDocNumber">Số: 01/DNTU/HACO</div>
+              </td>
+              <td style="width: 50%; vertical-align: top; text-align: center;">
+                <div style="font-weight: bold; font-size: 12pt;">CỘNG HOÀ XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
+                <div style="font-weight: bold; font-size: 12pt;">Độc lập - Tự do - Hạnh phúc</div>
+                <div style="font-size: 11pt; margin-top: 2px;">---------***---------</div>
+              </td>
+            </tr>
+          </table>
+
+          <div style="text-align: right; font-style: italic; margin-bottom: 15px; font-size: 12.5pt;">
+            Hà Nội, ngày …… tháng <span class="val-month">06</span> năm <span class="val-year">2026</span>
+          </div>
+
+          <div style="text-align: center; margin-bottom: 20px;">
+            <div style="font-weight: bold; font-size: 16pt;" id="dnttTitle">ĐỀ NGHỊ TẠM ỨNG (ĐỢT 1)</div>
+            <div style="font-style: italic; font-size: 12.5pt; margin-top: 2px;" id="dnttSubtitle">(V/v: Tạm ứng Đợt 1)</div>
+          </div>
+
+          <div style="font-size: 13pt; margin-bottom: 12px;">
+            <strong>Kính gửi:</strong> <strong class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</strong>
+          </div>
+
+          <div style="font-size: 12.5pt; margin-bottom: 12px; text-align: justify;">
+            <p style="margin: 3px 0;">- <i>Căn cứ theo Hợp đồng kinh tế số <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong> ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ Haco Việt Nam;</i></p>
+            <p style="margin: 3px 0;">- <i>Căn cứ vào tiến độ thực hiện hợp đồng.</i></p>
+          </div>
+
+          <div style="font-size: 13pt; line-height: 1.6; margin-bottom: 15px;">
+            <p style="margin: 4px 0;"><strong>Tên tổ chức đề nghị:</strong> CÔNG TY CỔ PHẦN CÔNG NGHỆ HACO VIỆT NAM</p>
+            <p style="margin: 4px 0;"><strong>Địa chỉ:</strong> Ngách 57/92 Đường Quang Minh, Thôn Gia Thượng 2, Xã Quang Minh, Thành phố Hà Nội, Việt Nam.</p>
+            <p style="margin: 4px 0;" id="dnttContentText"><strong>Nội dung:</strong> Đề nghị tạm ứng 50% giá trị hợp đồng...</p>
+            
+            <div style="margin: 10px 0;">
+              <p style="margin: 5px 0;">Giá trị Hợp đồng: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong><span class="val-grand-total">0</span> VNĐ</strong></p>
+              <p style="margin: 5px 0;" id="dnttAmountRow">Giá trị đề nghị tạm ứng: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>0 VNĐ</strong></p>
+              <p style="margin: 5px 0; font-style: italic;" id="dnttWordsRow">(Bằng chữ: <strong>Không đồng chẵn./.</strong>)</p>
+            </div>
+
+            <p style="margin: 4px 0;">Kèm theo hợp đồng số <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong> và hồ sơ thanh toán tương ứng.</p>
+            <p style="margin: 4px 0;">Hình thức thanh toán: <strong>Chuyển khoản</strong>.</p>
+            <p style="margin: 4px 0; font-weight: bold;">Thông tin bên nhận:</p>
+            <p style="margin: 2px 0 2px 15px;">- Đơn vị thụ hưởng: <strong>Công ty Cổ Phần Công Nghệ Haco Việt Nam</strong></p>
+            <p style="margin: 2px 0 2px 15px;">- Số tài khoản: <strong>1616.7777</strong> - Tại Ngân hàng TMCP Kỹ Thương Việt Nam (Techcombank) – CN Hoàng Quốc Việt, HN.</p>
+          </div>
+
+          <table style="width: 100%; border: none; border-collapse: collapse; margin-top: 30px;" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+              <td style="width: 45%; border: none;"></td>
+              <td style="width: 55%; text-align: center; vertical-align: top; border: none; padding: 0;">
+                <div style="font-weight: bold; font-size: 13pt;">CÔNG TY CỔ PHẦN CÔNG NGHỆ HACO VIỆT NAM</div>
+                <div style="font-style: italic; font-size: 11pt; color: #555;">(Ký, ghi rõ họ tên và đóng dấu)</div>
+                <div style="height: 75px;">&nbsp;</div>
+                <div style="font-weight: bold; font-size: 13pt;">Ngô Đức Hải</div>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- DOC 3: BIÊN BẢN NGHIỆM THU KỸ THUẬT SAU LẮP ĐẶT (NGUYÊN VĂN) -->
+        <div id="preview_bbnt_kt" class="document-page" contenteditable="true" spellcheck="false" style="display: none;">
+          <div style="text-align: center; margin-bottom: 12px;">
+            <div style="font-weight: bold; font-size: 13pt;">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
+            <div style="font-weight: bold; font-size: 13pt;">Độc Lập – Tự Do – Hạnh Phúc</div>
+            <div style="font-weight: bold; font-size: 13pt; margin-top: 2px;">--------***--------</div>
+          </div>
+
+          <div style="text-align: right; font-style: italic; margin-bottom: 10px; font-size: 12pt;">
+            Hà Nội, ngày …… tháng <span class="val-month">06</span> năm <span class="val-year">2026</span>
+          </div>
+
+          <div style="text-align: center; margin-bottom: 18px;">
+            <div style="font-weight: bold; font-size: 15pt;">BIÊN BẢN NGHIỆM THU KỸ THUẬT THIẾT BỊ SAU KHI LẮP ĐẶT</div>
+            <div style="font-size: 12pt; font-style: italic; margin-top: 3px;">(Căn cứ HĐKT số: <span class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</span>)</div>
+          </div>
+
+          <div style="font-weight: bold; font-size: 13pt; margin-bottom: 6px;">1. Thành phần tham gia nghiệm thu:</div>
+          <table class="doc-party-table">
+            <tr>
+              <td style="width: 110px; font-weight: bold;">BÊN MUA (A)</td>
+              <td style="width: 15px; font-weight: bold;">:</td>
+              <td style="font-weight: bold;"><span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span></td>
+            </tr>
+            <tr>
+              <td>Địa chỉ</td>
+              <td>:</td>
+              <td><span class="val-buyer-addr">Số 85/8 Nguyễn Đình Chiều, Khu Phố Đông B, phường Đông Hoà, Thành phố Hồ Chí Minh, Việt Nam</span></td>
+            </tr>
+            <tr>
+              <td>Đại diện</td>
+              <td>:</td>
+              <td><span class="val-buyer-rep">Bà Bùi Bích Ngọc</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Chức vụ: <span class="val-buyer-pos">Giám đốc</span></td>
+            </tr>
+            <tr><td colspan="3" style="padding: 3px 0;"></td></tr>
+            <tr>
+              <td style="font-weight: bold;">BÊN BÁN (B)</td>
+              <td style="font-weight: bold;">:</td>
+              <td style="font-weight: bold;">CÔNG TY CP CÔNG NGHỆ HACO VIỆT NAM</td>
+            </tr>
+            <tr>
+              <td>Địa chỉ</td>
+              <td>:</td>
+              <td>Ngách 57/92 Đường Quang Minh, Thôn Gia Thượng 2, Xã Quang Minh, thành phố Hà Nội, Việt Nam</td>
+            </tr>
+            <tr>
+              <td>Đại diện</td>
+              <td>:</td>
+              <td>Ông Ngô Đức Hải &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Chức vụ: Giám đốc</td>
+            </tr>
+          </table>
+
+          <div style="font-weight: bold; font-size: 13pt; margin-top: 14px; margin-bottom: 4px;">2. Nội dung:</div>
+          <p style="margin: 2px 0; font-weight: bold;">2.1. Sản phẩm:</p>
+          <table class="doc-table">
+            <thead>
+              <tr>
+                <th style="width: 35px;">TT</th>
+                <th>Tên vật tư hàng hóa, thiết bị</th>
+                <th style="width: 60px;">SL</th>
+                <th style="width: 60px;">ĐVT</th>
+              </tr>
+            </thead>
+            <tbody id="bbntKtItemsTbody"></tbody>
+          </table>
+
+          <p style="margin: 4px 0; font-weight: bold;">2.2. Treo lắp, kỹ thuật:</p>
+          <ul style="margin: 0 0 6px 0; padding-left: 22px; list-style-type: disc; text-align: justify;">
+            <li style="margin: 2px 0;">Đã treo lắp thiết bị vào đúng vị trí, theo yêu cầu của khách hàng. Vệ sinh gọn gàng sạch sẽ khu vực thi công sau khi treo lắp. Đáp ứng đúng yêu cầu về kỹ thuật, thẩm mỹ.</li>
+            <li style="margin: 2px 0;">Đã bàn giao đầy đủ thiết bị cho khách hàng.</li>
+            <li style="margin: 2px 0;">Màn hình lắp đặt đúng kích thước, chạy thử hoạt động đạt yêu cầu.</li>
+          </ul>
+
+          <p style="margin: 4px 0; font-weight: bold;">2.3. Hướng dẫn sử dụng sau khi hoàn thành:</p>
+          <ul style="margin: 0 0 6px 0; padding-left: 22px; list-style-type: disc; text-align: justify;">
+            <li style="margin: 2px 0;">Đã hướng dẫn sử dụng đầy đủ cho khách hàng.</li>
+          </ul>
+
+          <p style="margin: 4px 0; font-weight: bold;">2.4. Ý kiến khác:</p>
+          <p style="margin: 2px 0 6px 15px;">Không có ý kiến gì thêm.</p>
+
+          <div style="font-weight: bold; font-size: 13pt; margin-top: 14px; margin-bottom: 4px;">3. Đánh giá:</div>
+          <p style="margin: 3px 0; text-align: justify;">Chân thành cảm ơn quý khách hàng đã lựa chọn sản phẩm và sử dụng dịch vụ của chúng tôi.</p>
+          <p style="margin: 3px 0;">Biên bản bàn giao nghiệm thu kỹ thuật này gồm 02 trang, được lập thành 02 bản, bên mua giữ 01 bản, bên bán giữ 01 bản, có giá trị như nhau.</p>
+
+          <table style="width: 100%; border: none; border-collapse: collapse; margin-top: 30px;" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+              <td style="width: 50%; text-align: center; vertical-align: top; border: none; padding: 0;">
+                <div style="font-weight: bold; font-size: 13pt;">ĐẠI DIỆN BÊN MUA</div>
+                <div style="font-style: italic; font-size: 11pt; color: #555;">(Ký, ghi rõ họ tên)</div>
+                <div style="height: 70px;">&nbsp;</div>
+                <div style="font-weight: bold; font-size: 13pt;"><span class="val-buyer-rep">Bà Bùi Bích Ngọc</span></div>
+              </td>
+              <td style="width: 50%; text-align: center; vertical-align: top; border: none; padding: 0;">
+                <div style="font-weight: bold; font-size: 13pt;">ĐẠI DIỆN BÊN BÁN</div>
+                <div style="font-style: italic; font-size: 11pt; color: #555;">(Ký, ghi rõ họ tên)</div>
+                <div style="height: 70px;">&nbsp;</div>
+                <div style="font-weight: bold; font-size: 13pt;">Ông Ngô Đức Hải</div>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- DOC 4: BIÊN BẢN NGHIỆM THU HOÀN THÀNH ĐƯA VÀO SỬ DỤNG (NGUYÊN VĂN) -->
+        <div id="preview_bbnt" class="document-page" contenteditable="true" spellcheck="false" style="display: none;">
+          <div style="text-align: center; margin-bottom: 12px;">
+            <div style="font-weight: bold; font-size: 13pt;">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
+            <div style="font-weight: bold; font-size: 13pt;">Độc Lập – Tự Do – Hạnh Phúc</div>
+            <div style="font-weight: bold; font-size: 13pt; margin-top: 2px;">--------***--------</div>
+          </div>
+
+          <div style="text-align: center; margin-bottom: 18px;">
+            <div style="font-weight: bold; font-size: 15pt;">BIÊN BẢN NGHIỆM THU HOÀN THÀNH ĐƯA VÀO SỬ DỤNG</div>
+            <div style="font-weight: bold; font-size: 13pt; margin-top: 4px;">Số: <span class="val-bbnt-num">120626/BBNT/TOANTHANG-HACO</span></div>
+          </div>
+
+          <div style="font-size: 12.5pt; margin-bottom: 14px; text-align: justify;">
+            <p style="margin: 3px 0;">- <i>Căn cứ theo hợp đồng kinh tế số <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong> ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ Haco Việt Nam;</i></p>
+            <p style="margin: 3px 0;">- <i>Căn cứ vào tiến độ thực tế thi công công trình.</i></p>
+            <p style="margin: 8px 0 4px 0;">Hôm nay, ngày …… tháng …… năm <span class="val-year">2026</span>, chúng tôi gồm có:</p>
+          </div>
+
+          <table class="doc-party-table">
+            <tr>
+              <td style="width: 110px; font-weight: bold;">BÊN A</td>
+              <td style="width: 15px; font-weight: bold;">:</td>
+              <td style="font-weight: bold;"><span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span></td>
+            </tr>
+            <tr>
+              <td>Địa chỉ</td>
+              <td>:</td>
+              <td><span class="val-buyer-addr">Số 85/8 Nguyễn Đình Chiều, Khu Phố Đông B, phường Đông Hoà, Thành phố Hồ Chí Minh, Việt Nam</span></td>
+            </tr>
+            <tr>
+              <td>Mã số thuế</td>
+              <td>:</td>
+              <td><span class="val-buyer-tax">0317300612</span></td>
+            </tr>
+            <tr>
+              <td>Số tài khoản</td>
+              <td>:</td>
+              <td><span class="val-buyer-bank">0317300612 - Ngân hàng TMCP Á Châu (ACB) - Chi nhánh Đông Hoà</span></td>
+            </tr>
+            <tr>
+              <td>Đại diện</td>
+              <td>:</td>
+              <td><span class="val-buyer-rep">Bà Bùi Bích Ngọc</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Chức vụ: <span class="val-buyer-pos">Giám đốc</span></td>
+            </tr>
+            <tr><td colspan="3" style="padding: 4px 0;"></td></tr>
+            <tr>
+              <td style="font-weight: bold;">BÊN B</td>
+              <td style="font-weight: bold;">:</td>
+              <td style="font-weight: bold;">CÔNG TY CP CÔNG NGHỆ HACO VIỆT NAM</td>
+            </tr>
+            <tr>
+              <td>Địa chỉ</td>
+              <td>:</td>
+              <td>Ngách 57/92 Đường Quang Minh, Thôn Gia Thượng 2, Xã Quang Minh, thành phố Hà Nội, Việt Nam</td>
+            </tr>
+            <tr>
+              <td>Điện thoại</td>
+              <td>:</td>
+              <td>024.2242.4488</td>
+            </tr>
+            <tr>
+              <td>Mã số thuế</td>
+              <td>:</td>
+              <td>0108701064</td>
+            </tr>
+            <tr>
+              <td>Đại diện</td>
+              <td>:</td>
+              <td>Ông Ngô Đức Hải &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Chức vụ: Giám đốc</td>
+            </tr>
+          </table>
+
+          <p style="margin: 10px 0; text-align: justify;">Hai bên cùng thống nhất ký biên bản nghiệm thu hoàn thành đưa vào sử dụng theo Hợp đồng kinh tế số <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong> ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ Haco Việt Nam với các nội dung như sau:</p>
+
+          <div style="font-weight: bold; margin-top: 14px; font-size: 13pt;">Điều 1: Nội dung nghiệm thu lắp đặt:</div>
+
+          <table class="doc-table">
+            <thead>
+              <tr>
+                <th style="width: 35px;">TT</th>
+                <th>Tên vật tư hàng hóa, dịch vụ</th>
+                <th style="width: 50px;">SL</th>
+                <th style="width: 50px;">ĐVT</th>
+                <th style="width: 105px;">Giá tiền</th>
+                <th style="width: 115px;">Thành tiền</th>
+              </tr>
+            </thead>
+            <tbody id="bbntItemsTbody"></tbody>
+            <tfoot>
+              <tr>
+                <td colspan="5" style="text-align: right; font-weight: bold;">Tổng cộng (VNĐ):</td>
+                <td style="text-align: right; font-weight: bold;"><span class="val-subtotal">0</span></td>
+              </tr>
+              <tr>
+                <td colspan="5" style="text-align: right; font-weight: bold;">VAT <span class="val-vat-rate">8</span>%:</td>
+                <td style="text-align: right; font-weight: bold;"><span class="val-vat-amt">0</span></td>
+              </tr>
+              <tr>
+                <td colspan="5" style="text-align: right; font-weight: bold;">Tổng cộng bao gồm VAT <span class="val-vat-rate">8</span>%:</td>
+                <td style="text-align: right; font-weight: bold;"><span class="val-grand-total">0</span></td>
+              </tr>
+            </tfoot>
+          </table>
+
+          <div style="font-weight: bold; margin-top: 16px; font-size: 13pt;">Điều 2: Kết luận</div>
+          <p style="margin: 4px 0; text-align: justify;">Màn hình lắp đặt đúng kích thước như hợp đồng, hoạt động đạt yêu cầu. Chấp nhận nghiệm thu hoàn thành theo Hợp đồng kinh tế số <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong>, ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ Haco Việt Nam.</p>
+          <p style="margin: 6px 0;">Biên bản được thành lập 02 bản, mỗi bên giữ 01 bản và có giá trị pháp lý như nhau.</p>
+
+          <table style="width: 100%; border: none; border-collapse: collapse; margin-top: 30px;" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+              <td style="width: 50%; text-align: center; vertical-align: top; border: none; padding: 0;">
+                <div style="font-weight: bold; font-size: 13pt;">ĐẠI DIỆN BÊN A</div>
+                <div style="font-style: italic; font-size: 11pt; color: #555;">(Ký, ghi rõ họ tên và đóng dấu)</div>
+                <div style="height: 70px;">&nbsp;</div>
+                <div style="font-weight: bold; font-size: 13pt;"><span class="val-buyer-rep">Bà Bùi Bích Ngọc</span></div>
+              </td>
+              <td style="width: 50%; text-align: center; vertical-align: top; border: none; padding: 0;">
+                <div style="font-weight: bold; font-size: 13pt;">ĐẠI DIỆN BÊN B</div>
+                <div style="font-style: italic; font-size: 11pt; color: #555;">(Ký, ghi rõ họ tên và đóng dấu)</div>
+                <div style="height: 70px;">&nbsp;</div>
+                <div style="font-weight: bold; font-size: 13pt;">Ông Ngô Đức Hải</div>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        
+        <!-- DOC 5: BẢNG QUYẾT TOÁN GIÁ TRỊ KHỐI LƯỢNG HOÀN THÀNH (CHUẨN TOÀN THẮNG & HACO) -->
+        <div id="preview_quyet_toan" class="document-page" contenteditable="true" spellcheck="false" style="display: none;">
+          <div style="text-align: center; margin-bottom: 12px;">
+            <div style="font-weight: bold; font-size: 13pt;">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
+            <div style="font-weight: bold; font-size: 13pt;">Độc Lập – Tự Do – Hạnh Phúc</div>
+            <div style="font-weight: bold; font-size: 13pt; margin-top: 2px;">--------***--------</div>
+          </div>
+
+          <div style="text-align: center; margin-bottom: 18px;">
+            <div style="font-weight: bold; font-size: 16pt;">BẢNG QUYẾT TOÁN GIÁ TRỊ KHỐI LƯỢNG HOÀN THÀNH</div>
+            <div style="font-weight: bold; font-size: 13pt; margin-top: 4px;">Số: <span class="val-qt-num">120626/BBQT/TOANTHANG-HACO</span></div>
+          </div>
+
+          <div style="font-size: 12.5pt; margin-bottom: 12px; text-align: justify;">
+            <p style="margin: 3px 0;">- <i>Căn cứ theo Hợp đồng kinh tế số <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong> ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ HACO Việt Nam;</i></p>
+            <p style="margin: 3px 0;">- <i>Căn cứ Biên bản nghiệm thu hoàn thành đưa vào sử dụng công trình số <strong class="val-bbnt-num">120626/BBNT/TOANTHANG-HACO</strong>;</i></p>
+            <p style="margin: 3px 0;">- <i>Căn cứ vào khối lượng thi công và lắp đặt thực tế tại vị trí công trình.</i></p>
+            <p style="margin: 8px 0 4px 0;">Hôm nay, ngày …… tháng …… năm <span class="val-year">2026</span>, chúng tôi đại diện các bên gồm có:</p>
+          </div>
+
+          <!-- Bảng Bên A & Bên B -->
+          <table class="doc-party-table" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+              <td style="width: 110px; font-weight: bold;">BÊN A</td>
+              <td style="width: 15px; font-weight: bold;">:</td>
+              <td style="font-weight: bold;"><span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span></td>
+            </tr>
+            <tr>
+              <td>Địa chỉ</td>
+              <td>:</td>
+              <td><span class="val-buyer-addr">Số 85/8 Nguyễn Đình Chiều, Khu Phố Đông B, phường Đông Hoà, Thành phố Hồ Chí Minh, Việt Nam</span></td>
+            </tr>
+            <tr>
+              <td>Mã số thuế</td>
+              <td>:</td>
+              <td><span class="val-buyer-tax">0317300612</span></td>
+            </tr>
+            <tr>
+              <td>Số tài khoản</td>
+              <td>:</td>
+              <td><span class="val-buyer-bank">0317300612 - Ngân hàng TMCP Á Châu (ACB) - Chi nhánh Đông Hoà</span></td>
+            </tr>
+            <tr>
+              <td>Đại diện</td>
+              <td>:</td>
+              <td>
+                <table style="width: 100%; border: none; margin: 0; padding: 0;" border="0">
+                  <tr>
+                    <td style="width: 55%; border: none; padding: 0;"><span class="val-buyer-rep">Bà Bùi Bích Ngọc</span></td>
+                    <td style="width: 45%; border: none; padding: 0;">Chức vụ: <span class="val-buyer-pos">Giám đốc</span></td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr><td colspan="3" style="padding: 4px 0;"></td></tr>
+            <tr>
+              <td style="font-weight: bold;">BÊN B</td>
+              <td style="font-weight: bold;">:</td>
+              <td style="font-weight: bold;">CÔNG TY CP CÔNG NGHỆ HACO VIỆT NAM</td>
+            </tr>
+            <tr>
+              <td>Địa chỉ</td>
+              <td>:</td>
+              <td>Ngách 57/92 Đường Quang Minh, Thôn Gia Thượng 2, Xã Quang Minh, thành phố Hà Nội, Việt Nam</td>
+            </tr>
+            <tr>
+              <td>Mã số thuế</td>
+              <td>:</td>
+              <td>0108701064</td>
+            </tr>
+            <tr>
+              <td>Điện thoại</td>
+              <td>:</td>
+              <td>024.2242.4488</td>
+            </tr>
+            <tr>
+              <td>Đại diện</td>
+              <td>:</td>
+              <td>
+                <table style="width: 100%; border: none; margin: 0; padding: 0;" border="0">
+                  <tr>
+                    <td style="width: 55%; border: none; padding: 0;">Ông Ngô Đức Hải</td>
+                    <td style="width: 45%; border: none; padding: 0;">Chức vụ: Giám đốc</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+
+          <p style="margin: 10px 0 6px 0; text-align: justify;">Các bên cùng nhau xác nhận quyết toán giá trị và khối lượng thực tế hoàn thành công trình với những nội dung sau:</p>
+
+          <div style="font-weight: bold; margin-top: 10px; font-size: 13pt;">1. Nội dung quyết toán</div>
+          <table class="doc-table" style="font-size: 11pt;">
+            <thead>
+              <tr>
+                <th rowspan="2" style="width: 30px;">TT</th>
+                <th rowspan="2">Nội dung vật tư, thiết bị</th>
+                <th colspan="4" style="background-color: #e0f2fe; color: #0369a1;">THEO HỢP ĐỒNG</th>
+                <th colspan="4" style="background-color: #dcfce7; color: #15803d;">THEO THỰC TẾ</th>
+                <th rowspan="2" style="width: 95px;">Chênh lệch (+/-)</th>
+              </tr>
+              <tr>
+                <th style="width: 40px; background-color: #f0f9ff;">ĐVT</th>
+                <th style="width: 45px; background-color: #f0f9ff;">SL</th>
+                <th style="width: 80px; background-color: #f0f9ff;">Đơn giá</th>
+                <th style="width: 90px; background-color: #f0f9ff;">Thành tiền</th>
+                <th style="width: 40px; background-color: #f0fdf4;">ĐVT</th>
+                <th style="width: 45px; background-color: #f0fdf4;">SL</th>
+                <th style="width: 80px; background-color: #f0fdf4;">Đơn giá</th>
+                <th style="width: 90px; background-color: #f0fdf4;">Thành tiền</th>
+              </tr>
+            </thead>
+            <tbody id="quyetToanItemsTbody">
+              <!-- Populated dynamically via JS -->
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="5" style="text-align: right; font-weight: bold;">TỔNG THÀNH TIỀN (Chưa VAT):</td>
+                <td style="text-align: right; font-weight: bold;"><span class="val-subtotal">0</span></td>
+                <td colspan="3" style="text-align: right; font-weight: bold;">TỔNG THỰC TẾ:</td>
+                <td style="text-align: right; font-weight: bold;"><span id="qtActualSubtotal">0</span></td>
+                <td style="text-align: right; font-weight: bold;"><span id="qtDiffSubtotal">0</span></td>
+              </tr>
+              <tr>
+                <td colspan="5" style="text-align: right; font-weight: bold;">Thuế VAT (<span class="val-vat-rate">8</span>%):</td>
+                <td style="text-align: right; font-weight: bold;"><span class="val-vat-amt">0</span></td>
+                <td colspan="3" style="text-align: right; font-weight: bold;">VAT THỰC TẾ:</td>
+                <td style="text-align: right; font-weight: bold;"><span id="qtActualVat">0</span></td>
+                <td style="text-align: right; font-weight: bold;"><span id="qtDiffVat">0</span></td>
+              </tr>
+              <tr style="background-color: #f8fafc;">
+                <td colspan="5" style="text-align: right; font-weight: bold; font-size: 11.5pt;">TỔNG CỘNG BAO GỒM VAT:</td>
+                <td style="text-align: right; font-weight: bold; font-size: 11.5pt;"><span class="val-grand-total">0</span></td>
+                <td colspan="3" style="text-align: right; font-weight: bold; font-size: 11.5pt; color: #15803d;">QUYẾT TOÁN:</td>
+                <td style="text-align: right; font-weight: bold; font-size: 11.5pt; color: #15803d;"><span id="qtActualGrandTotal">0</span></td>
+                <td style="text-align: right; font-weight: bold; font-size: 11.5pt;" id="qtDiffGrandTotal">0</td>
+              </tr>
+            </tfoot>
+          </table>
+
+          <div style="font-weight: bold; margin-top: 14px; font-size: 13pt;">2. Giá trị quyết toán</div>
+          <div style="font-size: 12.5pt; line-height: 1.6; margin: 4px 0;">
+            <p style="margin: 4px 0;"><strong>2.1. Tổng giá trị Hợp đồng:</strong> <strong class="val-grand-total">0</strong> <strong>đồng</strong></p>
+            <p style="margin: 2px 0 6px 20px; font-style: italic;">(Bằng chữ: <strong class="val-words">Không đồng chẵn./.</strong>)</p>
+
+            <p style="margin: 4px 0;"><strong>2.2. Giá trị quyết toán thực tế:</strong> <strong id="qtFinalVal" style="color: #15803d;">0</strong> <strong>đồng</strong></p>
+            <p style="margin: 2px 0 6px 20px; font-style: italic;">(Bằng chữ: <strong id="qtFinalWords">Không đồng chẵn./.</strong>)</p>
+
+            <p style="margin: 4px 0;"><strong>2.3. Số tiền Bên A đã tạm ứng / thanh toán các đợt:</strong> <strong id="qtPriorPaid">0</strong> <strong>đồng</strong></p>
+
+            <p style="margin: 4px 0;"><strong>2.4. Bên A có trách nhiệm thanh toán cho Bên B giá trị còn lại là:</strong> <strong id="qtRemainingVal" style="color: #b45309;">0</strong> <strong>đồng</strong></p>
+            <p style="margin: 2px 0 6px 20px; font-style: italic;">(Bằng chữ: <strong id="qtRemainingWords">Không đồng chẵn./.</strong>)</p>
+          </div>
+
+          <div style="font-weight: bold; margin-top: 14px; font-size: 13pt;">3. Kết luận</div>
+          <div style="font-size: 12.5pt; line-height: 1.5; margin: 4px 0; text-align: justify;">
+            <p style="margin: 4px 0;">- Hai bên đồng ý quyết toán giá trị và khối lượng thực tế hoàn thành công trình như nội dung nêu trên.</p>
+            <p style="margin: 4px 0;">- Bảng quyết toán giá trị khối lượng này là căn cứ pháp lý để hai bên tiến hành ký Biên bản thanh lý hợp đồng và Bên A hoàn tất thanh toán dứt điểm giá trị còn lại cho Bên B.</p>
+            <p style="margin: 4px 0;">- Biên bản được thành lập 02 bản, mỗi bên giữ 01 bản và có giá trị pháp lý như nhau.</p>
+          </div>
+
+          <!-- Chữ ký 2 bên -->
+          <table style="width: 100%; border: none; border-collapse: collapse; margin-top: 30px;" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+              <td style="width: 50%; text-align: center; vertical-align: top; border: none; padding: 0;">
+                <div style="font-weight: bold; font-size: 13pt;">ĐẠI DIỆN BÊN A</div>
+                <div style="font-style: italic; font-size: 11pt; color: #555;">(Ký, ghi rõ họ tên và đóng dấu)</div>
+                <div style="height: 75px;">&nbsp;</div>
+                <div style="font-weight: bold; font-size: 13pt;"><span class="val-buyer-rep">Bà Bùi Bích Ngọc</span></div>
+              </td>
+              <td style="width: 50%; text-align: center; vertical-align: top; border: none; padding: 0;">
+                <div style="font-weight: bold; font-size: 13pt;">ĐẠI DIỆN BÊN B</div>
+                <div style="font-style: italic; font-size: 11pt; color: #555;">(Ký, ghi rõ họ tên và đóng dấu)</div>
+                <div style="height: 75px;">&nbsp;</div>
+                <div style="font-weight: bold; font-size: 13pt;">Ông Ngô Đức Hải</div>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- DOC 5: BIÊN BẢN THANH LÝ HỢP ĐỒNG (NGUYÊN VĂN) -->
+        <div id="preview_thanhly" class="document-page" contenteditable="true" spellcheck="false" style="display: none;">
+          <div style="text-align: center; margin-bottom: 12px;">
+            <div style="font-weight: bold; font-size: 13pt;">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
+            <div style="font-weight: bold; font-size: 13pt;">Độc Lập – Tự Do – Hạnh Phúc</div>
+            <div style="font-weight: bold; font-size: 13pt; margin-top: 2px;">--------***--------</div>
+          </div>
+
+          <div style="text-align: center; margin-bottom: 18px;">
+            <div style="font-weight: bold; font-size: 16pt;">BIÊN BẢN THANH LÝ HỢP ĐỒNG</div>
+            <div style="font-weight: bold; font-size: 13pt; margin-top: 4px;">Số: <span class="val-bbtl-num">120626/BBTLHD/TOANTHANG-HACO</span></div>
+          </div>
+
+          <div style="font-size: 12.5pt; margin-bottom: 12px; text-align: justify;">
+            <p style="margin: 3px 0;">- <i>Căn cứ theo hợp đồng số <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong> ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ Haco Việt Nam;</i></p>
+            <p style="margin: 3px 0;">- <i>Căn cứ biên bản nghiệm thu số <strong class="val-bbnt-num">120626/BBNT/TOANTHANG-HACO</strong> ngày …… tháng …… năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ Haco Việt Nam;</i></p>
+            <p style="margin: 3px 0;">- <i>Căn cứ biên bản quyết toán giá trị khối lượng hoàn thành ngày …… tháng …… năm <span class="val-year">2026</span>;</i></p>
+            <p style="margin: 8px 0 4px 0;">Hôm nay, ngày …… tháng …… năm <span class="val-year">2026</span>, chúng tôi gồm có:</p>
+          </div>
+
+          <table class="doc-party-table">
+            <tr>
+              <td style="width: 110px; font-weight: bold;">BÊN A</td>
+              <td style="width: 15px; font-weight: bold;">:</td>
+              <td style="font-weight: bold;"><span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span></td>
+            </tr>
+            <tr>
+              <td>Địa chỉ</td>
+              <td>:</td>
+              <td><span class="val-buyer-addr">Số 85/8 Nguyễn Đình Chiều, Khu Phố Đông B, phường Đông Hoà, Thành phố Hồ Chí Minh, Việt Nam</span></td>
+            </tr>
+            <tr>
+              <td>Mã số thuế</td>
+              <td>:</td>
+              <td><span class="val-buyer-tax">0317300612</span></td>
+            </tr>
+            <tr>
+              <td>Số tài khoản</td>
+              <td>:</td>
+              <td><span class="val-buyer-bank">0317300612 - Ngân hàng TMCP Á Châu (ACB) - Chi nhánh Đông Hoà</span></td>
+            </tr>
+            <tr>
+              <td>Đại diện</td>
+              <td>:</td>
+              <td><span class="val-buyer-rep">Bà Bùi Bích Ngọc</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Chức vụ: <span class="val-buyer-pos">Giám đốc</span></td>
+            </tr>
+            <tr><td colspan="3" style="padding: 3px 0;"></td></tr>
+            <tr>
+              <td style="font-weight: bold;">BÊN B</td>
+              <td style="font-weight: bold;">:</td>
+              <td style="font-weight: bold;">CÔNG TY CP CÔNG NGHỆ HACO VIỆT NAM</td>
+            </tr>
+            <tr>
+              <td>Địa chỉ</td>
+              <td>:</td>
+              <td>Ngách 57/92 Đường Quang Minh, Thôn Gia Thượng 2, Xã Quang Minh, thành phố Hà Nội, Việt Nam</td>
+            </tr>
+            <tr>
+              <td>Điện thoại</td>
+              <td>:</td>
+              <td>024.2242.4488</td>
+            </tr>
+            <tr>
+              <td>Mã số thuế</td>
+              <td>:</td>
+              <td>0108701064</td>
+            </tr>
+            <tr>
+              <td>Đại diện</td>
+              <td>:</td>
+              <td>Ông Ngô Đức Hải &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Chức vụ: Giám đốc</td>
+            </tr>
+            <tr>
+              <td>Số tài khoản</td>
+              <td>:</td>
+              <td>1616.7777 - Tại Ngân hàng TMCP Kỹ Thương Việt Nam (Techcombank) – Chi nhánh Hoàng Quốc Việt, Hà Nội</td>
+            </tr>
+          </table>
+
+          <p style="margin: 10px 0;">Hai bên cùng thống nhất ký biên bản thanh lý hợp đồng số <strong class="val-bbtl-num">120626/BBTLHD/TOANTHANG-HACO</strong> ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ Haco Việt Nam với các nội dung như sau:</p>
+
+          <div style="font-weight: bold; margin-top: 12px; font-size: 13pt;">ĐIỀU 1: THỎA THUẬN CHẤM DỨT HỢP ĐỒNG</div>
+          <p style="margin: 3px 0; text-align: justify;">Sau khi nhận thấy những mục đích và lợi ích khi ký kết hợp đồng đã đầy đủ, các bên đồng ý thỏa thuận chấm dứt hợp đồng kể từ ngày các bên đồng ký kết vào Biên bản này.</p>
+          <p style="margin: 3px 0; text-align: justify;">Các bên được giải phóng khỏi những quy định theo hợp đồng số <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong> ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ Haco Việt Nam.</p>
+
+          <div style="font-weight: bold; margin-top: 12px; font-size: 13pt;">ĐIỀU 2: NGHĨA VỤ ĐÃ HOÀN THÀNH</div>
+          <p style="margin: 3px 0; text-align: justify;">Bên B đã hoàn tất việc giao hàng đúng theo đơn hàng của Hợp đồng số <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong> ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ Haco Việt Nam..</p>
+
+          <div style="font-weight: bold; margin-top: 12px; font-size: 13pt;">ĐIỀU 3: NGHĨA VỤ CÒN LẠI CỦA CÁC BÊN</div>
+          <p style="margin: 3px 0;">Bên A có trách nhiệm thanh toán đến 100% giá trị của hợp đồng sau khi trừ khoản tạm ứng cho Bên B. Giá trị quyết toán như sau:</p>
+
+          <table class="doc-table">
+            <thead>
+              <tr>
+                <th style="width: 45px;">STT</th>
+                <th>NỘI DUNG</th>
+                <th style="width: 170px;">SỐ TIỀN (VNĐ) BAO GỒM VAT</th>
+              </tr>
+            </thead>
+            <tbody id="settlementTableBody"></tbody>
+          </table>
+
+          <p style="margin: 6px 0; font-weight: bold;">(Bằng chữ: <span class="val-final-rem-words">Không đồng chẵn./.</span>)</p>
+          <p style="margin: 4px 0; text-align: justify;">Bên A đồng ý thanh toán số tiền còn lại trên cho Bên B sau khi hai bên ký biên bản thanh lý hợp đồng và có đầy đủ chứng từ thanh toán hợp pháp, hợp lệ như trong Điều 3 của hợp đồng số: <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong> ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ Haco Việt Nam.</p>
+
+          <div style="font-weight: bold; margin-top: 12px; font-size: 13pt;">ĐIỀU 4: ĐIỀU KHOẢN THI HÀNH</div>
+          <p style="margin: 3px 0; text-align: justify;">Hai bên cam kết tiếp tục thực hiện những nghĩa vụ còn lại trong Hợp đồng số: <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong> ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ Haco Việt Nam theo thỏa thuận tại Điều 3 của Biên bản này.</p>
+          <p style="margin: 3px 0; text-align: justify;">Hợp đồng số: <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong> ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ Haco Việt Nam sẽ hết hiệu lực và mặc nhiên được thanh lý kể từ ngày hai bên hoàn tất mọi nghĩa vụ của mình.</p>
+          <p style="margin: 3px 0;">Biên bản được lập thành 02 bản, giao cho bên A giữ 01 bản, bên B giữ 01 bản và có giá trị pháp lý như nhau.</p>
+
+          <table style="width: 100%; border: none; border-collapse: collapse; margin-top: 30px;" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+              <td style="width: 50%; text-align: center; vertical-align: top; border: none; padding: 0;">
+                <div style="font-weight: bold; font-size: 13pt;">ĐẠI DIỆN BÊN A</div>
+                <div style="font-style: italic; font-size: 11pt; color: #555;">(Ký, ghi rõ họ tên và đóng dấu)</div>
+                <div style="height: 70px;">&nbsp;</div>
+                <div style="font-weight: bold; font-size: 13pt;"><span class="val-buyer-rep">Bà Bùi Bích Ngọc</span></div>
+              </td>
+              <td style="width: 50%; text-align: center; vertical-align: top; border: none; padding: 0;">
+                <div style="font-weight: bold; font-size: 13pt;">ĐẠI DIỆN BÊN B</div>
+                <div style="font-style: italic; font-size: 11pt; color: #555;">(Ký, ghi rõ họ tên và đóng dấu)</div>
+                <div style="height: 70px;">&nbsp;</div>
+                <div style="font-weight: bold; font-size: 13pt;">Ông Ngô Đức Hải</div>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- FLOATING QUICK JUMP NAV BUTTONS -->
+  <div class="no-print fixed bottom-6 left-6 z-40 flex flex-col gap-2">
+    <button onclick="scrollToPreview()" class="px-3 py-2 bg-blue-600/95 hover:bg-blue-600 text-white rounded-full shadow-lg text-xs font-bold backdrop-blur transition flex items-center gap-1.5 hover:scale-105" title="Cuộn nhanh xuống bản xem trước văn bản">
+      <span>👇</span> Xem văn bản
+    </button>
+    <button onclick="scrollToInput()" class="px-3 py-2 bg-slate-900/90 hover:bg-slate-900 text-white rounded-full shadow-lg text-xs font-bold backdrop-blur transition flex items-center gap-1.5 hover:scale-105" title="Cuộn nhanh lên khu vực nhập liệu">
+      <span>☝️</span> Lên nhập liệu
+    </button>
+  </div>
+
+  <script>
+    // State
+    let items = [];
+    let currentTab = 'contract';
+    let isAutoContractNumber = true;
+    let selectedPaymentDocIndex = 0;
+
+    // Payment installments (1 to 5 installments)
+    let payments = [
+      {
+        name: "Đợt 1 (Tạm ứng)",
+        percent: 50,
+        condition: "sau khi hợp đồng được ký kết",
+        isDeposit: true
+      },
+      {
+        name: "Đợt 2 (Còn lại)",
+        percent: 50,
+        condition: "trong vòng 05-07 ngày sau khi hoàn thành, bàn giao công trình đưa vào sử dụng",
+        isDeposit: false
+      }
+    ];
+
+    // Remove Vietnamese Diacritics
+    function removeVietnameseDiacritics(str) {
+      return str
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/đ/g, "d")
+        .replace(/Đ/g, "D");
+    }
+
+    // Company Short Name Extractor
+    function getCompanyShortName(companyName) {
+      if (!companyName) return "KH";
+      let clean = removeVietnameseDiacritics(companyName);
+      clean = clean.replace(/\b(CONG TY|CTY|TNHH|CO PHAN|CP|MTV|MOT THANH VIEN|THUONG MAI|DICH VU|TMDV|DAU TU|SAN XUAT|XAY DUNG|CONG NGHE|TIN HOC|QUOC TE|TAP DOAN|VA)\b/gi, " ");
+      clean = clean.replace(/[^a-zA-Z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+      const words = clean.split(" ").filter(w => w.length > 0);
+      if (words.length === 0) return "KH";
+      if (words.length <= 2) {
+        return words.join("").toUpperCase();
+      }
+      if (words.length === 3 && words.join("").length <= 12) {
+        return words.join("").toUpperCase();
+      }
+      return words.map(w => w[0]).join("").toUpperCase();
+    }
+
+    // Money Formatter
+    function formatMoney(num) {
+      if (isNaN(num)) return "0";
+      return Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    // Number to Words in Vietnamese
+    function numberToWords(number) {
+      if (!number || isNaN(number) || number === 0) return 'Không đồng chẵn./.';
+      
+      const digits = ['không', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín'];
+      const units = ['', 'nghìn', 'triệu', 'tỷ', 'nghìn tỷ', 'triệu tỷ'];
+
+      function readThree(b, isHighest) {
+        let hundred = Math.floor(b / 100);
+        let ten = Math.floor((b % 100) / 10);
+        let unit = b % 10;
+        let res = '';
+
+        if (hundred > 0 || !isHighest) {
+          res += digits[hundred] + ' trăm ';
+        }
+
+        if (ten > 1) {
+          res += digits[ten] + ' mươi ';
+          if (unit === 1) res += 'mốt ';
+          else if (unit === 4) res += 'bốn ';
+          else if (unit === 5) res += 'lăm ';
+          else if (unit > 0) res += digits[unit] + ' ';
+        } else if (ten === 1) {
+          res += 'mười ';
+          if (unit === 5) res += 'lăm ';
+          else if (unit > 0) res += digits[unit] + ' ';
+        } else if (ten === 0) {
+          if (unit > 0) {
+            if (hundred > 0 || !isHighest) res += 'lẻ ' + digits[unit] + ' ';
+            else res += digits[unit] + ' ';
+          }
+        }
+        return res.trim();
+      }
+
+      let numStr = Math.round(Math.abs(number)).toString();
+      let groups = [];
+      while (numStr.length > 0) {
+        groups.push(parseInt(numStr.slice(-3), 10));
+        numStr = numStr.slice(0, -3);
+      }
+
+      let res = '';
+      for (let i = groups.length - 1; i >= 0; i--) {
+        let val = groups[i];
+        if (val > 0) {
+          let text = readThree(val, i === groups.length - 1);
+          res += text + ' ' + units[i] + ' ';
+        }
+      }
+
+      res = res.trim().replace(/\s+/g, ' ');
+      if (!res) return 'Không đồng chẵn./.';
+      const prefix = number < 0 ? 'Âm ' : '';
+      return prefix + res.charAt(0).toUpperCase() + res.slice(1) + ' đồng chẵn./.';
+    }
+
+    // Auto-generate Contract Number
+    function suggestContractNumber(force = false) {
+      if (!isAutoContractNumber && !force) return;
+
+      const dateVal = document.getElementById('contractDate').value;
+      const d = dateVal ? new Date(dateVal) : new Date();
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const yy = String(d.getFullYear()).slice(-2);
+
+      const buyerName = document.getElementById('buyerName').value.trim();
+      const shortName = getCompanyShortName(buyerName);
+      
+      const contractInput = document.getElementById('contractNumber');
+      contractInput.value = `${dd}${mm}${yy}/HĐKT/${shortName}-HACO`;
+    }
+
+    function onBuyerNameChange() {
+      if (isAutoContractNumber) {
+        suggestContractNumber();
+      }
+      updateAll(); updateLedgerBadge();
+    }
+
+    function onDateChange() {
+      if (isAutoContractNumber) {
+        suggestContractNumber();
+      }
+      updateAll(); updateLedgerBadge();
+    }
+
+    function toggleAutoContractNumber() {
+      isAutoContractNumber = !isAutoContractNumber;
+      const btn = document.getElementById('btnAutoContractNum');
+      const statusSpan = document.getElementById('autoContractNumStatus');
+      const input = document.getElementById('contractNumber');
+
+      if (isAutoContractNumber) {
+        btn.className = "text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 font-semibold hover:bg-blue-200 transition flex items-center gap-0.5";
+        statusSpan.innerText = "⚡ Tự động: BẬT";
+        input.classList.add("bg-blue-50/40");
+        suggestContractNumber(true);
+        updateAll(); updateLedgerBadge();
+      } else {
+        btn.className = "text-[10px] px-1.5 py-0.5 rounded bg-slate-200 text-slate-700 font-medium hover:bg-slate-300 transition flex items-center gap-0.5";
+        statusSpan.innerText = "✏️ Thủ công";
+        input.classList.remove("bg-blue-50/40");
+      }
+    }
+
+    function onManualContractNumberInput() {
+      if (isAutoContractNumber) {
+        isAutoContractNumber = false;
+        const btn = document.getElementById('btnAutoContractNum');
+        const statusSpan = document.getElementById('autoContractNumStatus');
+        const input = document.getElementById('contractNumber');
+        btn.className = "text-[10px] px-1.5 py-0.5 rounded bg-slate-200 text-slate-700 font-medium hover:bg-slate-300 transition flex items-center gap-0.5";
+        statusSpan.innerText = "✏️ Thủ công";
+        input.classList.remove("bg-blue-50/40");
+      }
+      updateAll(); updateLedgerBadge();
+    }
+
+    // --- PAYMENT INSTALLMENTS MANAGEMENT (Up to 5 Installments) ---
+    function renderPaymentsForm() {
+      const container = document.getElementById('paymentsContainer');
+      container.innerHTML = '';
+
+      payments.forEach((p, idx) => {
+        const row = document.createElement('div');
+        row.className = 'p-2.5 bg-white rounded-lg border border-slate-200 space-y-1.5 text-xs';
+        
+        row.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-slate-800">Đợt ${idx + 1}: ${idx === 0 ? '(Tạm ứng)' : (idx === payments.length - 1 ? '(Quyết toán)' : '')}</span>
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] font-semibold text-blue-700" id="payAmountPreview_${idx}">0 VNĐ</span>
+              ${payments.length > 1 ? `<button onclick="removePaymentInstallment(${idx})" class="text-rose-500 hover:text-rose-700 font-medium text-[11px]" title="Xóa đợt này">✕</button>` : ''}
+            </div>
+          </div>
+          <div class="grid grid-cols-12 gap-2">
+            <div class="col-span-3">
+              <label class="block text-[10px] text-slate-500 mb-0.5">Tỷ lệ %:</label>
+              <div class="flex items-center">
+                <input type="number" min="0" max="100" value="${p.percent}" oninput="payments[${idx}].percent = parseFloat(this.value) || 0; updateAll(); updateLedgerBadge();" class="w-full p-1.5 border border-slate-200 rounded-l text-slate-800 font-bold">
+                <span class="bg-slate-100 px-1.5 py-1.5 border border-l-0 border-slate-200 text-slate-500 rounded-r text-[11px]">%</span>
+              </div>
+            </div>
+            <div class="col-span-9">
+              <label class="block text-[10px] text-slate-500 mb-0.5">Điều kiện thanh toán:</label>
+              <input type="text" value="${p.condition}" oninput="payments[${idx}].condition = this.value; updateAll(); updateLedgerBadge();" class="w-full p-1.5 border border-slate-200 rounded text-slate-800" placeholder="sau khi ký hợp đồng...">
+            </div>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+
+      const btnAdd = document.getElementById('btnAddPayment');
+      if (payments.length >= 5) {
+        btnAdd.disabled = true;
+        btnAdd.classList.add('opacity-50', 'cursor-not-allowed');
+      } else {
+        btnAdd.disabled = false;
+        btnAdd.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+    }
+
+    function addPaymentInstallment() {
+      if (payments.length >= 5) {
+        alert("Hệ thống hỗ trợ tối đa 5 đợt thanh toán!");
+        return;
+      }
+      const newIdx = payments.length + 1;
+      const defaultConditions = [
+        "sau khi hợp đồng được ký kết",
+        "sau khi tập kết vật tư thiết bị đến chân công trình",
+        "sau khi hoàn thiện lắp đặt và chạy thử",
+        "trong vòng 05-07 ngày sau khi ký biên bản nghiệm thu bàn giao",
+        "sau khi hết hạn bảo hành công trình"
+      ];
+      
+      payments.push({
+        name: `Đợt ${newIdx}`,
+        percent: 0,
+        condition: defaultConditions[newIdx - 1] || "theo thỏa thuận của hai bên",
+        isDeposit: false
+      });
+
+      balanceLastPayment();
+      renderPaymentsForm();
+      updateAll(); updateLedgerBadge();
+    }
+
+    function removePaymentInstallment(index) {
+      if (payments.length <= 1) {
+        alert("Cần có ít nhất 1 đợt thanh toán!");
+        return;
+      }
+      payments.splice(index, 1);
+      if (selectedPaymentDocIndex >= payments.length) {
+        selectedPaymentDocIndex = payments.length - 1;
+      }
+      balanceLastPayment();
+      renderPaymentsForm();
+      updateAll(); updateLedgerBadge();
+    }
+
+    function balanceLastPayment() {
+      if (payments.length === 0) return;
+      let sumOther = 0;
+      for (let i = 0; i < payments.length - 1; i++) {
+        sumOther += payments[i].percent || 0;
+      }
+      const lastPercent = Math.max(0, 100 - sumOther);
+      payments[payments.length - 1].percent = lastPercent;
+      renderPaymentsForm();
+      updateAll(); updateLedgerBadge();
+    }
+
+    function applyPaymentPreset(percentages) {
+      const defaultConditions = [
+        "sau khi hợp đồng được ký kết",
+        "sau khi tập kết vật tư thiết bị đến chân công trình",
+        "sau khi hoàn thiện lắp đặt và chạy thử",
+        "trong vòng 05-07 ngày sau khi ký biên bản nghiệm thu bàn giao",
+        "sau khi hết hạn bảo hành công trình"
+      ];
+
+      payments = percentages.map((pct, idx) => ({
+        name: idx === 0 ? "Đợt 1 (Tạm ứng)" : (idx === percentages.length - 1 ? `Đợt ${idx + 1} (Còn lại)` : `Đợt ${idx + 1}`),
+        percent: pct,
+        condition: defaultConditions[idx] || "theo thỏa thuận của hai bên",
+        isDeposit: idx === 0
+      }));
+
+      if (selectedPaymentDocIndex >= payments.length) {
+        selectedPaymentDocIndex = 0;
+      }
+
+      renderPaymentsForm();
+      updateAll(); updateLedgerBadge();
+    }
+
+    // Render payment selector pills inside preview tab ĐNTT
+    function renderPaymentPills() {
+      const container = document.getElementById('previewPaymentPills');
+      if (!container) return;
+      container.innerHTML = '';
+
+      payments.forEach((p, idx) => {
+        const btn = document.createElement('button');
+        const isSelected = idx === selectedPaymentDocIndex;
+        btn.className = `px-2.5 py-1 text-xs rounded-full font-semibold transition ${
+          isSelected 
+            ? 'bg-blue-600 text-white shadow-sm' 
+            : 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-100'
+        }`;
+        btn.innerText = `Đợt ${idx + 1} (${p.percent}%)`;
+        btn.onclick = () => {
+          selectedPaymentDocIndex = idx;
+          renderPaymentPills();
+          updateDnttPreview();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    // Render items input form
+    function renderItemsForm() {
+      const container = document.getElementById('itemsContainer');
+      container.innerHTML = '';
+
+      items.forEach((item, index) => {
+        const row = document.createElement('div');
+        row.className = 'p-3 rounded-lg border border-slate-200 bg-slate-50/50 space-y-2 text-xs relative group';
+        
+        row.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-slate-700">Mục ${index + 1}</span>
+            <button onclick="removeItemRow(${index})" class="text-rose-500 hover:text-rose-700 font-medium transition" title="Xóa dòng này">
+              ✕ Xóa
+            </button>
+          </div>
+          <div>
+            <textarea rows="2" oninput="items[${index}].name = this.value; updateAll(); updateLedgerBadge();" class="w-full p-2 border border-slate-200 rounded-md font-medium text-slate-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none" placeholder="Tên hàng hóa, quy cách chi tiết...">${item.name}</textarea>
+          </div>
+          <div class="grid grid-cols-5 gap-2">
+            <div>
+              <label class="block text-[11px] text-slate-500 mb-0.5">SL HĐ</label>
+              <input type="number" step="any" value="${item.qty}" oninput="items[${index}].qty = parseFloat(this.value) || 0; if (items[${index}].actualQty === undefined) items[${index}].actualQty = items[${index}].qty; updateAll(); updateLedgerBadge();" class="w-full p-1.5 border border-slate-200 rounded text-slate-800 font-medium">
+            </div>
+            <div>
+              <label class="block text-[11px] text-emerald-700 font-bold mb-0.5">SL Thực tế</label>
+              <input type="number" step="any" value="${item.actualQty !== undefined ? item.actualQty : item.qty}" oninput="items[${index}].actualQty = parseFloat(this.value) || 0; updateAll(); updateLedgerBadge();" class="w-full p-1.5 border border-emerald-300 rounded text-emerald-900 font-bold bg-emerald-50/70" title="Số lượng thực tế nghiệm thu quyết toán">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-500 mb-0.5">ĐVT</label>
+              <input type="text" value="${item.unit}" oninput="items[${index}].unit = this.value; updateAll(); updateLedgerBadge();" class="w-full p-1.5 border border-slate-200 rounded text-slate-800">
+            </div>
+            <div class="col-span-2">
+              <label class="block text-[11px] text-slate-500 mb-0.5">Đơn giá (VNĐ)</label>
+              <div class="flex items-center gap-1">
+                <input type="number" value="${item.price}" ${item.isIncluded ? 'disabled' : ''} oninput="items[${index}].price = parseFloat(this.value) || 0; updateAll(); updateLedgerBadge();" class="w-full p-1.5 border border-slate-200 rounded text-slate-800 ${item.isIncluded ? 'bg-slate-100 text-slate-400' : ''}">
+                <label class="flex items-center gap-1 text-[11px] text-slate-600 whitespace-nowrap cursor-pointer">
+                  <input type="checkbox" ${item.isIncluded ? 'checked' : ''} onchange="toggleIncluded(${index})" class="rounded text-blue-600 focus:ring-blue-500">
+                  <span>Trọn gói</span>
+                </label>
+              </div>
+            </div></div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function toggleIncluded(index, isChecked) {
+      items[index].isIncluded = isChecked;
+      if (isChecked) items[index].price = 0;
+      renderItemsForm();
+      updateAll(); updateLedgerBadge();
+    }
+
+    function addItemRow() {
+      items.push({
+        name: "",
+        qty: 1,
+        unit: "Bộ",
+        price: 0,
+        isIncluded: false
+      });
+      renderItemsForm();
+      updateAll(); updateLedgerBadge();
+    }
+
+    function removeItemRow(index) {
+      if (items.length <= 1) {
+        alert("Cần có ít nhất 1 mục hàng hóa!");
+        return;
+      }
+      items.splice(index, 1);
+      renderItemsForm();
+      updateAll(); updateLedgerBadge();
+    }
+
+    // Switch Preview Tabs
+    
+    // Scroll Navigation Helpers
+    function scrollToPreview() {
+      const el = document.getElementById('previewSection');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function scrollToInput() {
+      const el = document.getElementById('inputSection');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      const tabs = ['contract', 'dntt', 'bbnt_kt', 'bbnt', 'quyet_toan', 'thanhly'];
+      
+      tabs.forEach(t => {
+        const el = document.getElementById(`preview_${t}`);
+        const btn = document.getElementById(`tabBtn_${t}`);
+        if (t === tab) {
+          if (el) el.style.display = 'block';
+          if (btn) btn.className = "px-2.5 py-1.5 text-xs font-semibold rounded-md bg-white text-blue-700 shadow-sm transition";
+        } else {
+          if (el) el.style.display = 'none';
+          if (btn) btn.className = "px-2.5 py-1.5 text-xs font-medium rounded-md text-slate-600 hover:text-slate-900 transition";
+        }
+      });
+
+      if (tab === 'dntt') {
+        renderPaymentPills();
+        updateDnttPreview();
+      }
+    }
+
+    // Smart Text Parser
+    function parseSmartInput() {
+      const text = document.getElementById('smartPasteInput').value.trim();
+      if (!text) {
+        alert("Vui lòng dán thông tin Bên Mua vào ô!");
+        return;
+      }
+
+      // Tax code
+      const taxMatch = text.match(/(?:mã số thuế|mst|tax code|tax)\s*[:：]?\s*([0-9]{10}(?:-[0-9]{3})?|[0-9]{10,13})/i);
+      if (taxMatch) document.getElementById('buyerTaxCode').value = taxMatch[1].trim();
+
+      // Phone
+      const phoneMatch = text.match(/(?:điện thoại|sđt|tel|phone|hotline)\s*[:：]?\s*([0-9.\s]{9,15})/i);
+      if (phoneMatch) document.getElementById('buyerPhone').value = phoneMatch[1].trim();
+
+      // Representative
+      const repMatch = text.match(/(?:người đại diện|đại diện|ông|bà|gđ|giám đốc)\s*[:：]?\s*([^\n,;]+?)(?:\s*-\s*chức vụ|\s+chức vụ|\n|$)/i);
+      if (repMatch) document.getElementById('buyerRep').value = repMatch[1].trim();
+
+      // Position
+      const posMatch = text.match(/chức vụ\s*[:：]?\s*([^\n,;]+)/i);
+      if (posMatch) {
+        document.getElementById('buyerPosition').value = posMatch[1].trim();
+      } else if (text.toLowerCase().includes("giám đốc")) {
+        document.getElementById('buyerPosition').value = "Giám đốc";
+      }
+
+      // Company Name
+      const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+      let companyFound = false;
+      for (const line of lines) {
+        if (/^(?:công ty|cty|doanh nghiệp|tổng công ty|tập đoàn|trường|bệnh viện|trung tâm)/i.test(line)) {
+          document.getElementById('buyerName').value = line.replace(/^(?:tên đơn vị|tên công ty|khách hàng)\s*[:：]\s*/i, '').trim();
+          companyFound = true;
+          break;
+        }
+      }
+      if (!companyFound) {
+        const compMatch = text.match(/(?:tên đơn vị|tên công ty|bên mua|khách hàng)\s*[:：]?\s*([^\n]+)/i);
+        if (compMatch) document.getElementById('buyerName').value = compMatch[1].trim();
+      }
+
+      // Address
+      const addrMatch = text.match(/(?:địa chỉ|đ\/c|address)\s*[:：]?\s*([^\n]+)/i);
+      if (addrMatch) document.getElementById('buyerAddress').value = addrMatch[1].trim();
+
+      // Bank Account & Bank Name
+      const bankMatch = text.match(/(?:số\s*tài\s*khoản|stk|tài\s*khoản|tk\s*ngân\s*hàng|ngân\s*hàng|tài\s*khoản\s*số)\s*[:：]?\s*([0-9A-Za-z\s.\-–/()]+?)(?=(?:\n|$|mã số thuế|mst|địa chỉ|đại diện|chức vụ|điện thoại|sđt))/i);
+      if (bankMatch) document.getElementById('buyerBank').value = bankMatch[1].trim();
+
+      suggestContractNumber(true);
+      updateAll(); updateLedgerBadge();
+    }
+
+    // Main Calculation & Sync Across All Documents
+    function updateAll() {
+      // 1. Calculations
+      let subtotal = 0;
+      items.forEach(item => {
+        if (!item.isIncluded) {
+          subtotal += (item.qty || 0) * (item.price || 0);
+        }
+      });
+
+      const vatRate = parseFloat(document.getElementById('vatRate').value) || 0;
+      const vatAmount = subtotal * (vatRate / 100);
+      const grandTotal = subtotal + vatAmount;
+
+      // Adjusted amount for Liquidation (Phát sinh tăng/giảm)
+      const adjustedAmount = parseFloat(document.getElementById('adjustedAmount').value) || 0;
+      const finalSettlement = grandTotal + adjustedAmount;
+
+      const grandWords = numberToWords(grandTotal);
+
+      // Check payment percentages sum
+      let sumPct = 0;
+      payments.forEach((p, idx) => {
+        sumPct += p.percent || 0;
+        const pAmount = grandTotal * (p.percent / 100);
+        const previewEl = document.getElementById(`payAmountPreview_${idx}`);
+        if (previewEl) previewEl.innerText = formatMoney(pAmount) + ' VNĐ';
+      });
+
+      const statusBox = document.getElementById('paymentStatusBox');
+      const statusText = document.getElementById('paymentTotalStatus');
+      if (Math.abs(sumPct - 100) < 0.01) {
+        statusBox.className = 'flex items-center justify-between p-2.5 rounded-lg border text-xs bg-emerald-50 border-emerald-200 text-emerald-800';
+        statusText.innerHTML = `✓ Tổng các đợt: <strong>100%</strong> (Đã cân đối)`;
+      } else {
+        statusBox.className = 'flex items-center justify-between p-2.5 rounded-lg border text-xs bg-amber-50 border-amber-200 text-amber-800';
+        statusText.innerHTML = `⚠️ Tổng các đợt: <strong>${sumPct}%</strong> (Lệch ${100 - sumPct}%)`;
+      }
+
+      // Update Summary in Form
+      document.getElementById('summarySubtotal').innerText = formatMoney(subtotal) + ' VNĐ';
+      document.getElementById('summaryVatPercent').innerText = vatRate;
+      document.getElementById('summaryVatAmount').innerText = formatMoney(vatAmount) + ' VNĐ';
+      document.getElementById('summaryGrandTotal').innerText = formatMoney(grandTotal) + ' VNĐ';
+      document.getElementById('summaryTotalInWords').innerText = 'Bằng chữ: ' + grandWords;
+
+      // 2. Fetch Form Values
+      const buyerName = document.getElementById('buyerName').value.trim() || '……………………';
+      const buyerAddress = document.getElementById('buyerAddress').value.trim() || '……………………';
+      const buyerTaxCode = document.getElementById('buyerTaxCode').value.trim() || '……………………';
+      const buyerPhone = document.getElementById('buyerPhone').value.trim() || '……………………';
+      const buyerBank = document.getElementById('buyerBank').value.trim() || '……………………';
+      const buyerRep = document.getElementById('buyerRep').value.trim() || '……………………';
+      const buyerPosition = document.getElementById('buyerPosition').value.trim() || '……………………';
+
+      const contractNumber = document.getElementById('contractNumber').value.trim() || '120626/HĐKT/TOANTHANG-HACO';
+      const bbntNumber = contractNumber.replace('/HĐKT/', '/BBNT/');
+      const bbtlNumber = contractNumber.replace('/HĐKT/', '/BBTLHD/');
+      const subject = document.getElementById('contractSubject').value.trim() || 'Cung cấp & Lắp đặt màn hình LED';
+
+      const dateStr = document.getElementById('contractDate').value;
+      const d = dateStr ? new Date(dateStr) : new Date();
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+
+      // 3. Inject Values to Preview Placeholders across all tabs
+      document.querySelectorAll('.val-buyer-name').forEach(el => el.innerText = buyerName);
+      document.querySelectorAll('.val-buyer-addr').forEach(el => el.innerText = buyerAddress);
+      document.querySelectorAll('.val-buyer-tax').forEach(el => el.innerText = buyerTaxCode);
+      document.querySelectorAll('.val-buyer-phone').forEach(el => el.innerText = buyerPhone);
+      document.querySelectorAll('.val-buyer-bank').forEach(el => el.innerText = buyerBank);
+      document.querySelectorAll('.val-buyer-rep').forEach(el => el.innerText = buyerRep);
+      document.querySelectorAll('.val-buyer-pos').forEach(el => el.innerText = buyerPosition);
+
+      document.querySelectorAll('.val-contract-num').forEach(el => el.innerText = contractNumber);
+      document.querySelectorAll('.val-bbnt-num').forEach(el => el.innerText = bbntNumber);
+      document.querySelectorAll('.val-bbtl-num').forEach(el => el.innerText = bbtlNumber);
+      document.querySelectorAll('.val-subject').forEach(el => el.innerText = subject);
+      document.querySelectorAll('.val-subject-lower').forEach(el => el.innerText = subject.toLowerCase());
+
+      document.querySelectorAll('.val-day').forEach(el => el.innerText = day);
+      document.querySelectorAll('.val-month').forEach(el => el.innerText = month);
+      document.querySelectorAll('.val-year').forEach(el => el.innerText = year);
+
+      document.querySelectorAll('.val-subtotal').forEach(el => el.innerText = formatMoney(subtotal));
+      document.querySelectorAll('.val-vat-rate').forEach(el => el.innerText = vatRate);
+      document.querySelectorAll('.val-vat-amt').forEach(el => el.innerText = formatMoney(vatAmount));
+      document.querySelectorAll('.val-grand-total').forEach(el => el.innerText = formatMoney(grandTotal));
+      document.querySelectorAll('.val-grand-words').forEach(el => el.innerText = grandWords);
+
+      // 4. Render Dynamic Payment Clauses in HĐKT (Điều 3.2)
+      let clausesHtml = '';
+      payments.forEach((p, idx) => {
+        const pAmount = grandTotal * (p.percent / 100);
+        const actionText = idx === 0 ? "tạm ứng cho bên B" : "thanh toán cho bên B";
+        clausesHtml += `
+          <p style="margin: 3px 0;"><strong>+ Đợt ${idx + 1}:</strong> Bên A ${actionText} ${p.percent}% giá trị hợp đồng (tương đương: <strong>${formatMoney(pAmount)} VNĐ</strong>) ${p.condition}.</p>
+        `;
+      });
+      document.getElementById('contractPaymentClauses').innerHTML = clausesHtml;
+
+      // 5. Render Liquidation Settlement Table (BBTL Điều 3)
+      let priorPaymentsTotal = 0;
+      for (let i = 0; i < payments.length - 1; i++) {
+        priorPaymentsTotal += grandTotal * (payments[i].percent / 100);
+      }
+      const finalRemaining = finalSettlement - priorPaymentsTotal;
+      const finalRemainingWords = numberToWords(finalRemaining);
+
+      let settleRowsHtml = `
+        <tr>
+          <td style="text-align: center;">1</td>
+          <td>Giá trị theo hợp đồng (1)</td>
+          <td style="text-align: right; font-weight: bold;">${formatMoney(grandTotal)}</td>
+        </tr>
+        <tr>
+          <td style="text-align: center;">2</td>
+          <td>Phát sinh tăng / giảm (2)</td>
+          <td style="text-align: right;">${formatMoney(adjustedAmount)}</td>
+        </tr>
+        <tr style="background-color: #f8fafc;">
+          <td style="text-align: center; font-weight: bold;">3</td>
+          <td style="font-weight: bold;">Tổng giá trị quyết toán (1) + (2) = (3)</td>
+          <td style="text-align: right; font-weight: bold; color: #1e3a8a;">${formatMoney(finalSettlement)}</td>
+        </tr>
+      `;
+
+      if (payments.length === 1) {
+        settleRowsHtml += `
+          <tr style="background-color: #f0fdf4;">
+            <td style="text-align: center; font-weight: bold;">4</td>
+            <td style="font-weight: bold;">Tổng số tiền thanh toán quyết toán</td>
+            <td style="text-align: right; font-weight: bold; color: #15803d;">${formatMoney(finalSettlement)}</td>
+          </tr>
+        `;
+      } else {
+        settleRowsHtml += `
+          <tr>
+            <td style="text-align: center;">4</td>
+            <td>Số tiền Bên A đã thanh toán các đợt trước (Đợt 1${payments.length > 2 ? ' đến Đợt ' + (payments.length - 1) : ''}) (4)</td>
+            <td style="text-align: right;">${formatMoney(priorPaymentsTotal)}</td>
+          </tr>
+          <tr style="background-color: #f0fdf4;">
+            <td style="text-align: center; font-weight: bold;">5</td>
+            <td style="font-weight: bold;">Tổng số tiền còn lại cần thanh toán Đợt cuối (3) - (4) = (5)</td>
+            <td style="text-align: right; font-weight: bold; color: #15803d;">${formatMoney(finalRemaining)}</td>
+          </tr>
+        `;
+      }
+      document.getElementById('settlementTableBody').innerHTML = settleRowsHtml;
+      document.querySelectorAll('.val-final-rem-words').forEach(el => el.innerText = finalRemainingWords);
+
+      // 6. Render Items Tables for Contract, BBNT Sử dụng, and BBNT Kỹ thuật
+      let itemsHtml = '';
+      let itemsKtHtml = '';
+      items.forEach((item, index) => {
+        const itemTotal = item.isIncluded ? 'Bao gồm' : formatMoney(item.qty * item.price);
+        const itemPrice = item.isIncluded ? '' : formatMoney(item.price);
+        const formattedName = item.name.replace(/\n/g, '<br>');
+
+        itemsHtml += `
+          <tr>
+            <td style="text-align: center;">${String(index + 1).padStart(2, '0')}</td>
+            <td style="text-align: justify;">${formattedName}</td>
+            <td style="text-align: center;">${item.qty}</td>
+            <td style="text-align: center;">${item.unit}</td>
+            <td style="text-align: right;">${itemPrice}</td>
+            <td style="text-align: right; font-weight: ${item.isIncluded ? 'normal' : 'bold'};">${itemTotal}</td>
+          </tr>
+        `;
+
+        itemsKtHtml += `
+          <tr>
+            <td style="text-align: center;">${String(index + 1).padStart(2, '0')}</td>
+            <td style="text-align: justify;">${formattedName}</td>
+            <td style="text-align: center;">${item.qty}</td>
+            <td style="text-align: center;">${item.unit}</td>
+          </tr>
+        `;
+      });
+
+      document.getElementById('contractItemsTbody').innerHTML = itemsHtml;
+      document.getElementById('bbntItemsTbody').innerHTML = itemsHtml;
+      document.getElementById('bbntKtItemsTbody').innerHTML = itemsKtHtml;
+
+      // Generate Quyết Toán Table rows
+      let qtHtml = '';
+      let qtActualSubtotal = 0;
+      let qtDiffSubtotal = 0;
+
+      items.forEach((item, index) => {
+        const hTotal = item.isIncluded ? 0 : (item.qty * item.price);
+        // Actual qty (supports actualQty property if item has it, else adjusted if last item or same)
+        const actQty = (item.actualQty !== undefined && item.actualQty !== null) ? item.actualQty : item.qty;
+        const actPrice = item.isIncluded ? 0 : item.price;
+        const actTotal = item.isIncluded ? 0 : (actQty * actPrice);
+        const diffTotal = actTotal - hTotal;
+
+        qtActualSubtotal += actTotal;
+        qtDiffSubtotal += diffTotal;
+
+        const hTotalStr = item.isIncluded ? 'Bao gồm' : formatMoney(hTotal);
+        const actTotalStr = item.isIncluded ? 'Bao gồm' : formatMoney(actTotal);
+        const diffStr = item.isIncluded ? '-' : (diffTotal === 0 ? '0' : (diffTotal > 0 ? '+' + formatMoney(diffTotal) : formatMoney(diffTotal)));
+        const formattedName = item.name.replace(/\n/g, '<br>');
+
+        qtHtml += `
+          <tr>
+            <td style="text-align: center;">${String(index + 1).padStart(2, '0')}</td>
+            <td style="text-align: justify;">${formattedName}</td>
+            <td style="text-align: center;">${item.unit}</td>
+            <td style="text-align: center;">${item.qty}</td>
+            <td style="text-align: right;">${item.isIncluded ? '' : formatMoney(item.price)}</td>
+            <td style="text-align: right; font-weight: ${item.isIncluded ? 'normal' : 'bold'};">${hTotalStr}</td>
+            <td style="text-align: center;">${item.unit}</td>
+            <td style="text-align: center; font-weight: bold; color: #15803d;">${actQty}</td>
+            <td style="text-align: right;">${item.isIncluded ? '' : formatMoney(actPrice)}</td>
+            <td style="text-align: right; font-weight: bold; color: #15803d;">${actTotalStr}</td>
+            <td style="text-align: right; font-weight: bold; color: ${diffTotal < 0 ? '#b91c1c' : (diffTotal > 0 ? '#15803d' : '#64748b')};">${diffStr}</td>
+          </tr>
+        `;
+      });
+
+      const qtActualVat = qtActualSubtotal * (vatRate / 100);
+      const qtDiffVat = qtDiffSubtotal * (vatRate / 100);
+      const qtActualGrandTotal = qtActualSubtotal + qtActualVat;
+      const qtDiffGrandTotal = qtDiffSubtotal + qtDiffVat;
+
+      const qtTbody = document.getElementById('quyetToanItemsTbody');
+      if (qtTbody) qtTbody.innerHTML = qtHtml;
+
+      const qtActualSubtotalEl = document.getElementById('qtActualSubtotal');
+      if (qtActualSubtotalEl) qtActualSubtotalEl.innerText = formatMoney(qtActualSubtotal);
+
+      const qtDiffSubtotalEl = document.getElementById('qtDiffSubtotal');
+      if (qtDiffSubtotalEl) qtDiffSubtotalEl.innerText = (qtDiffSubtotal >= 0 ? '+' : '') + formatMoney(qtDiffSubtotal);
+
+      const qtActualVatEl = document.getElementById('qtActualVat');
+      if (qtActualVatEl) qtActualVatEl.innerText = formatMoney(qtActualVat);
+
+      const qtDiffVatEl = document.getElementById('qtDiffVat');
+      if (qtDiffVatEl) qtDiffVatEl.innerText = (qtDiffVat >= 0 ? '+' : '') + formatMoney(qtDiffVat);
+
+      const qtActualGrandTotalEl = document.getElementById('qtActualGrandTotal');
+      if (qtActualGrandTotalEl) qtActualGrandTotalEl.innerText = formatMoney(qtActualGrandTotal);
+
+      const qtDiffGrandTotalEl = document.getElementById('qtDiffGrandTotal');
+      if (qtDiffGrandTotalEl) {
+        qtDiffGrandTotalEl.innerText = (qtDiffGrandTotal >= 0 ? '+' : '') + formatMoney(qtDiffGrandTotal);
+        qtDiffGrandTotalEl.style.color = qtDiffGrandTotal < 0 ? '#b91c1c' : (qtDiffGrandTotal > 0 ? '#15803d' : '#64748b');
+      }
+
+      // 2. Values in Section 2 of Quyết Toán
+      // Use either calculated actual grand total or finalSettlement
+      const effectiveSettlement = (adjustedAmount !== 0) ? finalSettlement : qtActualGrandTotal;
+      const priorPaid = grandTotal * ((payments[0]?.percent || 50) / 100);
+      const remainingVal = Math.max(0, effectiveSettlement - priorPaid);
+
+      const qtFinalValEl = document.getElementById('qtFinalVal');
+      if (qtFinalValEl) qtFinalValEl.innerText = formatMoney(effectiveSettlement);
+
+      const qtFinalWordsEl = document.getElementById('qtFinalWords');
+      if (qtFinalWordsEl) qtFinalWordsEl.innerText = numberToWords(effectiveSettlement);
+
+      const qtPriorPaidEl = document.getElementById('qtPriorPaid');
+      if (qtPriorPaidEl) qtPriorPaidEl.innerText = formatMoney(priorPaid);
+
+      const qtRemainingValEl = document.getElementById('qtRemainingVal');
+      if (qtRemainingValEl) qtRemainingValEl.innerText = formatMoney(remainingVal);
+
+      const qtRemainingWordsEl = document.getElementById('qtRemainingWords');
+      if (qtRemainingWordsEl) qtRemainingWordsEl.innerText = numberToWords(remainingVal);
+
+      // Quyết toán document number
+      const bbqtNum = contractNumber.replace('/HĐKT/', '/BBQT/');
+      document.querySelectorAll('.val-qt-num').forEach(el => el.innerText = bbqtNum);
+
+
+      // Update ĐNTT preview tab
+      updateDnttPreview();
+    }
+
+    // Update ĐNTT preview content according to selectedPaymentDocIndex
+    function updateDnttPreview() {
+      if (!payments || payments.length === 0) return;
+      if (selectedPaymentDocIndex >= payments.length) selectedPaymentDocIndex = 0;
+
+      const p = payments[selectedPaymentDocIndex];
+      const isFirst = selectedPaymentDocIndex === 0;
+      const isLast = selectedPaymentDocIndex === payments.length - 1;
+      const dotNum = selectedPaymentDocIndex + 1;
+
+      // Subtotal & Grand total
+      let subtotal = 0;
+      items.forEach(item => {
+        if (!item.isIncluded) subtotal += (item.qty || 0) * (item.price || 0);
+      });
+      const vatRate = parseFloat(document.getElementById('vatRate').value) || 0;
+      const grandTotal = subtotal + subtotal * (vatRate / 100);
+      const contractNumber = document.getElementById('contractNumber').value.trim() || '120626/HĐKT/TOANTHANG-HACO';
+      const dateStr = document.getElementById('contractDate').value;
+      const d = dateStr ? new Date(dateStr) : new Date();
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+
+      // Adjusted amount for Liquidation
+      const adjustedAmount = parseFloat(document.getElementById('adjustedAmount').value) || 0;
+      const finalSettlement = grandTotal + adjustedAmount;
+
+      // Calculate amount for this installment
+      let installmentAmount = 0;
+      if (isLast && adjustedAmount !== 0) {
+        let priorTotal = 0;
+        for (let i = 0; i < payments.length - 1; i++) {
+          priorTotal += grandTotal * (payments[i].percent / 100);
+        }
+        installmentAmount = finalSettlement - priorTotal;
+      } else {
+        installmentAmount = grandTotal * (p.percent / 100);
+      }
+
+      const installmentWords = numberToWords(installmentAmount);
+
+      // Doc Number & Titles
+      const docNumEl = document.getElementById('dnttDocNumber');
+      const titleEl = document.getElementById('dnttTitle');
+      const subTitleEl = document.getElementById('dnttSubtitle');
+      const contentEl = document.getElementById('dnttContentText');
+      const amountRowEl = document.getElementById('dnttAmountRow');
+      const wordsRowEl = document.getElementById('dnttWordsRow');
+
+      if (isFirst) {
+        docNumEl.innerText = `Số: 01/DNTU/HACO`;
+        titleEl.innerText = `ĐỀ NGHỊ TẠM ỨNG (ĐỢT 1)`;
+        subTitleEl.innerText = `(V/v: Tạm ứng Đợt 1)`;
+        contentEl.innerHTML = `<strong>Nội dung tạm ứng:</strong> Đề nghị tạm ứng ${p.percent}% giá trị hợp đồng theo Hợp đồng kinh tế số <strong class="val-contract-num">${contractNumber}</strong> ký ngày ${day} tháng ${month} năm ${year}.`;
+        amountRowEl.innerHTML = `Giá trị đề nghị tạm ứng (${p.percent}%): &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>${formatMoney(installmentAmount)} VNĐ</strong>`;
+      } else {
+        const prefix = dotNum < 10 ? `0${dotNum}` : `${dotNum}`;
+        docNumEl.innerText = `Số: ${prefix}/DNTT/HACO`;
+        titleEl.innerText = isLast ? `ĐỀ NGHỊ THANH TOÁN (ĐỢT ${dotNum} - QUYẾT TOÁN)` : `ĐỀ NGHỊ THANH TOÁN (ĐỢT ${dotNum})`;
+        subTitleEl.innerText = `(V/v: Thanh toán Đợt ${dotNum})`;
+        contentEl.innerHTML = `<strong>Nội dung thanh toán:</strong> Đề nghị thanh toán Đợt ${dotNum} (${p.percent}% giá trị hợp đồng) theo Hợp đồng kinh tế số <strong class="val-contract-num">${contractNumber}</strong> ký ngày ${day} tháng ${month} năm ${year}.`;
+        amountRowEl.innerHTML = `Giá trị đề nghị thanh toán Đợt ${dotNum}: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>${formatMoney(installmentAmount)} VNĐ</strong>`;
+      }
+
+      wordsRowEl.innerHTML = `(Bằng chữ: <strong>${installmentWords}</strong>)`;
+    }
+
+    // Load Sample Toàn Thắng Audio (3 Installments)
+    function loadSampleToanThang() {
+      document.getElementById('buyerName').value = "CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO";
+      document.getElementById('buyerAddress').value = "Số 85/8 Nguyễn Đình Chiều, Khu Phố Đông B, phường Đông Hoà, Thành phố Hồ Chí Minh, Việt Nam";
+      document.getElementById('buyerTaxCode').value = "0317300612";
+      document.getElementById('buyerPhone').value = "0944 070 797";
+      document.getElementById('buyerBank').value = "0317300612 - Ngân hàng TMCP Á Châu (ACB) - CN Đông Hoà";
+      document.getElementById('buyerRep').value = "Bà Bùi Bích Ngọc";
+      document.getElementById('buyerPosition').value = "Giám đốc";
+
+      document.getElementById('contractNumber').value = "120626/HĐKT/TOANTHANG-HACO";
+      document.getElementById('contractDate').value = "2026-06-12";
+      document.getElementById('vatRate').value = "8";
+      document.getElementById('adjustedAmount').value = "-13381200";
+      document.getElementById('contractSubject').value = "Cung cấp & Lắp đặt màn hình LED P2.5";
+
+      // 3 Installments for Toàn Thắng
+      payments = [
+        {
+          name: "Đợt 1 (Tạm ứng)",
+          percent: 50,
+          condition: "sau khi hợp đồng được ký kết",
+          isDeposit: true
+        },
+        {
+          name: "Đợt 2",
+          percent: 30,
+          condition: "khi thiết bị được tập kết tại công trình",
+          isDeposit: false
+        },
+        {
+          name: "Đợt 3 (Quyết toán)",
+          percent: 20,
+          condition: "trong vòng 05-07 ngày sau khi ký biên bản nghiệm thu hoàn thành đưa vào sử dụng",
+          isDeposit: false
+        }
+      ];
+
+      items = [
+        {
+          name: "Màn hình LED P2.5 hiển thị trong nhà:\n- Kích thước: 3840x1920mm\n- Độ phân giải: 1536x768 pixel Mã sản phẩm: P2.5 Hãng sản xuất: Ilikit/China\n- Màn hình LED P2.5\n- Card tín hiệu\n- Bộ đổi nguồn từ xoay chiều sang 1 chiều",
+          qty: 7.3728,
+          actualQty: 6.20,
+          unit: "M2",
+          price: 10500000,
+          isIncluded: false
+        },
+        {
+          name: "Hệ thống khung giàn gia cố màn hình LED:\n- Hệ thống khung\n- Ốp trang trí màn hình LED",
+          qty: 1,
+          unit: "Hệ",
+          price: 0,
+          isIncluded: true
+        },
+        {
+          name: "Hệ thống điện, tín hiệu chạy ổn định màn hình LED:\n- Hệ aptomat cho màn hình\n- Hệ dây điện trong màn, dây điện nguồn\n- Hệ dây tín hiệu, cáp dẹt, cat5E, cat6",
+          qty: 1,
+          unit: "Hệ",
+          price: 0,
+          isIncluded: true
+        },
+        {
+          name: "Bộ xử lý hình ảnh KLS2C",
+          qty: 1,
+          unit: "Cái",
+          price: 4576000,
+          isIncluded: false
+        }
+      ];
+
+      selectedPaymentDocIndex = 0;
+      renderPaymentsForm();
+      renderItemsForm();
+      updateAll(); updateLedgerBadge();
+    }
+
+    // Load Sample Minh Anh (2 Installments)
+    function loadSampleData() {
+      document.getElementById('buyerName').value = "CÔNG TY TNHH MỘT THÀNH VIÊN THƯƠNG MẠI VÀ DỊCH VỤ CÔNG NGHỆ TIN HỌC MINH ANH";
+      document.getElementById('buyerAddress').value = "Thôn Tân Thịnh, Xã Hàm Yên, Tỉnh Tuyên Quang, Việt Nam";
+      document.getElementById('buyerTaxCode').value = "5000844443";
+      document.getElementById('buyerPhone').value = "0944 070 797";
+      document.getElementById('buyerBank').value = "5000844443 - Ngân hàng Nông nghiệp & PTNT (Agribank) - CN Hàm Yên";
+      document.getElementById('buyerRep').value = "Ông Phạm Anh Tuấn";
+      document.getElementById('buyerPosition').value = "Giám đốc";
+
+      document.getElementById('contractNumber').value = "021126/HĐKT/HACO-MINHANH";
+      document.getElementById('contractDate').value = "2026-11-02";
+      document.getElementById('vatRate').value = "8";
+      document.getElementById('adjustedAmount').value = "0";
+      document.getElementById('contractSubject').value = "Cung cấp & Lắp đặt màn hình LED";
+
+      // 2 Installments for Minh Anh
+      payments = [
+        {
+          name: "Đợt 1 (Tạm ứng)",
+          percent: 50,
+          condition: "sau khi hợp đồng được ký kết",
+          isDeposit: true
+        },
+        {
+          name: "Đợt 2 (Còn lại)",
+          percent: 50,
+          condition: "trong vòng 05-07 ngày sau khi hoàn thành, bàn giao công trình đưa vào sử dụng",
+          isDeposit: false
+        }
+      ];
+
+      items = [
+        {
+          name: "Màn hình LED P2.5 hiển thị trong nhà bao gồm:\n- Màn hình LED LED P2.5 (KT: 3200x1600 mm) Xuất xứ: GKGD – Trung Quốc\n- Card tín hiệu\n- Bộ đổi nguồn từ xoay chiều sang 1 chiều",
+          qty: 5.12,
+          unit: "M2",
+          price: 12500000,
+          isIncluded: false
+        },
+        {
+          name: "Hệ thống dây điện, tín hiệu chạy ổn định màn hình Led:\n- Hệ dây điện trong màn, dây nguồn\n- Hệ dây tín hiệu, cáp dẹp, cáp mạng",
+          qty: 1,
+          unit: "Hệ",
+          price: 0,
+          isIncluded: true
+        },
+        {
+          name: "Hệ thống khung, giàn cố định màn hình Led:\n- Hệ khung treo, cố định màn hình LED\n- Ốp alumi đen xung quanh màn hình",
+          qty: 1,
+          unit: "Hệ",
+          price: 0,
+          isIncluded: true
+        },
+        {
+          name: "Hệ thống điều khiển màn hình Led:\nBộ xử lý hình ảnh KLS2C",
+          qty: 1,
+          unit: "Cái",
+          price: 6000000,
+          isIncluded: false
+        },
+        {
+          name: "Chi phí vận chuyển, lắp đặt:\n- Vận chuyển hàng hóa, vật tư đến chân công trình\n- Lắp đặt, chạy thử, bàn giao màn hình LED",
+          qty: 1,
+          unit: "Gói",
+          price: 0,
+          isIncluded: true
+        }
+      ];
+
+      selectedPaymentDocIndex = 0;
+      renderPaymentsForm();
+      renderItemsForm();
+      updateAll(); updateLedgerBadge();
+    }
+
+    // Clear Form
+    function clearAllData() {
+      if (!confirm("Bạn có chắc chắn muốn xóa trắng thông tin để tạo mới?")) return;
+      document.getElementById('buyerName').value = "";
+      document.getElementById('buyerAddress').value = "";
+      document.getElementById('buyerTaxCode').value = "";
+      document.getElementById('buyerPhone').value = "";
+      document.getElementById('buyerBank').value = "";
+      document.getElementById('buyerRep').value = "";
+      document.getElementById('buyerPosition').value = "Giám đốc";
+
+      document.getElementById('smartPasteInput').value = "";
+      document.getElementById('adjustedAmount').value = "0";
+      setDefaultDate();
+      suggestContractNumber(true);
+
+      payments = [
+        {
+          name: "Đợt 1 (Tạm ứng)",
+          percent: 50,
+          condition: "sau khi hợp đồng được ký kết",
+          isDeposit: true
+        },
+        {
+          name: "Đợt 2 (Còn lại)",
+          percent: 50,
+          condition: "trong vòng 05-07 ngày sau khi hoàn thành, bàn giao công trình đưa vào sử dụng",
+          isDeposit: false
+        }
+      ];
+
+      items = [{
+        name: "",
+        qty: 1,
+        unit: "Bộ",
+        price: 0,
+        isIncluded: false
+      }];
+
+      selectedPaymentDocIndex = 0;
+      renderPaymentsForm();
+      renderItemsForm();
+      updateAll(); updateLedgerBadge();
+    }
+
+    function setDefaultDate() {
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      document.getElementById('contractDate').value = `${yyyy}-${mm}-${dd}`;
+    }
+
+    // Export to Word Document
+    function exportToWord(elementId, filename) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+
+      const clone = el.cloneNode(true);
+      clone.querySelectorAll('.no-print').forEach(node => node.remove());
+
+      const header = `
+        <html xmlns:o='urn:schemas-microsoft-com:office:office' 
+              xmlns:w='urn:schemas-microsoft-com:office:word' 
+              xmlns='http://www.w3.org/TR/REC-html40'>
+        <head>
+          <meta charset='utf-8'>
+          <title>${filename}</title>
+          <!--[if gte mso 9]>
+          <xml>
+            <w:WordDocument>
+              <w:View>Print</w:View>
+              <w:Zoom>100</w:Zoom>
+              <w:DoNotOptimizeForBrowser/>
+            </w:WordDocument>
+          </xml>
+          <![endif]-->
+          <style>
+            @page Section1 {
+              size: 21.0cm 29.7cm; /* A4 */
+              margin: 2.0cm 2.0cm 2.0cm 3.0cm; /* Standard VN: Top 2cm, Right 2cm, Bottom 2cm, Left 3cm */
+              mso-header-margin: 36.0pt;
+              mso-footer-margin: 36.0pt;
+              mso-paper-source: 0;
+            }
+            div.Section1 { page: Section1; }
+            body {
+              font-family: 'Times New Roman', serif;
+              font-size: 13pt;
+              line-height: 1.35;
+              color: #000;
+              text-align: justify;
+              text-justify: inter-word;
+            }
+            p {
+              margin: 0 0 5pt 0;
+              line-height: 1.35;
+              text-align: justify;
+              text-justify: inter-word;
+              font-size: 13pt;
+              font-family: 'Times New Roman', serif;
+            }
+            table {
+              border-collapse: collapse;
+              mso-table-lspace: 0pt;
+              mso-table-rspace: 0pt;
+              width: 100%;
+            }
+            .doc-table {
+              border: 1.0pt solid windowtext;
+              margin: 8pt 0;
+            }
+            .doc-table th {
+              border: 1.0pt solid windowtext;
+              background-color: #f2f2f2;
+              font-weight: bold;
+              text-align: center;
+              padding: 4pt 6pt;
+              font-size: 12pt;
+              font-family: 'Times New Roman', serif;
+            }
+            .doc-table td {
+              border: 1.0pt solid windowtext;
+              padding: 4pt 6pt;
+              font-size: 12pt;
+              vertical-align: middle;
+              font-family: 'Times New Roman', serif;
+            }
+            .doc-party-table {
+              border: none !important;
+              margin: 6pt 0;
+            }
+            .doc-party-table td {
+              border: none !important;
+              padding: 2pt 4pt;
+              font-size: 12.5pt;
+              vertical-align: top;
+              font-family: 'Times New Roman', serif;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="Section1">
+            ${clone.innerHTML}
+          </div>
+        </body>
+        </html>
+      `;
+
+      const blob = new Blob(['\ufeff', header], { type: 'application/msword;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function downloadCurrentDoc() {
+      const contractNum = document.getElementById('contractNumber').value.trim() || 'HACO';
+      const safeNum = contractNum.replace(/[/\\?%*:|"<>]/g, '-');
+      
+      if (currentTab === 'contract') {
+        exportToWord('preview_contract', `1. Hop_Dong_${safeNum}.doc`);
+      } else if (currentTab === 'dntt') {
+        const dotNum = selectedPaymentDocIndex + 1;
+        const prefix = selectedPaymentDocIndex === 0 ? 'DNTU' : 'DNTT';
+        exportToWord('preview_dntt', `2. ${prefix}_Dot_${dotNum}_${safeNum}.doc`);
+      } else if (currentTab === 'bbnt_kt') {
+        exportToWord('preview_bbnt_kt', `3. BBNT_Ky_Thuat_${safeNum}.doc`);
+      } else if (currentTab === 'bbnt') {
+        exportToWord('preview_bbnt', `4. BBNT_Su_Dung_${safeNum}.doc`);
+      } else {
+        exportToWord('preview_thanhly', `5. Thanh_Ly_Hop_Dong_${safeNum}.doc`);
+      }
+    }
+
+    // Download All Documents (Contract, all Payment Requests, BBNT KT, BBNT Sử dụng, Thanh lý)
+    function downloadAllDocs() {
+      const contractNum = document.getElementById('contractNumber').value.trim() || 'HACO';
+      const safeNum = contractNum.replace(/[/\\?%*:|"<>]/g, '-');
+      
+      const queue = [
+        { id: 'preview_contract', name: `1. Hop_Dong_${safeNum}.doc` }
+      ];
+
+      const originalSelected = selectedPaymentDocIndex;
+      payments.forEach((p, idx) => {
+        selectedPaymentDocIndex = idx;
+        updateDnttPreview();
+        const dotNum = idx + 1;
+        const prefix = idx === 0 ? 'DNTU' : 'DNTT';
+        queue.push({
+          id: 'preview_dntt',
+          name: `2.${dotNum}_${prefix}_Dot_${dotNum}_${safeNum}.doc`,
+          executeBefore: () => {
+            selectedPaymentDocIndex = idx;
+            updateDnttPreview();
+          }
+        });
+      });
+
+      queue.push({ id: 'preview_bbnt_kt', name: `3. BBNT_Ky_Thuat_${safeNum}.doc` });
+      queue.push({ id: 'preview_bbnt', name: `4. BBNT_Su_Dung_${safeNum}.doc` });
+      queue.push({ id: 'preview_quyet_toan', name: `5. Bang_Quyet_Toan_${safeNum}.doc` });
+      queue.push({ id: 'preview_thanhly', name: `6. Thanh_Ly_Hop_Dong_${safeNum}.doc` });
+
+      queue.forEach((item, index) => {
+        setTimeout(() => {
+          if (item.executeBefore) item.executeBefore();
+          exportToWord(item.id, item.name);
+          if (index === queue.length - 1) {
+            selectedPaymentDocIndex = originalSelected;
+            updateDnttPreview();
+          }
+        }, index * 400);
+      });
+    }
+
+    // Print to PDF
+    function printDocument() {
+      window.print();
+    }
+
+    // Copy formatted HTML to clipboard
+    async function copyCurrentDoc() {
+      const targetId = `preview_${currentTab}`;
+      const el = document.getElementById(targetId) || document.getElementById('preview_contract');
+      
+      const clone = el.cloneNode(true);
+      clone.querySelectorAll('.no-print').forEach(node => node.remove());
+
+      try {
+        const type = "text/html";
+        const blob = new Blob([clone.innerHTML], { type });
+        const data = [new ClipboardItem({ [type]: blob })];
+        await navigator.clipboard.write(data);
+        alert("Đã sao chép văn bản! Mở Word trống và nhấn Ctrl+V để dán trực tiếp.");
+      } catch (err) {
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(clone);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        document.execCommand('copy');
+        selection.removeAllRanges();
+        alert("Đã sao chép văn bản! Mở Word và nhấn Ctrl+V.");
+      }
+    }
+
+    // Initialize on load
+    window.onload = function() {
+      setDefaultDate();
+      loadSampleToanThang();
+    };
+  
+    // ==========================================
+    // 1. LIVE WORD INLINE EDITING ENGINE
+    // ==========================================
+    let isEditModeActive = true;
+
+    function toggleEditMode() {
+      isEditModeActive = !isEditModeActive;
+      const docPages = document.querySelectorAll('.document-page');
+      const btn = document.getElementById('toggleEditModeBtn');
+      
+      docPages.forEach(p => {
+        p.contentEditable = isEditModeActive ? "true" : "false";
+        if (isEditModeActive) {
+          p.classList.add('edit-mode-active');
+        } else {
+          p.classList.remove('edit-mode-active');
+        }
+      });
+
+      if (btn) {
+        if (isEditModeActive) {
+          btn.className = "px-2 py-0.5 text-[11px] font-semibold rounded bg-blue-100 text-blue-800 border border-blue-300 hover:bg-blue-200 transition";
+          btn.innerText = "✓ Đang BẬT";
+        } else {
+          btn.className = "px-2 py-0.5 text-[11px] font-semibold rounded bg-slate-200 text-slate-700 border border-slate-300 hover:bg-slate-300 transition";
+          btn.innerText = "✕ Đang TẮT";
+        }
+      }
+      showToast("Chế độ soạn thảo", isEditModeActive ? "Đã bật chế độ sửa trực tiếp trên văn bản." : "Đã khóa chế độ sửa trực tiếp.", isEditModeActive ? "✍️" : "🔒");
+    }
+
+    function formatDoc(command) {
+      if (!isEditModeActive) toggleEditMode();
+      document.execCommand(command, false, null);
+    }
+
+    function addCustomClause() {
+      const activeDoc = document.querySelector('.document-page:not([style*="display: none"])');
+      if (!activeDoc) return;
+
+      const title = prompt("Nhập tên điều khoản bổ sung:", "ĐIỀU KHOẢN BỔ SUNG: CAM KẾT THEO YÊU CẦU CỦA KHÁCH HÀNG");
+      if (!title) return;
+
+      const content = prompt("Nhập nội dung điều khoản:", "Hai bên cùng thống nhất bổ sung các điều kiện kỹ thuật / hỗ trợ đặc biệt sau...");
+      if (!content) return;
+
+      const clauseDiv = document.createElement('div');
+      clauseDiv.className = "custom-clause-box";
+      clauseDiv.innerHTML = `
+        <div style="font-weight: bold; margin-top: 14px; font-size: 13pt; color: #1e3a8a;">${title}</div>
+        <p style="margin: 4px 0; text-align: justify;">${content}</p>
+      `;
+
+      // Find signature table in activeDoc and insert before it
+      const sigTable = activeDoc.querySelector('table[style*="margin-top: 30px"]');
+      if (sigTable) {
+        sigTable.parentNode.insertBefore(clauseDiv, sigTable);
+      } else {
+        activeDoc.appendChild(clauseDiv);
+      }
+
+      clauseDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      showToast("Đã thêm điều khoản", `Đã bổ sung: "${title}" vào văn bản.`, "➕");
+    }
+
+    function resetDocToGenerated() {
+      if (confirm("Bạn có chắc chắn muốn khôi phục lại văn bản gốc theo thông tin Form không? Mọi câu chữ bạn đã gõ thêm bằng tay trên văn bản này sẽ được đặt lại.")) {
+        updateAll(); updateLedgerBadge();
+        showToast("Đã khôi phục", "Đã nạp lại văn bản gốc theo form dữ liệu.", "🔄");
+      }
+    }
+
+    // ==========================================
+    // 2. ACCOUNTING DEBT LEDGER (SỔ CÔNG NỢ KẾ TOÁN)
+    // ==========================================
+    const DEBT_LEDGER_KEY = 'haco_debt_ledger_data_v1';
+
+    function getLedgerData() {
+      try {
+        const raw = localStorage.getItem(DEBT_LEDGER_KEY);
+        if (!raw) return getDefaultLedgerData();
+        return JSON.parse(raw);
+      } catch (e) {
+        return getDefaultLedgerData();
+      }
+    }
+
+    function saveLedgerData(data) {
+      try {
+        localStorage.setItem(DEBT_LEDGER_KEY, JSON.stringify(data));
+        updateLedgerBadge();
+      } catch (e) {
+        console.error("Failed to save ledger data:", e);
+      }
+    }
+
+    function getDefaultLedgerData() {
+      return [
+        {
+          id: "tt_01",
+          contractNumber: "120626/HĐKT/TOANTHANG-HACO",
+          contractDate: "2026-06-12",
+          buyerName: "CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO",
+          buyerTax: "0317300612",
+          buyerPhone: "0944 070 797",
+          buyerBank: "0317300612 - Ngân hàng TMCP Á Châu (ACB) - CN Đông Hoà",
+          buyerRep: "Bà Bùi Bích Ngọc",
+          subject: "Cung cấp & Lắp đặt màn hình LED P2.5",
+          grandTotal: 75168000,
+          installments: [
+            { name: "Đợt 1 (Tạm ứng)", percent: 50, amount: 44274600, isPaid: true, paidDate: "12/06/2026" },
+            { name: "Đợt 2 (Quyết toán)", percent: 50, amount: 30893400, isPaid: false, paidDate: "" }
+          ],
+          paidAmount: 44274600,
+          remainingDebt: 30893400,
+          status: "Đang thu (Đợt 2)",
+          createdAt: "2026-06-12T08:00:00Z"
+        },
+        {
+          id: "ma_02",
+          contractNumber: "021126/HĐKT/HACO-MINHANH",
+          contractDate: "2026-11-02",
+          buyerName: "CÔNG TY TNHH MỘT THÀNH VIÊN TM & DV TIN HỌC MINH ANH",
+          buyerTax: "5000844443",
+          buyerPhone: "0944 070 797",
+          buyerBank: "5000844443 - Ngân hàng Nông nghiệp & PTNT (Agribank) - CN Hàm Yên",
+          buyerRep: "Ông Phạm Anh Tuấn",
+          subject: "Cung cấp & Lắp đặt màn hình LED P2.5 GKGD",
+          grandTotal: 75600000,
+          installments: [
+            { name: "Đợt 1 (Tạm ứng)", percent: 50, amount: 37800000, isPaid: true, paidDate: "02/11/2026" },
+            { name: "Đợt 2 (Quyết toán)", percent: 50, amount: 37800000, isPaid: false, paidDate: "" }
+          ],
+          paidAmount: 37800000,
+          remainingDebt: 37800000,
+          status: "Đang thu (Đợt 2)",
+          createdAt: "2026-11-02T08:00:00Z"
+        }
+      ];
+    }
+
+    function seedSampleLedgerData() {
+      const samples = getDefaultLedgerData();
+      saveLedgerData(samples);
+      renderDebtLedgerTable();
+      showToast("Đã nạp mẫu", "Đã nạp 2 hợp đồng mẫu Toàn Thắng và Minh Anh vào Sổ công nợ.", "📋");
+    }
+
+    function updateLedgerBadge() {
+      const data = getLedgerData();
+      const count = data.length;
+      const b1 = document.getElementById('headerLedgerBadge');
+      const b2 = document.getElementById('modalLedgerTotalBadge');
+      if (b1) b1.innerText = count;
+      if (b2) b2.innerText = `${count} HĐ`;
+    }
+
+    function confirmAndSaveContractToLedger() {
+      // 1. Gather current contract data
+      let subtotal = 0;
+      items.forEach(item => {
+        if (!item.isIncluded) subtotal += (item.qty || 0) * (item.price || 0);
+      });
+      const vatRate = parseFloat(document.getElementById('vatRate').value) || 0;
+      const grandTotal = subtotal + subtotal * (vatRate / 100);
+      const adjustedAmount = parseFloat(document.getElementById('adjustedAmount').value) || 0;
+      const finalGrandTotal = grandTotal + adjustedAmount;
+
+      const contractNumber = document.getElementById('contractNumber').value.trim() || 'HĐKT-HACO';
+      const contractDate = document.getElementById('contractDate').value || new Date().toISOString().split('T')[0];
+      const buyerName = document.getElementById('buyerName').value.trim() || 'Khách hàng Bên A';
+      const buyerTax = document.getElementById('buyerTaxCode').value.trim() || '';
+      const buyerPhone = document.getElementById('buyerPhone').value.trim() || '';
+      const buyerRep = document.getElementById('buyerRep').value.trim() || '';
+      const subject = document.getElementById('contractSubject').value.trim() || 'Cung cấp & Lắp đặt màn hình LED';
+
+      // 2. Build installments
+      const installments = payments.map((p, idx) => {
+        const dotNum = idx + 1;
+        const pAmount = finalGrandTotal * (p.percent / 100);
+        return {
+          name: idx === 0 ? `Đợt 1 (Tạm ứng)` : (idx === payments.length - 1 ? `Đợt ${dotNum} (Quyết toán)` : `Đợt ${dotNum}`),
+          percent: p.percent,
+          amount: pAmount,
+          isPaid: false,
+          paidDate: ""
+        };
+      });
+
+      const newRecord = {
+        id: "hd_" + Date.now(),
+        contractNumber,
+        contractDate,
+        buyerName,
+        buyerTax,
+        buyerPhone,
+        buyerBank,
+        buyerRep,
+        subject,
+        grandTotal: finalGrandTotal,
+        installments,
+        paidAmount: 0,
+        remainingDebt: finalGrandTotal,
+        status: "Chưa thu tiền",
+        createdAt: new Date().toISOString()
+      };
+
+      const ledger = getLedgerData();
+      // Check if duplicate contract number exists
+      const existingIdx = ledger.findIndex(x => x.contractNumber === contractNumber);
+      if (existingIdx >= 0) {
+        if (confirm(`Hợp đồng số "${contractNumber}" đã có trong Sổ công nợ kế toán. Bạn có muốn cập nhật lại thông tin mới nhất không?`)) {
+          // Keep existing paid status if any
+          newRecord.paidAmount = ledger[existingIdx].paidAmount;
+          newRecord.remainingDebt = newRecord.grandTotal - newRecord.paidAmount;
+          newRecord.status = newRecord.remainingDebt <= 0 ? "Đã quyết toán xong" : (newRecord.paidAmount > 0 ? "Đang thu dở dang" : "Chưa thu tiền");
+          ledger[existingIdx] = newRecord;
+        } else {
+          return;
+        }
+      } else {
+        ledger.unshift(newRecord);
+      }
+
+      saveLedgerData(ledger);
+      showToast(
+        "Đã chốt hợp đồng!", 
+        `Đã chuyển "${contractNumber}" sang Sổ công nợ kế toán.`, 
+        "🎉", 
+        openDebtLedgerModal
+      );
+    }
+
+    function openDebtLedgerModal() {
+      renderDebtLedgerTable();
+      const modal = document.getElementById('debtLedgerModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    function closeDebtLedgerModal() {
+      const modal = document.getElementById('debtLedgerModal');
+      if (modal) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+    }
+
+    function toggleInstallmentPaid(contractIndex, instIndex) {
+      const ledger = getLedgerData();
+      if (!ledger[contractIndex]) return;
+      const c = ledger[contractIndex];
+      const inst = c.installments[instIndex];
+      
+      inst.isPaid = !inst.isPaid;
+      if (inst.isPaid) {
+        const d = new Date();
+        inst.paidDate = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+      } else {
+        inst.paidDate = "";
+      }
+
+      // Recalculate paid amount
+      let sumPaid = 0;
+      c.installments.forEach(x => {
+        if (x.isPaid) sumPaid += x.amount;
+      });
+      c.paidAmount = sumPaid;
+      c.remainingDebt = Math.max(0, c.grandTotal - sumPaid);
+
+      if (c.remainingDebt <= 0) {
+        c.status = "Đã quyết toán xong";
+      } else if (c.paidAmount > 0) {
+        c.status = "Đang thu dở dang";
+      } else {
+        c.status = "Chưa thu tiền";
+      }
+
+      saveLedgerData(ledger);
+      renderDebtLedgerTable();
+    }
+
+    function quickPaymentPrompt(contractIndex) {
+      const ledger = getLedgerData();
+      if (!ledger[contractIndex]) return;
+      const c = ledger[contractIndex];
+
+      const input = prompt(`Nhập số tiền khách thanh toán cho HĐ ${c.contractNumber} (VNĐ):`, c.remainingDebt);
+      if (input === null) return;
+      const amount = parseFloat(input.replace(/[^0-9.]/g, '')) || 0;
+      if (amount <= 0) return;
+
+      c.paidAmount = Math.min(c.grandTotal, (c.paidAmount || 0) + amount);
+      c.remainingDebt = Math.max(0, c.grandTotal - c.paidAmount);
+
+      if (c.remainingDebt <= 0) {
+        c.status = "Đã quyết toán xong";
+        c.installments.forEach(i => i.isPaid = true);
+      } else {
+        c.status = "Đang thu dở dang";
+      }
+
+      saveLedgerData(ledger);
+      renderDebtLedgerTable();
+      showToast("Cập nhật thanh toán", `Đã ghi nhận thu ${formatMoney(amount)} VNĐ.`, "💰");
+    }
+
+    function deleteContractFromLedger(contractIndex) {
+      const ledger = getLedgerData();
+      if (!ledger[contractIndex]) return;
+      if (confirm(`Bạn có chắc chắn muốn xóa hợp đồng "${ledger[contractIndex].contractNumber}" khỏi Sổ công nợ không?`)) {
+        ledger.splice(contractIndex, 1);
+        saveLedgerData(ledger);
+        renderDebtLedgerTable();
+        showToast("Đã xóa", "Đã xóa hợp đồng khỏi sổ theo dõi công nợ.", "🗑️");
+      }
+    }
+
+    function loadContractBackToForm(contractIndex) {
+      const ledger = getLedgerData();
+      if (!ledger[contractIndex]) return;
+      const c = ledger[contractIndex];
+
+      document.getElementById('buyerName').value = c.buyerName || '';
+      document.getElementById('buyerTaxCode').value = c.buyerTax || '';
+      document.getElementById('buyerPhone').value = c.buyerPhone || '';
+      document.getElementById('buyerBank').value = c.buyerBank || '';
+      document.getElementById('buyerRep').value = c.buyerRep || '';
+      document.getElementById('contractNumber').value = c.contractNumber || '';
+      document.getElementById('contractDate').value = c.contractDate || '';
+      document.getElementById('contractSubject').value = c.subject || '';
+
+      closeDebtLedgerModal();
+      updateAll(); updateLedgerBadge();
+      showToast("Đã nạp hợp đồng", `Đã tải lại thông tin "${c.contractNumber}" lên màn hình soạn thảo.`, "📂");
+    }
+
+    function renderDebtLedgerTable() {
+      const ledger = getLedgerData();
+      const keyword = (document.getElementById('ledgerSearchInput')?.value || '').toLowerCase().trim();
+      const filter = document.getElementById('ledgerStatusFilter')?.value || 'ALL';
+
+      let totalVal = 0;
+      let totalPaid = 0;
+      let totalRemaining = 0;
+
+      const filtered = ledger.filter(item => {
+        totalVal += item.grandTotal || 0;
+        totalPaid += item.paidAmount || 0;
+        totalRemaining += item.remainingDebt || 0;
+
+        const matchSearch = !keyword || 
+          (item.contractNumber || '').toLowerCase().includes(keyword) ||
+          (item.buyerName || '').toLowerCase().includes(keyword) ||
+          (item.buyerTax || '').toLowerCase().includes(keyword);
+
+        const matchFilter = filter === 'ALL' ||
+          (filter === 'OWING' && (item.remainingDebt || 0) > 0) ||
+          (filter === 'PAID' && (item.remainingDebt || 0) <= 0);
+
+        return matchSearch && matchFilter;
+      });
+
+      // Update KPI
+      const kpiCount = document.getElementById('kpiTotalContracts');
+      const kpiVal = document.getElementById('kpiTotalContractValue');
+      const kpiPaid = document.getElementById('kpiTotalPaid');
+      const kpiRemaining = document.getElementById('kpiTotalRemaining');
+      const kpiPaidPct = document.getElementById('kpiPaidPercent');
+
+      if (kpiCount) kpiCount.innerText = `${ledger.length} HĐ`;
+      if (kpiVal) kpiVal.innerText = formatMoney(totalVal) + ' VNĐ';
+      if (kpiPaid) kpiPaid.innerText = formatMoney(totalPaid) + ' VNĐ';
+      if (kpiRemaining) kpiRemaining.innerText = formatMoney(totalRemaining) + ' VNĐ';
+      if (kpiPaidPct) {
+        const pct = totalVal > 0 ? Math.round((totalPaid / totalVal) * 100) : 0;
+        kpiPaidPct.innerText = `${pct}% tổng doanh số đã thu`;
+      }
+
+      const tbody = document.getElementById('debtLedgerTbody');
+      const emptyState = document.getElementById('ledgerEmptyState');
+      if (!tbody) return;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '';
+        if (emptyState) emptyState.classList.remove('hidden');
+        return;
+      }
+      if (emptyState) emptyState.classList.add('hidden');
+
+      let html = '';
+      filtered.forEach((c, idx) => {
+        const isDone = (c.remainingDebt || 0) <= 0;
+        const isPartial = (c.paidAmount || 0) > 0 && !isDone;
+        const statusBadge = isDone 
+          ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">✓ ĐÃ XONG</span>`
+          : (isPartial 
+            ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">⏳ ĐANG THU</span>`
+            : `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300">🔴 CHƯA THU</span>`);
+
+        // Installment pills with click to toggle
+        let instHtml = '<div class="flex flex-col gap-1 items-start">';
+        if (c.installments && c.installments.length > 0) {
+          c.installments.forEach((inst, iIdx) => {
+            const btnClass = inst.isPaid 
+              ? 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100'
+              : 'bg-slate-100 text-slate-600 border-slate-300 hover:bg-slate-200';
+            const icon = inst.isPaid ? '✓' : '○';
+            instHtml += `
+              <button onclick="toggleInstallmentPaid(${idx}, ${iIdx})" class="px-2 py-0.5 rounded text-[10px] font-medium border ${btnClass} transition flex items-center gap-1" title="Bấm để đánh dấu đã thu / chưa thu đợt này">
+                <strong>${icon} ${inst.name}:</strong> ${formatMoney(inst.amount)}đ ${inst.paidDate ? `<span class="text-[9px] text-emerald-700 font-normal">(${inst.paidDate})</span>` : ''}
+              </button>
+            `;
+          });
+        } else {
+          instHtml += `<span class="text-slate-400 italic">Chưa chia đợt</span>`;
+        }
+        instHtml += '</div>';
+
+        html += `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="py-3 px-3 text-center font-medium text-slate-500">${idx + 1}</td>
+            <td class="py-3 px-3">
+              <div class="font-bold text-slate-900">${c.contractNumber}</div>
+              <div class="text-[11px] text-slate-500">${c.contractDate || '---'}</div>
+            </td>
+            <td class="py-3 px-3">
+              <div class="font-semibold text-slate-800 max-w-[200px] truncate" title="${c.buyerName}">${c.buyerName}</div>
+              <div class="text-[11px] text-slate-500">MST: ${c.buyerTax || '---'} | SĐT: ${c.buyerPhone || '---'}</div>
+              ${c.buyerBank ? `<div class="text-[10px] text-slate-500 truncate" title="${c.buyerBank}">🏦 ${c.buyerBank}</div>` : ''}
+            </td>
+            <td class="py-3 px-3 text-right font-bold text-slate-900">${formatMoney(c.grandTotal)}đ</td>
+            <td class="py-3 px-3">${instHtml}</td>
+            <td class="py-3 px-3 text-right font-bold text-emerald-700">${formatMoney(c.paidAmount)}đ</td>
+            <td class="py-3 px-3 text-right font-bold ${c.remainingDebt > 0 ? 'text-amber-700' : 'text-slate-400'}">${formatMoney(c.remainingDebt)}đ</td>
+            <td class="py-3 px-3 text-center">${statusBadge}</td>
+            <td class="py-3 px-3 text-center">
+              <div class="flex items-center justify-center gap-1">
+                <button onclick="quickPaymentPrompt(${idx})" class="p-1.5 hover:bg-emerald-100 text-emerald-700 rounded transition" title="Ghi nhận thu tiền lẻ">
+                  💵
+                </button>
+                <button onclick="loadContractBackToForm(${idx})" class="p-1.5 hover:bg-blue-100 text-blue-700 rounded transition" title="Nạp lại vào màn hình soạn thảo">
+                  📂
+                </button>
+                <button onclick="deleteContractFromLedger(${idx})" class="p-1.5 hover:bg-rose-100 text-rose-700 rounded transition" title="Xóa khỏi sổ">
+                  🗑️
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+    }
+
+    function exportLedgerToExcel() {
+      const ledger = getLedgerData();
+      if (ledger.length === 0) {
+        alert("Sổ công nợ đang trống, không có dữ liệu để xuất.");
+        return;
+      }
+
+      let csvContent = "﻿"; // UTF-8 BOM for Microsoft Excel
+      csvContent += "CÔNG TY CP CÔNG NGHỆ HACO VIỆT NAM\n";
+      csvContent += "SỔ THEO DÕI CÔNG NỢ & TIẾN ĐỘ THU TIỀN HỢP ĐỒNG\n";
+      csvContent += `Thời điểm xuất: ${new Date().toLocaleString('vi-VN')}\n\n`;
+      csvContent += "STT,Số Hợp Đồng,Ngày Ký,Tên Khách Hàng (Bên A),Mã Số Thuế,Điện Thoại,STK & Ngân Hàng,Hạng Mục,Tổng Giá Trị (VNĐ),Đã Thu (VNĐ),Công Nợ Còn Lại (VNĐ),Trạng Thái,Chi Tiết Các Đợt\n";
+
+      ledger.forEach((c, idx) => {
+        const instText = (c.installments || []).map(i => `${i.name}: ${formatMoney(i.amount)}đ (${i.isPaid ? 'ĐÃ THU' : 'CHƯA THU'})`).join(' | ');
+        const cleanBuyer = (c.buyerName || '').replace(/,/g, ' ');
+        const cleanSubject = (c.subject || '').replace(/,/g, ' ');
+
+        csvContent += `${idx + 1},"${c.contractNumber}","${c.contractDate}","${cleanBuyer}","${c.buyerTax}","${c.buyerPhone}","${(c.buyerBank || "").replace(/,/g, " ")}","${cleanSubject}",${c.grandTotal},${c.paidAmount},${c.remainingDebt},"${c.status}","${instText}"\n`;
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `So_Cong_No_HACO_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast("Xuất Excel thành công", "Đã tải file CSV Sổ công nợ mở được bằng Excel tiếng Việt.", "📥");
+    }
+
+    // Toast Utility
+    let toastTimeout;
+    function showToast(title, message, icon = '🎉', onAction = null) {
+      const toast = document.getElementById('hacoToast');
+      const tTitle = document.getElementById('toastTitle');
+      const tMsg = document.getElementById('toastMessage');
+      const tIcon = document.getElementById('toastIcon');
+      const tBtn = document.getElementById('toastActionBtn');
+
+      if (!toast) return;
+
+      tTitle.innerText = title;
+      tMsg.innerText = message;
+      tIcon.innerText = icon;
+
+      if (onAction) {
+        tBtn.classList.remove('hidden');
+        tBtn.onclick = () => {
+          hideToast();
+          onAction();
+        };
+      } else {
+        tBtn.classList.add('hidden');
+      }
+
+      toast.classList.remove('translate-y-24', 'opacity-0', 'pointer-events-none');
+
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        hideToast();
+      }, 4500);
+    }
+
+    function hideToast() {
+      const toast = document.getElementById('hacoToast');
+      if (toast) {
+        toast.classList.add('translate-y-24', 'opacity-0', 'pointer-events-none');
+      }
+    }
+
+</script>
+
+  <!-- MODAL: SỔ THEO DÕI CÔNG NỢ KẾ TOÁN (DEBT TRACKING LEDGER) -->
+  <div id="debtLedgerModal" class="no-print fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-6xl max-h-[92vh] rounded-2xl shadow-2xl flex flex-col border border-slate-300 overflow-hidden">
+      <!-- Modal Header -->
+      <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg bg-amber-500 flex items-center justify-center font-bold text-slate-900 text-lg shadow">
+            📊
+          </div>
+          <div>
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              SỔ THEO DÕI CÔNG NỢ & TIẾN ĐỘ THU TIỀN HỢP ĐỒNG (KẾ TOÁN)
+              <span class="text-xs bg-amber-400 text-slate-900 font-bold px-2 py-0.5 rounded-full" id="modalLedgerTotalBadge">0 HĐ</span>
+            </h2>
+            <p class="text-xs text-slate-400">Tự động đồng bộ số liệu thanh toán, đối soát đợt thu và xuất Excel đối chiếu</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <a href="https://drive.google.com/file/d/18MuFH77m35NgnvK697jEG1d4xT214DQI/view?usp=drivesdk" target="_blank" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition flex items-center gap-1.5" title="Mở file Excel gốc trên Google Drive">
+            <span>☁️</span> Mở Excel trên Drive
+          </a>
+          <button onclick="exportLedgerToExcel()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-sm transition flex items-center gap-1.5">
+            <span>📥</span> Xuất Excel Sổ Công Nợ (.csv)
+          </button>
+          <button onclick="closeDebtLedgerModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center font-bold text-lg transition">
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <!-- Financial KPI Cards -->
+      <div class="bg-slate-50 p-4 border-b border-slate-200 grid grid-cols-1 sm:grid-cols-4 gap-3">
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
+          <div class="text-xs font-medium text-slate-500">📁 Tổng Hợp Đồng</div>
+          <div class="text-xl font-bold text-slate-900 mt-1" id="kpiTotalContracts">0</div>
+          <div class="text-[11px] text-slate-400 mt-0.5">Đã chốt & chuyển kế toán</div>
+        </div>
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
+          <div class="text-xs font-medium text-slate-500">💼 Tổng Doanh Số (HĐ)</div>
+          <div class="text-xl font-bold text-blue-700 mt-1" id="kpiTotalContractValue">0 VNĐ</div>
+          <div class="text-[11px] text-blue-600 mt-0.5">Bao gồm VAT & phát sinh</div>
+        </div>
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
+          <div class="text-xs font-medium text-slate-500">💰 Đã Thực Thu</div>
+          <div class="text-xl font-bold text-emerald-700 mt-1" id="kpiTotalPaid">0 VNĐ</div>
+          <div class="text-[11px] text-emerald-600 mt-0.5" id="kpiPaidPercent">0% tổng doanh số</div>
+        </div>
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
+          <div class="text-xs font-medium text-slate-500">⏳ Công Nợ Phải Thu</div>
+          <div class="text-xl font-bold text-amber-700 mt-1" id="kpiTotalRemaining">0 VNĐ</div>
+          <div class="text-[11px] text-amber-600 mt-0.5">Chưa thanh toán dứt điểm</div>
+        </div>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="px-6 py-3 bg-white border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2 flex-1 max-w-md">
+          <span class="text-xs font-bold text-slate-600">🔍</span>
+          <input type="text" id="ledgerSearchInput" oninput="renderDebtLedgerTable()" placeholder="Tìm theo tên khách hàng, số HĐ, MST..." class="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div class="flex items-center gap-2 text-xs">
+          <span class="text-slate-600 font-medium">Lọc trạng thái:</span>
+          <select id="ledgerStatusFilter" onchange="renderDebtLedgerTable()" class="px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="ALL">Tất cả hợp đồng</option>
+            <option value="OWING">Còn công nợ</option>
+            <option value="PAID">Đã thanh toán 100%</option>
+          </select>
+          <button onclick="seedSampleLedgerData()" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-lg border border-slate-300 transition text-xs">
+            + Nạp mẫu Toàn Thắng & Minh Anh
+          </button>
+        </div>
+      </div>
+
+      <!-- Ledger Table -->
+      <div class="flex-1 overflow-y-auto p-6">
+        <table class="w-full text-xs text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-100 text-slate-700 font-bold uppercase tracking-wider text-[11px] border-b border-slate-300">
+              <th class="py-2.5 px-3 text-center w-10">STT</th>
+              <th class="py-2.5 px-3">Số HĐ / Ngày</th>
+              <th class="py-2.5 px-3">Khách Hàng (Bên A)</th>
+              <th class="py-2.5 px-3 text-right">Tổng Tiền (HĐ)</th>
+              <th class="py-2.5 px-3 text-center">Tiến Độ Từng Đợt (Bấm ✓ để thu)</th>
+              <th class="py-2.5 px-3 text-right">Đã Thu</th>
+              <th class="py-2.5 px-3 text-right">Còn Nợ</th>
+              <th class="py-2.5 px-3 text-center">Trạng Thái</th>
+              <th class="py-2.5 px-3 text-center w-24">Thao Tác</th>
+            </tr>
+          </thead>
+          <tbody id="debtLedgerTbody" class="divide-y divide-slate-200">
+            <!-- Populated dynamically via JS -->
+          </tbody>
+        </table>
+        <div id="ledgerEmptyState" class="hidden py-12 text-center text-slate-400">
+          <div class="text-4xl mb-2">📂</div>
+          <div class="font-medium text-slate-600">Chưa có hợp đồng nào trong Sổ công nợ</div>
+          <p class="text-xs text-slate-400 mt-1">Khi soạn xong hợp đồng, bấm nút <strong>"✅ Chốt HĐ & Chuyển Công Nợ"</strong> để lưu vào đây.</p>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="bg-slate-50 px-6 py-3 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+        <div>💡 Mẹo: Nhấp trực tiếp vào nút <strong>[✓ Đã thu]</strong> ở cột Tiến độ từng đợt để ghi nhận tiền đã về tài khoản công ty.</div>
+        <button onclick="closeDebtLedgerModal()" class="px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg transition">
+          Đóng Sổ Công Nợ
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="hacoToast" class="no-print fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+    <div class="bg-slate-900 text-white px-5 py-3.5 rounded-xl shadow-2xl border border-slate-700 flex items-center gap-3">
+      <span class="text-xl" id="toastIcon">🎉</span>
+      <div>
+        <div class="text-xs font-bold" id="toastTitle">Thành công</div>
+        <div class="text-[11px] text-slate-300" id="toastMessage">Đã lưu hợp đồng</div>
+      </div>
+      <button id="toastActionBtn" class="ml-2 px-3 py-1 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold text-xs rounded-lg transition">
+        Xem
+      </button>
+    </div>
+  </div>
+
+</body>
+</html>

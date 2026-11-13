@@ -67,6 +67,56 @@
     }
 
     
+    
+    /* Chuẩn thể thức văn bản hành chính Việt Nam (Nghị định 30/2020/NĐ-CP) */
+    .doc-p {
+      margin: 5px 0;
+      text-indent: 28px; /* Thụt đầu dòng đoạn văn 1cm chuẩn hành chính */
+      text-align: justify;
+      line-height: 1.5;
+    }
+    .doc-p-lead {
+      margin: 6px 0;
+      text-indent: 28px;
+      text-align: justify;
+      line-height: 1.5;
+    }
+    .doc-bullet {
+      margin: 4px 0;
+      padding-left: 28px;
+      text-indent: -16px; /* Gạch đầu dòng thụt lề chuẩn, dòng 2 thẳng hàng với chữ */
+      text-align: justify;
+      line-height: 1.5;
+    }
+    .doc-subbullet {
+      margin: 3px 0;
+      padding-left: 48px;
+      text-indent: -16px; /* Cấp con thụt sâu hơn */
+      text-align: justify;
+      line-height: 1.5;
+    }
+    .doc-words {
+      margin: 4px 0 8px 0;
+      text-indent: 28px;
+      font-style: italic;
+      text-align: justify;
+      line-height: 1.5;
+    }
+    .doc-article-title {
+      font-weight: bold;
+      font-size: 13pt;
+      margin-top: 14px;
+      margin-bottom: 5px;
+      text-indent: 0;
+    }
+    .doc-sub-title {
+      font-weight: bold;
+      font-size: 12.5pt;
+      margin-top: 8px;
+      margin-bottom: 4px;
+      text-indent: 0;
+    }
+
     /* Inline Word Editing Styles */
     .document-page[contenteditable="true"] {
       outline: none;
@@ -588,11 +638,11 @@
             </tr>
           </table>
 
-          <p style="margin: 10px 0; font-style: italic;">Sau khi bàn bạc, hai bên thống nhất ký hợp đồng <span class="val-subject-lower">cung cấp và lắp đặt màn hình LED</span> với các nội dung như sau:</p>
+          <p class="doc-p" style="font-style: italic; margin-top: 10px; margin-bottom: 10px;">Sau khi bàn bạc và thỏa thuận, hai bên cùng thống nhất ký kết Hợp đồng kinh tế <span class="val-subject-lower">cung cấp và lắp đặt màn hình LED</span> với các điều khoản cụ thể như sau:</p>
 
           <!-- ĐIỀU 1 -->
-          <div style="font-weight: bold; margin-top: 14px; font-size: 13pt;">ĐIỀU 1. ĐỐI TƯỢNG & GIÁ TRỊ HỢP ĐỒNG</div>
-          <p style="margin: 4px 0;">Bên A đồng ý mua và Bên B đồng ý cung cấp và lắp đặt màn hình LED cho Bên A với các hạng mục chi tiết như sau:</p>
+          <div class="doc-article-title">ĐIỀU 1. ĐỐI TƯỢNG VÀ GIÁ TRỊ HỢP ĐỒNG</div>
+          <p class="doc-p">Bên A đồng ý mua và Bên B đồng ý cung cấp, vận chuyển và lắp đặt hoàn thiện màn hình LED cho Bên A với các hạng mục chi tiết như sau:</p>
 
           <table class="doc-table">
             <thead>
@@ -622,84 +672,76 @@
             </tfoot>
           </table>
 
-          <p style="margin: 6px 0; font-weight: bold;">(Bằng chữ: <span class="val-grand-words">Không đồng chẵn./.</span>)</p>
-          <p style="margin: 2px 0 10px 0; font-style: italic;">Chi phí trên đã bao gồm thuế GTGT <span class="val-vat-rate">8</span>%.</p>
+          <p class="doc-words"><strong>(Bằng chữ: <span class="val-grand-words">Không đồng chẵn./.</span>)</strong></p>
+          <p class="doc-words" style="margin-top: -3px;"><i>* Chi phí trên đã bao gồm thuế GTGT <span class="val-vat-rate">8</span>%.</i></p>
 
           <!-- ĐIỀU 2 -->
-          <div style="font-weight: bold; margin-top: 14px; font-size: 13pt;">ĐIỀU 2: THỜI GIAN BÀN GIAO VÀ ĐỊA ĐIỂM THI CÔNG</div>
-          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- <strong>Thời gian thi công & bàn giao:</strong> Sau khi Bên A ký hợp đồng với Bên B, Bên B sẽ thi công, lắp đặt hoàn thiện màn hình LED trong vòng 05-07 ngày kể từ ngày ký hợp đồng và nhận được tiền tạm ứng Đợt 1.</p>
-          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- <strong>Địa điểm thi công:</strong> Theo yêu cầu của Bên A.</p>
+          <div class="doc-article-title">ĐIỀU 2: THỜI GIAN BÀN GIAO VÀ ĐỊA ĐIỂM THI CÔNG</div>
+          <p class="doc-bullet">- <strong>Thời gian thi công & bàn giao:</strong> Sau khi Bên A ký hợp đồng với Bên B, Bên B sẽ thi công, lắp đặt hoàn thiện màn hình LED trong vòng 05-07 ngày kể từ ngày ký hợp đồng và nhận được tiền tạm ứng Đợt 1.</p>
+          <p class="doc-bullet">- <strong>Địa điểm thi công:</strong> Theo yêu cầu của Bên A.</p>
 
           <!-- ĐIỀU 3 -->
-          <div style="font-weight: bold; margin-top: 14px; font-size: 13pt;">ĐIỀU 3: NGHIỆM THU VÀ THANH TOÁN</div>
-          <p style="margin: 3px 0; font-weight: bold;">3.1. Nghiệm thu sản phẩm:</p>
-          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- Bên A phối hợp với Bên B tổ chức nghiệm thu sản phẩm tại vị trí thi công sau khi hoàn tất lắp đặt.</p>
+          <div class="doc-article-title">ĐIỀU 3: NGHIỆM THU VÀ TIẾN ĐỘ THANH TOÁN</div>
+          <div class="doc-sub-title">3.1. Nghiệm thu sản phẩm:</div>
+          <p class="doc-bullet">- Bên A phối hợp với Bên B tổ chức nghiệm thu sản phẩm tại vị trí thi công sau khi hoàn tất công tác lắp đặt.</p>
           
-          <p style="margin: 8px 0 3px 0; font-weight: bold;">3.2. Tiến độ thanh toán và phương thức thanh toán:</p>
-          <p style="margin: 4px 0 4px 18px; text-indent: -18px; line-height: 1.5;">- <strong>Tổng giá trị hợp đồng:</strong> <strong><span class="val-grand-total">0</span> VNĐ</strong> (Bằng chữ: <i><span class="val-grand-words">Không đồng chẵn./.</span></i>).</p>
-          <p style="margin: 4px 0 4px 18px; text-indent: -18px; line-height: 1.5;">- <strong>Phương thức thanh toán:</strong> Bên A sẽ tạm ứng và thanh toán cho Bên B bằng hình thức chuyển khoản qua Ngân hàng theo các đợt sau:</p>
+          <div class="doc-sub-title" style="margin-top: 10px;">3.2. Tiến độ thanh toán và phương thức thanh toán:</div>
+          <p class="doc-bullet">- <strong>Tổng giá trị hợp đồng:</strong> <strong><span class="val-grand-total">0</span> VNĐ</strong> (Bằng chữ: <i><span class="val-grand-words">Không đồng chẵn./.</span></i>).</p>
+          <p class="doc-bullet">- <strong>Phương thức thanh toán:</strong> Bên A sẽ tạm ứng và thanh toán cho Bên B bằng hình thức chuyển khoản qua Ngân hàng theo các đợt sau:</p>
           
           <!-- Dynamic payment clauses -->
-          <div id="contractPaymentClauses" style="margin: 4px 0;"></div>
+          <div id="contractPaymentClauses" style="margin: 2px 0;"></div>
           
-          <p style="margin: 6px 0 2px 18px; text-indent: -18px; line-height: 1.5;">- <strong>Hồ sơ đề nghị thanh toán gồm:</strong></p>
-          <div style="margin-left: 20px;">
-            <p style="margin: 2px 0 2px 16px; text-indent: -16px; line-height: 1.45;">+ Giấy đề nghị thanh toán / tạm ứng;</p>
-            <p style="margin: 2px 0 2px 16px; text-indent: -16px; line-height: 1.45;">+ Hóa đơn giá trị gia tăng (VAT);</p>
-            <p style="margin: 2px 0 2px 16px; text-indent: -16px; line-height: 1.45;">+ Biên bản nghiệm thu và bàn giao đưa vào sử dụng;</p>
-            <p style="margin: 2px 0 2px 16px; text-indent: -16px; line-height: 1.45;">+ Chứng nhận xuất xứ và chất lượng (CO, CQ) sản phẩm.</p>
-          </div>
-          <p style="margin: 4px 0 4px 18px; text-indent: -18px; line-height: 1.5;">- <strong>Đồng tiền thanh toán:</strong> Đồng Việt Nam (VNĐ).</p>
-          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- <strong>Trường hợp chậm thanh toán:</strong> Trường hợp Bên A chậm thanh toán (nguyên nhân không do lỗi của Bên B), Bên A sẽ phải trả lãi đối với số tiền chậm trả theo lãi suất cơ bản do Ngân hàng Nhà nước công bố tương ứng với thời gian chậm trả tại thời điểm thanh toán. Sau thời hạn thanh toán 15 ngày, nếu Bên A không hoàn thành nghĩa vụ thanh toán, Bên B có quyền tháo dỡ và thu hồi hàng hóa, có thông báo trước để tránh ảnh hưởng đến hoạt động của Bên A.</p>
-          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- <strong>Quyền sở hữu tài sản:</strong> Quyền sở hữu đối với toàn bộ hàng hóa/thiết bị nêu trên vẫn thuộc về Bên B (Bên bán) cho đến khi Bên A (Bên mua) hoàn tất 100% nghĩa vụ thanh toán theo Hợp đồng.</p>
+          <p class="doc-bullet">- <strong>Hồ sơ đề nghị thanh toán gồm:</strong></p>
+          <p class="doc-subbullet">- Giấy đề nghị thanh toán / tạm ứng;</p>
+          <p class="doc-subbullet">- Hóa đơn giá trị gia tăng (VAT);</p>
+          <p class="doc-subbullet">- Biên bản nghiệm thu và bàn giao đưa vào sử dụng;</p>
+          <p class="doc-subbullet">- Chứng nhận xuất xứ và chất lượng (CO, CQ) sản phẩm.</p>
+          <p class="doc-bullet">- <strong>Đồng tiền thanh toán:</strong> Đồng Việt Nam (VNĐ).</p>
+          <p class="doc-bullet">- <strong>Trường hợp chậm thanh toán:</strong> Trường hợp Bên A chậm thanh toán (nguyên nhân không do lỗi của Bên B), Bên A sẽ phải chịu lãi đối với số tiền chậm trả theo lãi suất cơ bản do Ngân hàng Nhà nước công bố tương ứng với thời gian chậm trả tại thời điểm thanh toán. Quá thời hạn thanh toán 15 ngày, nếu Bên A không hoàn thành nghĩa vụ thanh toán, Bên B có quyền tháo dỡ và thu hồi hàng hóa/thiết bị sau khi có thông báo trước.</p>
+          <p class="doc-bullet">- <strong>Quyền sở hữu tài sản:</strong> Quyền sở hữu đối với toàn bộ hàng hóa/thiết bị nêu trên vẫn thuộc về Bên B (Bên bán) cho đến khi Bên A (Bên mua) hoàn tất 100% nghĩa vụ thanh toán theo Hợp đồng.</p>
 
-          <!-- ĐIỀU 4 (100% NGUYÊN VĂN GỐC) -->
-          <div style="font-weight: bold; margin-top: 14px;">ĐIỀU 4. CAM KẾT VÀ TRÁCH NHIỆM CỦA MỖI BÊN</div>
-          <p style="margin: 4px 0 2px 0; font-weight: bold;">Trách nhiệm của bên A</p>
-          <ul style="margin: 0 0 8px 0; padding-left: 22px; list-style-type: disc; text-align: justify;">
-            <li style="margin: 2px 0;">Cung cấp đầy đủ thông tin cho Bên B để Bên B thi công</li>
-            <li style="margin: 2px 0;">Chịu trách nhiệm về các phát sinh bên ngoài thỏa thuận thi công ban đầu, phát sinh không phải do bên B gây ra như: thay đổi phương án thi công ban đầu, thay đổi kích thước, vị trí lắp đặt, thay đổi màu sắc alumi...</li>
-            <li style="margin: 2px 0;">Cử cán bộ chịu trách nhiệm giám sát thường xuyên theo dõi giải quyết các vấn đề vướng mắc phát sinh trong quá trình thi công.</li>
-            <li style="margin: 2px 0;">Chủ trì, phối hợp cùng Bên B tổ chức nghiệm thu khi công việc được hoàn thành sau 03 ngày làm việc theo đúng các trình tự và quy định của pháp luật. Nếu trong vòng 03 ngày sau khi Bên B đã lắp đặt hoàn thiện thiết bị đúng quy trình kỹ thuật, hàng hóa được giao đúng chủng loại mẫu mã mà Bên A đã chọn, đã gửi biên bản bàn giao thiết bị cho Bên A mà bên A không phản hồi cho bên B thì hợp đồng này mặc nhiên được nghiệm thu và Bên A phải hoàn thành thủ tục thanh toán cho Bên B.</li>
-            <li style="margin: 2px 0;">Thanh toán cho Bên B theo đúng Điều 3 của Hợp đồng. Cử cán bộ chịu trách nhiệm giám sát thường xuyên theo dõi giải quyết các vấn đề vướng mắc phát sinh trong quá trình bàn giao thiết bị.</li>
-            <li style="margin: 2px 0;">Trường hợp chậm thanh toán (nguyên nhân không do lỗi của Bên B), Bên A sẽ phải trả lãi đối với số tiền chậm trả theo lãi suất cơ bản do Ngân hàng Nhà nước công bố tương ứng với thời gian chậm trả tại thời điểm thanh toán.</li>
-          </ul>
+          <!-- ĐIỀU 4 -->
+          <div class="doc-article-title">ĐIỀU 4. CAM KẾT VÀ TRÁCH NHIỆM CỦA MỖI BÊN</div>
+          <div class="doc-sub-title">Trách nhiệm của Bên A:</div>
+          <p class="doc-bullet">- Cung cấp đầy đủ thông tin, mặt bằng và nguồn điện cho Bên B để Bên B tiến hành thi công lắp đặt;</p>
+          <p class="doc-bullet">- Chịu trách nhiệm về các phát sinh ngoài thỏa thuận thi công ban đầu do Bên A yêu cầu (như thay đổi kích thước, vị trí, phương án thi công, màu sắc ốp viền...);</p>
+          <p class="doc-bullet">- Cử cán bộ giám sát có thẩm quyền phối hợp thường xuyên cùng Bên B giải quyết các vướng mắc trong quá trình thi công;</p>
+          <p class="doc-bullet">- Chủ trì, phối hợp cùng Bên B tổ chức nghiệm thu khi công việc được hoàn thành sau 03 ngày làm việc theo đúng quy định. Nếu trong vòng 03 ngày sau khi Bên B đã lắp đặt hoàn thiện, gửi biên bản bàn giao mà Bên A không phản hồi thì công trình mặc nhiên được coi là đã nghiệm thu đạt yêu cầu;</p>
+          <p class="doc-bullet">- Thực hiện thanh toán đầy đủ, đúng hạn cho Bên B theo đúng Điều 3 của Hợp đồng;</p>
+          <p class="doc-bullet">- Trường hợp chậm thanh toán, Bên A phải chịu lãi suất chậm trả theo quy định của Ngân hàng Nhà nước tương ứng với thời gian chậm trả.</p>
 
-          <p style="margin: 6px 0 2px 0; font-weight: bold;">Trách nhiệm của Bên B</p>
-          <ul style="margin: 0 0 8px 0; padding-left: 22px; list-style-type: disc; text-align: justify;">
-            <li style="margin: 2px 0;">Đảm bảo cung cấp đúng chất lượng, mẫu mã, chủng loại, đủ số lượng, đúng quy cách, đúng tính năng kỹ thuật, đúng nhà sản xuất và mới 100%.</li>
-            <li style="margin: 2px 0;">Đảm bảo hoạt động ổn định của thiết bị, tính thẩm mỹ của công trình.</li>
-            <li style="margin: 2px 0;">Đảm bảo thời gian thi công đúng tiến độ.</li>
-            <li style="margin: 2px 0;">Đào tạo hướng dẫn sử dụng đúng quy trình kỹ thuật.</li>
-            <li style="margin: 2px 0;">Chịu trách nhiệm về an toàn lao động trong thời gian thi công.</li>
-            <li style="margin: 2px 0;">Thực hiện các chế độ bảo hành bảo trì theo Điều 5.</li>
-            <li style="margin: 2px 0;">Cử cán bộ kỹ thuật phối hợp với Bên A tiến hành nghiệm thu, hoàn chỉnh hồ sơ thanh toán theo yêu cầu của Bên A và các quy định khác.</li>
-            <li style="margin: 2px 0;">Cung cấp hồ sơ thanh toán cho Bên A khi thanh quyết toán hợp đồng.</li>
-            <li style="margin: 2px 0;">Cam kết giao cung cấp, lắp đặt bàn giao thiết bị đúng thời hạn đã nêu ở Điều 2. Trong trường hợp Bên B bàn giao chậm trễ làm tổn thất cho Bên A thì Bên B cam kết chi trả đầy đủ cho bên A toàn bộ chi phi tổn thất do việc bàn giao chậm mang lại.</li>
-            <li style="margin: 2px 0;">Trường hợp Bên B thi công không đạt chất lượng theo yêu cầu thì Bên B phải làm lại sản phẩm mà Bên A không phải trả thêm bất cứ chi phí nào. Cử cán bộ hỗ trợ việc lắp đặt, bàn giao sản phẩm cùng Bên A. Nếu làm lại mà không đạt yêu cầu thì Bên A có quyền đơn phương chấm dứt hợp đồng và Bên B phải hoàn trả lại số tiền mà Bên A đã tạm ứng cho Bên B.</li>
-            <li style="margin: 2px 0;">Thời gian hoàn thành thi công chậm so quy định của hợp đồng thì Bên B phải chịu phạt một khoản 0.05%/ngày/giá trị hợp đồng nhân với số ngày chậm tiến độ. Thời gian chậm hoàn thành không được quá 15 ngày, nếu thời gian hoàn thi công chậm quá 15 so với thời gian trong hợp đồng thì Bên A có quyền đơn phương chấm dứt hợp đồng và Bên B hoàn trả lại số tiền tạm ứng cho Bên A đồng thời phải trả cho Bên A thêm một khoản phạt tương ứng số tiền Bên A đã tạm ứng trước đó.</li>
-          </ul>
+          <div class="doc-sub-title" style="margin-top: 10px;">Trách nhiệm của Bên B:</div>
+          <p class="doc-bullet">- Đảm bảo cung cấp đúng chất lượng, mẫu mã, chủng loại, đủ số lượng, đúng quy cách, tính năng kỹ thuật và hàng mới 100%;</p>
+          <p class="doc-bullet">- Đảm bảo hoạt động ổn định của thiết bị và tính thẩm mỹ cao của công trình;</p>
+          <p class="doc-bullet">- Đảm bảo thời gian thi công đúng tiến độ cam kết;</p>
+          <p class="doc-bullet">- Đào tạo, hướng dẫn sử dụng và chuyển giao phần mềm điều khiển đúng quy trình kỹ thuật cho Bên A;</p>
+          <p class="doc-bullet">- Chịu trách nhiệm hoàn toàn về an toàn lao động trong suốt thời gian thi công tại công trình;</p>
+          <p class="doc-bullet">- Thực hiện nghiêm túc các chế độ bảo hành, bảo trì sản phẩm theo đúng quy định tại Điều 5;</p>
+          <p class="doc-bullet">- Cử cán bộ kỹ thuật phối hợp với Bên A tiến hành nghiệm thu, hoàn chỉnh hồ sơ thanh quyết toán hợp đồng;</p>
+          <p class="doc-bullet">- Cam kết cung cấp, lắp đặt và bàn giao thiết bị đúng thời hạn đã nêu ở Điều 2. Trường hợp Bên B chậm trễ gây thiệt hại thì chịu phạt 0.05%/ngày trên giá trị hợp đồng (thời gian chậm không quá 15 ngày);</p>
+          <p class="doc-bullet">- Trường hợp Bên B thi công không đạt chất lượng theo thỏa thuận thì Bên B phải làm lại sản phẩm mà Bên A không phải trả thêm bất cứ chi phí nào.</p>
 
           <!-- ĐIỀU 5: CHẾ ĐỘ BẢO HÀNH -->
-          <div style="font-weight: bold; margin-top: 14px; font-size: 13pt;">ĐIỀU 5: CHẾ ĐỘ BẢO HÀNH</div>
-          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- <strong>Thời hạn bảo hành:</strong> Sản phẩm được bảo hành 12 tháng tính từ thời gian bàn giao đưa vào sử dụng.</p>
-          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- <strong>Tiếp nhận bảo hành:</strong> Khi nhận được thông báo về bảo hành sản phẩm, Bên B có trách nhiệm cử cán bộ kỹ thuật tiến hành tiếp nhận bảo hành thiết bị cho Bên A, thời gian xử lý bảo hành chậm nhất không quá 24h kể từ khi nhận được thông báo của Bên A qua Zalo / SMS / Điện thoại / Email hoặc bằng các hình thức thông báo tương tự.</p>
-          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- <strong>Phạm vi bảo hành:</strong> Nội dung bảo hành bao gồm khắc phục, sửa chữa khiếm khuyết, lỗi, hỏng do việc thi công của Bên B gây ra hoặc do hỏng, khiếm khuyết của sản phẩm do lỗi của nhà sản xuất mà không do Bên A. Bên B chịu toàn bộ chi phí liên quan đến việc bảo hành.</p>
-          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- <strong>Trách nhiệm bảo hành:</strong> Trong thời gian bảo hành, nếu màn hình LED bị hỏng, khiếm khuyết thuộc trách nhiệm của Bên B mà Bên B không tiến hành bảo hành hoặc bảo hành chậm, không đúng thời gian yêu cầu thì Bên A sẽ thuê sửa chữa và có quyền yêu cầu Bên B trả chi phí.</p>
-          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- <strong>Vật tư thay thế:</strong> Bên B có trách nhiệm thay thế, sửa chữa miễn phí những vật tư, thiết bị theo đúng thông số kỹ thuật trong Hợp đồng trong thời hạn bảo hành. Vật tư sẽ một đổi một sau khi nhận được sản phẩm bảo hành từ Bên A, trừ trường hợp các bên có thỏa thuận khác.</p>
-          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- <strong>Từ chối bảo hành:</strong> Bên B từ chối bảo hành sản phẩm trong những trường hợp sau: Điều khoản thanh toán không được thực hiện đúng; chập cháy do nguồn điện không ổn định; thiên tai lũ lụt gây hỏng hóc; cài đặt mật khẩu hoặc tự ý tháo lắp thay đổi kết cấu của thiết bị mà không có sự đồng ý bằng văn bản của Bên B.</p>
+          <div class="doc-article-title">ĐIỀU 5: CHẾ ĐỘ BẢO HÀNH</div>
+          <p class="doc-bullet">- <strong>Thời hạn bảo hành:</strong> Sản phẩm được bảo hành 12 tháng tính từ thời gian bàn giao đưa vào sử dụng.</p>
+          <p class="doc-bullet">- <strong>Tiếp nhận bảo hành:</strong> Khi nhận được thông báo về bảo hành sản phẩm, Bên B có trách nhiệm cử cán bộ kỹ thuật tiến hành tiếp nhận bảo hành thiết bị cho Bên A, thời gian xử lý bảo hành chậm nhất không quá 24h kể từ khi nhận được thông báo của Bên A qua Zalo / SMS / Điện thoại / Email hoặc bằng các hình thức thông báo tương tự.</p>
+          <p class="doc-bullet">- <strong>Phạm vi bảo hành:</strong> Nội dung bảo hành bao gồm khắc phục, sửa chữa khiếm khuyết, lỗi, hỏng do việc thi công của Bên B gây ra hoặc do hỏng, khiếm khuyết của sản phẩm do lỗi của nhà sản xuất mà không do lỗi Bên A. Bên B chịu toàn bộ chi phí liên quan đến việc bảo hành.</p>
+          <p class="doc-bullet">- <strong>Trách nhiệm bảo hành:</strong> Trong thời gian bảo hành, nếu màn hình LED bị hỏng, khiếm khuyết thuộc trách nhiệm của Bên B mà Bên B không tiến hành bảo hành hoặc bảo hành chậm không đúng cam kết thì Bên A sẽ thuê sửa chữa và có quyền yêu cầu Bên B chi trả toàn bộ chi phí phát sinh.</p>
+          <p class="doc-bullet">- <strong>Vật tư thay thế:</strong> Bên B có trách nhiệm thay thế, sửa chữa miễn phí những vật tư, thiết bị theo đúng thông số kỹ thuật trong Hợp đồng trong thời hạn bảo hành. Vật tư sẽ một đổi một sau khi nhận được sản phẩm bảo hành từ Bên A, trừ trường hợp các bên có thỏa thuận khác.</p>
+          <p class="doc-bullet">- <strong>Từ chối bảo hành:</strong> Bên B từ chối bảo hành sản phẩm trong những trường hợp sau: Điều khoản thanh toán không được thực hiện đúng; chập cháy do nguồn điện không ổn định; thiên tai, lũ lụt, hỏa hoạn gây hỏng hóc; cài đặt mật khẩu hoặc tự ý tháo lắp thay đổi kết cấu của thiết bị mà không có sự đồng ý bằng văn bản của Bên B.</p>
 
           <!-- ĐIỀU 6 -->
-          <div style="font-weight: bold; margin-top: 14px; font-size: 13pt;">ĐIỀU 6: TRÁCH NHIỆM THỰC HIỆN HỢP ĐỒNG VÀ PHẠT VI PHẠM</div>
-          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- Hai Bên cam kết thực hiện đầy đủ, thiện chí các nghĩa vụ tại Hợp đồng này.</p>
-          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- Nếu Bên nào không thực hiện một hoặc một số trách nhiệm đã cam kết và/hoặc cố tình kéo dài thời gian, gây thiệt hại cho Bên kia trong quá trình thực hiện Hợp đồng thì phải bồi thường thiệt hại cho Bên kia theo quy định của pháp luật và chịu mức phạt vi phạm là 8% phần giá trị Hợp đồng theo quy định của Luật Thương mại.</p>
+          <div class="doc-article-title">ĐIỀU 6: TRÁCH NHIỆM THỰC HIỆN HỢP ĐỒNG VÀ PHẠT VI PHẠM</div>
+          <p class="doc-bullet">- Hai Bên cam kết thực hiện đầy đủ, thiện chí các nghĩa vụ tại Hợp đồng này.</p>
+          <p class="doc-bullet">- Nếu Bên nào không thực hiện một hoặc một số trách nhiệm đã cam kết và/hoặc cố tình kéo dài thời gian, gây thiệt hại cho Bên kia trong quá trình thực hiện Hợp đồng thì phải bồi thường thiệt hại cho Bên kia theo quy định của pháp luật và chịu mức phạt vi phạm là 8% phần giá trị Hợp đồng theo quy định của Luật Thương mại.</p>
 
           <!-- ĐIỀU 7 -->
-          <div style="font-weight: bold; margin-top: 14px; font-size: 13pt;">ĐIỀU 7: ĐIỀU KHOẢN CHUNG</div>
-          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- <strong>Giải quyết tranh chấp:</strong> Mọi bất đồng, tranh chấp liên quan đến Hợp đồng này hai bên sẽ giải quyết trên cơ sở thương lượng với tinh thần thiện chí, tôn trọng quyền và nghĩa vụ hợp pháp của mỗi bên. Trong trường hợp hai bên không đạt được sự thống nhất, một trong hai bên hoặc cả hai bên đều có quyền làm đơn khởi kiện yêu cầu Tòa án có thẩm quyền giải quyết. Phán quyết của Tòa án là phán quyết cuối cùng các bên phải tuân theo. Mọi chi phí cho việc giải quyết tranh chấp tại Tòa án sẽ do bên thua kiện chịu, trừ khi có thỏa thuận khác.</p>
-          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- <strong>Sửa đổi bổ sung:</strong> Những bổ sung điều chỉnh hợp đồng phải được sự đồng ý của hai bên bằng văn bản hoặc phụ lục hợp đồng (được coi là bộ phận không tách rời của Hợp đồng).</p>
-          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- <strong>Hiệu lực hợp đồng:</strong> Hợp đồng này có hiệu lực kể từ ngày bên A chuyển tiền tạm ứng Đợt 1 cho bên B, và hết hiệu lực khi hai bên hoàn thành tất cả nghĩa vụ đối với bên còn lại.</p>
-          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- <strong>Số bản phát hành:</strong> Hợp đồng này gồm 07 Điều, được lập thành 04 (bốn) bản có nội dung và giá trị pháp lý như nhau, mỗi bên giữ 02 (hai) bản.</p>
+          <div class="doc-article-title">ĐIỀU 7: ĐIỀU KHOẢN CHUNG</div>
+          <p class="doc-bullet">- <strong>Giải quyết tranh chấp:</strong> Mọi bất đồng, tranh chấp liên quan đến Hợp đồng này hai bên sẽ giải quyết trên cơ sở thương lượng với tinh thần thiện chí, tôn trọng quyền và nghĩa vụ hợp pháp của mỗi bên. Trong trường hợp hai bên không đạt được sự thống nhất, một trong hai bên hoặc cả hai bên đều có quyền làm đơn khởi kiện yêu cầu Tòa án có thẩm quyền giải quyết. Phán quyết của Tòa án là phán quyết cuối cùng các bên phải tuân theo. Mọi chi phí cho việc giải quyết tranh chấp tại Tòa án sẽ do bên thua kiện chịu, trừ khi có thỏa thuận khác.</p>
+          <p class="doc-bullet">- <strong>Sửa đổi bổ sung:</strong> Những bổ sung điều chỉnh hợp đồng phải được sự đồng ý của hai bên bằng văn bản hoặc phụ lục hợp đồng (được coi là bộ phận không tách rời của Hợp đồng).</p>
+          <p class="doc-bullet">- <strong>Hiệu lực hợp đồng:</strong> Hợp đồng này có hiệu lực kể từ ngày bên A chuyển tiền tạm ứng Đợt 1 cho bên B, và hết hiệu lực khi hai bên hoàn thành tất cả nghĩa vụ đối với bên còn lại.</p>
+          <p class="doc-bullet">- <strong>Số bản phát hành:</strong> Hợp đồng này gồm 07 Điều, được lập thành 04 (bốn) bản có nội dung và giá trị pháp lý như nhau, mỗi bên giữ 02 (hai) bản.</p>
 
           <!-- Chữ ký 2 bên -->
           <table style="width: 100%; border: none; border-collapse: collapse; margin-top: 30px;" border="0" cellspacing="0" cellpadding="0">
@@ -861,24 +903,21 @@
             <tbody id="bbntKtItemsTbody"></tbody>
           </table>
 
-          <p style="margin: 4px 0; font-weight: bold;">2.2. Treo lắp, kỹ thuật:</p>
-          <ul style="margin: 0 0 6px 0; padding-left: 22px; list-style-type: disc; text-align: justify;">
-            <li style="margin: 2px 0;">Đã treo lắp thiết bị vào đúng vị trí, theo yêu cầu của khách hàng. Vệ sinh gọn gàng sạch sẽ khu vực thi công sau khi treo lắp. Đáp ứng đúng yêu cầu về kỹ thuật, thẩm mỹ.</li>
-            <li style="margin: 2px 0;">Đã bàn giao đầy đủ thiết bị cho khách hàng.</li>
-            <li style="margin: 2px 0;">Màn hình lắp đặt đúng kích thước, chạy thử hoạt động đạt yêu cầu.</li>
-          </ul>
+          <div class="doc-sub-title">2.2. Treo lắp, kỹ thuật:</div>
+          <p class="doc-bullet">- Đã treo lắp thiết bị vào đúng vị trí theo yêu cầu của khách hàng, đảm bảo tính thẩm mỹ và an toàn kỹ thuật;</p>
+          <p class="doc-bullet">- Vệ sinh gọn gàng sạch sẽ khu vực thi công sau khi treo lắp hoàn thiện;</p>
+          <p class="doc-bullet">- Đã bàn giao đầy đủ thiết bị, vật tư phụ kiện cho khách hàng;</p>
+          <p class="doc-bullet">- Màn hình LED lắp đặt đúng kích thước, chạy thử hoạt động đạt tiêu chuẩn kỹ thuật.</p>
 
-          <p style="margin: 4px 0; font-weight: bold;">2.3. Hướng dẫn sử dụng sau khi hoàn thành:</p>
-          <ul style="margin: 0 0 6px 0; padding-left: 22px; list-style-type: disc; text-align: justify;">
-            <li style="margin: 2px 0;">Đã hướng dẫn sử dụng đầy đủ cho khách hàng.</li>
-          </ul>
+          <div class="doc-sub-title" style="margin-top: 8px;">2.3. Hướng dẫn sử dụng sau khi hoàn thành:</div>
+          <p class="doc-bullet">- Đã bàn giao phần mềm điều khiển và hướng dẫn sử dụng, vận hành đầy đủ cho khách hàng.</p>
 
-          <p style="margin: 4px 0; font-weight: bold;">2.4. Ý kiến khác:</p>
-          <p style="margin: 2px 0 6px 15px;">Không có ý kiến gì thêm.</p>
+          <div class="doc-sub-title" style="margin-top: 8px;">2.4. Ý kiến khác:</div>
+          <p class="doc-bullet">- Không có ý kiến phát sinh thêm.</p>
 
-          <div style="font-weight: bold; font-size: 13pt; margin-top: 14px; margin-bottom: 4px;">3. Đánh giá:</div>
-          <p style="margin: 3px 0; text-align: justify;">Chân thành cảm ơn quý khách hàng đã lựa chọn sản phẩm và sử dụng dịch vụ của chúng tôi.</p>
-          <p style="margin: 3px 0;">Biên bản bàn giao nghiệm thu kỹ thuật này gồm 02 trang, được lập thành 02 bản, bên mua giữ 01 bản, bên bán giữ 01 bản, có giá trị như nhau.</p>
+          <div class="doc-article-title">3. Đánh giá & Kết luận:</div>
+          <p class="doc-p">Chân thành cảm ơn Quý khách hàng đã tin tưởng lựa chọn sản phẩm và sử dụng dịch vụ của chúng tôi.</p>
+          <p class="doc-p">Biên bản bàn giao nghiệm thu kỹ thuật này gồm 02 trang, được lập thành 02 bản, bên mua giữ 01 bản, bên bán giữ 01 bản, có giá trị pháp lý như nhau.</p>
 
           <table style="width: 100%; border: none; border-collapse: collapse; margin-top: 30px;" border="0" cellspacing="0" cellpadding="0">
             <tr>
@@ -967,9 +1006,9 @@
             </tr>
           </table>
 
-          <p style="margin: 10px 0; text-align: justify;">Hai bên cùng thống nhất ký biên bản nghiệm thu hoàn thành đưa vào sử dụng theo Hợp đồng kinh tế số <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong> ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ Haco Việt Nam với các nội dung như sau:</p>
+          <p class="doc-p" style="margin-top: 10px; margin-bottom: 10px;">Hai bên cùng thống nhất ký Biên bản nghiệm thu hoàn thành đưa vào sử dụng theo Hợp đồng kinh tế số <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong> ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ Haco Việt Nam với các nội dung chi tiết như sau:</p>
 
-          <div style="font-weight: bold; margin-top: 14px; font-size: 13pt;">Điều 1: Nội dung nghiệm thu lắp đặt:</div>
+          <div class="doc-article-title">Điều 1: Nội dung nghiệm thu lắp đặt</div>
 
           <table class="doc-table">
             <thead>
@@ -999,14 +1038,12 @@
             </tfoot>
           </table>
 
-          <div style="font-weight: bold; margin-top: 16px; font-size: 13pt;">Điều 2: Đánh giá và Kết luận</div>
-          <div style="font-size: 12.5pt; line-height: 1.5; margin-top: 6px; text-align: justify;">
-            <p style="margin: 4px 0 4px 18px; text-indent: -18px;">- <strong>Về quy cách lắp đặt:</strong> Màn hình LED và hệ thống phụ trợ được lắp đặt đúng kích thước, vị trí và thẩm mỹ theo Hợp đồng kinh tế số <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong>, ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ Haco Việt Nam.</p>
-            <p style="margin: 4px 0 4px 18px; text-indent: -18px;">- <strong>Về chất lượng kỹ thuật:</strong> Thiết bị hoạt động ổn định, đạt yêu cầu kỹ thuật, hình ảnh sắc nét, độ sáng và màu sắc đồng đều.</p>
-            <p style="margin: 4px 0 4px 18px; text-indent: -18px;">- <strong>Bàn giao vận hành:</strong> Bên B đã hoàn tất việc chuyển giao phần mềm điều khiển và hướng dẫn chi tiết quy trình vận hành cho Bên A.</p>
-            <p style="margin: 4px 0 4px 18px; text-indent: -18px;">- <strong>Kết luận nghiệm thu:</strong> Hai bên thống nhất chấp nhận nghiệm thu hoàn thành toàn bộ công việc và chính thức bàn giao công trình đưa vào sử dụng.</p>
-            <p style="margin: 4px 0 4px 18px; text-indent: -18px;">- <strong>Hiệu lực biên bản:</strong> Biên bản được lập thành 02 bản có giá trị pháp lý như nhau, mỗi bên giữ 01 bản để làm căn cứ xuất hóa đơn GTGT, thực hiện các thủ tục quyết toán, thanh lý hợp đồng và tính thời hạn bảo hành công trình.</p>
-          </div>
+          <div class="doc-article-title">Điều 2: Đánh giá và Kết luận</div>
+          <p class="doc-bullet">- <strong>Về quy cách lắp đặt:</strong> Màn hình LED và hệ thống phụ trợ được lắp đặt đúng kích thước, vị trí và thẩm mỹ theo Hợp đồng kinh tế số <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong>, ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ Haco Việt Nam.</p>
+          <p class="doc-bullet">- <strong>Về chất lượng kỹ thuật:</strong> Thiết bị hoạt động ổn định, đạt yêu cầu kỹ thuật, hình ảnh sắc nét, độ sáng và màu sắc đồng đều.</p>
+          <p class="doc-bullet">- <strong>Bàn giao vận hành:</strong> Bên B đã hoàn tất việc chuyển giao phần mềm điều khiển và hướng dẫn chi tiết quy trình vận hành cho Bên A.</p>
+          <p class="doc-bullet">- <strong>Kết luận nghiệm thu:</strong> Hai bên thống nhất chấp nhận nghiệm thu hoàn thành toàn bộ công việc và chính thức bàn giao công trình đưa vào khai thác sử dụng.</p>
+          <p class="doc-bullet">- <strong>Hiệu lực biên bản:</strong> Biên bản được lập thành 02 bản có giá trị pháp lý như nhau, mỗi bên giữ 01 bản để làm căn cứ xuất hóa đơn GTGT, thực hiện các thủ tục quyết toán, thanh lý hợp đồng và tính thời hạn bảo hành công trình.</p>
 
           <table style="width: 100%; border: none; border-collapse: collapse; margin-top: 30px;" border="0" cellspacing="0" cellpadding="0">
             <tr>
@@ -1040,11 +1077,11 @@
             <div style="font-weight: bold; font-size: 13pt; margin-top: 4px;">Số: <span class="val-qt-num">120626/BBQT/TOANTHANG-HACO</span></div>
           </div>
 
-          <div style="font-size: 12.5pt; margin-bottom: 12px; text-align: justify;">
-            <p style="margin: 3px 0;">- <i>Căn cứ theo Hợp đồng kinh tế số <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong> ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ HACO Việt Nam;</i></p>
-            <p style="margin: 3px 0;">- <i>Căn cứ Biên bản nghiệm thu hoàn thành đưa vào sử dụng công trình số <strong class="val-bbnt-num">120626/BBNT/TOANTHANG-HACO</strong>;</i></p>
-            <p style="margin: 3px 0;">- <i>Căn cứ vào khối lượng thi công và lắp đặt thực tế tại vị trí công trình.</i></p>
-            <p style="margin: 8px 0 4px 0;">Hôm nay, ngày …… tháng …… năm <span class="val-year">2026</span>, chúng tôi đại diện các bên gồm có:</p>
+          <div style="font-size: 12.5pt; margin-bottom: 12px;">
+            <p class="doc-bullet">- <i>Căn cứ theo Hợp đồng kinh tế số <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong> ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ HACO Việt Nam;</i></p>
+            <p class="doc-bullet">- <i>Căn cứ Biên bản nghiệm thu hoàn thành đưa vào sử dụng công trình số <strong class="val-bbnt-num">120626/BBNT/TOANTHANG-HACO</strong>;</i></p>
+            <p class="doc-bullet">- <i>Căn cứ vào khối lượng thi công và lắp đặt thực tế tại vị trí công trình.</i></p>
+            <p class="doc-p" style="margin-top: 8px;">Hôm nay, ngày …… tháng …… năm <span class="val-year">2026</span>, chúng tôi đại diện các bên gồm có:</p>
           </div>
 
           <!-- Bảng Bên A & Bên B -->
@@ -1112,9 +1149,9 @@
             </tr>
           </table>
 
-          <p style="margin: 10px 0 6px 0; text-align: justify;">Các bên cùng nhau xác nhận quyết toán giá trị và khối lượng thực tế hoàn thành công trình với những nội dung sau:</p>
+          <p class="doc-p" style="margin-top: 10px; margin-bottom: 6px;">Các bên cùng nhau xác nhận quyết toán giá trị và khối lượng thực tế hoàn thành công trình với những nội dung cụ thể sau:</p>
 
-          <div style="font-weight: bold; margin-top: 10px; font-size: 13pt;">1. Nội dung quyết toán</div>
+          <div class="doc-article-title">1. Nội dung quyết toán</div>
           <table class="doc-table" style="font-size: 11pt;">
             <thead>
               <tr>
@@ -1163,26 +1200,24 @@
             </tfoot>
           </table>
 
-          <div style="font-weight: bold; margin-top: 14px; font-size: 13pt;">2. Giá trị quyết toán</div>
-          <div style="font-size: 12.5pt; line-height: 1.6; margin: 4px 0;">
-            <p style="margin: 4px 0;"><strong>2.1. Tổng giá trị Hợp đồng:</strong> <strong class="val-grand-total">0</strong> <strong>đồng</strong></p>
-            <p style="margin: 2px 0 6px 20px; font-style: italic;">(Bằng chữ: <strong class="val-words">Không đồng chẵn./.</strong>)</p>
+          <div class="doc-article-title">2. Giá trị quyết toán</div>
+          <div style="font-size: 12.5pt; margin: 4px 0;">
+            <p class="doc-bullet">- <strong>2.1. Tổng giá trị Hợp đồng:</strong> <strong class="val-grand-total">0</strong> <strong>đồng</strong></p>
+            <p class="doc-words" style="margin-left: 10px;">(Bằng chữ: <strong class="val-grand-words">Không đồng chẵn./.</strong>)</p>
 
-            <p style="margin: 4px 0;"><strong>2.2. Giá trị quyết toán thực tế:</strong> <strong id="qtFinalVal" style="color: #15803d;">0</strong> <strong>đồng</strong></p>
-            <p style="margin: 2px 0 6px 20px; font-style: italic;">(Bằng chữ: <strong id="qtFinalWords">Không đồng chẵn./.</strong>)</p>
+            <p class="doc-bullet">- <strong>2.2. Giá trị quyết toán thực tế:</strong> <strong id="qtFinalVal" style="color: #15803d;">0</strong> <strong>đồng</strong></p>
+            <p class="doc-words" style="margin-left: 10px;">(Bằng chữ: <strong id="qtFinalWords">Không đồng chẵn./.</strong>)</p>
 
-            <p style="margin: 4px 0;"><strong>2.3. Số tiền Bên A đã tạm ứng / thanh toán các đợt:</strong> <strong id="qtPriorPaid">0</strong> <strong>đồng</strong></p>
+            <p class="doc-bullet">- <strong>2.3. Số tiền Bên A đã tạm ứng / thanh toán các đợt trước:</strong> <strong id="qtPriorPaid">0</strong> <strong>đồng</strong></p>
 
-            <p style="margin: 4px 0;"><strong>2.4. Bên A có trách nhiệm thanh toán cho Bên B giá trị còn lại là:</strong> <strong id="qtRemainingVal" style="color: #b45309;">0</strong> <strong>đồng</strong></p>
-            <p style="margin: 2px 0 6px 20px; font-style: italic;">(Bằng chữ: <strong id="qtRemainingWords">Không đồng chẵn./.</strong>)</p>
+            <p class="doc-bullet">- <strong>2.4. Bên A có trách nhiệm thanh toán cho Bên B giá trị còn lại là:</strong> <strong id="qtRemainingVal" style="color: #b45309;">0</strong> <strong>đồng</strong></p>
+            <p class="doc-words" style="margin-left: 10px;">(Bằng chữ: <strong id="qtRemainingWords">Không đồng chẵn./.</strong>)</p>
           </div>
 
-          <div style="font-weight: bold; margin-top: 14px; font-size: 13pt;">3. Kết luận</div>
-          <div style="font-size: 12.5pt; line-height: 1.5; margin: 4px 0; text-align: justify;">
-            <p style="margin: 4px 0;">- Hai bên đồng ý quyết toán giá trị và khối lượng thực tế hoàn thành công trình như nội dung nêu trên.</p>
-            <p style="margin: 4px 0;">- Bảng quyết toán giá trị khối lượng này là căn cứ pháp lý để hai bên tiến hành ký Biên bản thanh lý hợp đồng và Bên A hoàn tất thanh toán dứt điểm giá trị còn lại cho Bên B.</p>
-            <p style="margin: 4px 0;">- Biên bản được thành lập 02 bản, mỗi bên giữ 01 bản và có giá trị pháp lý như nhau.</p>
-          </div>
+          <div class="doc-article-title">3. Kết luận</div>
+          <p class="doc-bullet">- Hai bên đồng ý quyết toán giá trị và khối lượng thực tế hoàn thành công trình như nội dung nêu trên.</p>
+          <p class="doc-bullet">- Bảng quyết toán giá trị khối lượng này là căn cứ pháp lý để hai bên tiến hành ký Biên bản thanh lý hợp đồng và Bên A hoàn tất thanh toán dứt điểm giá trị còn lại cho Bên B.</p>
+          <p class="doc-bullet">- Biên bản được thành lập 02 bản, mỗi bên giữ 01 bản và có giá trị pháp lý như nhau.</p>
 
           <!-- Chữ ký 2 bên -->
           <table style="width: 100%; border: none; border-collapse: collapse; margin-top: 30px;" border="0" cellspacing="0" cellpadding="0">
@@ -1278,22 +1313,18 @@
             </tr>
           </table>
 
-          <p style="margin: 10px 0;">Hai bên cùng thống nhất ký biên bản thanh lý hợp đồng số <strong class="val-bbtl-num">120626/BBTLHD/TOANTHANG-HACO</strong> ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ Haco Việt Nam với các nội dung như sau:</p>
+          <p class="doc-p" style="margin-top: 10px; margin-bottom: 10px;">Hai bên cùng thống nhất ký Biên bản thanh lý Hợp đồng kinh tế số <strong class="val-bbtl-num">120626/BBTLHD/TOANTHANG-HACO</strong> ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ Haco Việt Nam với các nội dung như sau:</p>
 
-          <div style="font-weight: bold; margin-top: 12px; font-size: 13pt;">ĐIỀU 1: THỎA THUẬN CHẤM DỨT HỢP ĐỒNG</div>
-          <div style="font-size: 12.5pt; line-height: 1.5; margin-top: 4px; text-align: justify;">
-            <p style="margin: 4px 0 4px 18px; text-indent: -18px;">- Sau khi nhận thấy những mục đích và lợi ích khi ký kết hợp đồng đã được thực hiện đầy đủ, các bên đồng ý thỏa thuận chấm dứt hợp đồng kể từ ngày các bên cùng ký kết vào Biên bản này.</p>
-            <p style="margin: 4px 0 4px 18px; text-indent: -18px;">- Các bên được giải phóng khỏi những quy định theo Hợp đồng số <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong> ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ Haco Việt Nam (ngoại trừ trách nhiệm bảo hành theo Điều 5 của Hợp đồng).</p>
-          </div>
+          <div class="doc-article-title">ĐIỀU 1: THỎA THUẬN CHẤM DỨT HỢP ĐỒNG</div>
+          <p class="doc-bullet">- Sau khi nhận thấy những mục đích và quyền lợi khi ký kết hợp đồng đã được thực hiện đầy đủ, các bên đồng ý thỏa thuận chấm dứt hợp đồng kể từ ngày các bên cùng ký kết vào Biên bản này.</p>
+          <p class="doc-bullet">- Các bên được giải phóng khỏi những quy định theo Hợp đồng số <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong> ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ Haco Việt Nam (ngoại trừ trách nhiệm bảo hành theo Điều 5 của Hợp đồng).</p>
 
-          <div style="font-weight: bold; margin-top: 12px; font-size: 13pt;">ĐIỀU 2: NGHĨA VỤ ĐÃ HOÀN THÀNH</div>
-          <div style="font-size: 12.5pt; line-height: 1.5; margin-top: 4px; text-align: justify;">
-            <p style="margin: 4px 0 4px 18px; text-indent: -18px;">- Bên B đã hoàn tất việc giao hàng, thi công lắp đặt và bàn giao đúng theo đơn hàng của Hợp đồng số <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong>.</p>
-            <p style="margin: 4px 0 4px 18px; text-indent: -18px;">- Bên A đã nghiệm thu, tiếp nhận toàn bộ công trình và đưa vào khai thác sử dụng.</p>
-          </div>
+          <div class="doc-article-title">ĐIỀU 2: NGHĨA VỤ ĐÃ HOÀN THÀNH</div>
+          <p class="doc-bullet">- Bên B đã hoàn tất việc giao hàng, thi công lắp đặt và bàn giao đúng theo đơn hàng của Hợp đồng số <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong>.</p>
+          <p class="doc-bullet">- Bên A đã nghiệm thu, tiếp nhận toàn bộ công trình và đưa vào khai thác sử dụng.</p>
 
-          <div style="font-weight: bold; margin-top: 12px; font-size: 13pt;">ĐIỀU 3: NGHĨA VỤ CÒN LẠI CỦA CÁC BÊN</div>
-          <p style="margin: 4px 0 4px 18px; text-indent: -18px; line-height: 1.5;">- Bên A có trách nhiệm thanh toán số tiền còn lại sau khi đối trừ các khoản tạm ứng cho Bên B theo bảng quyết toán chi tiết dưới đây:</p>
+          <div class="doc-article-title">ĐIỀU 3: NGHĨA VỤ CÒN LẠI CỦA CÁC BÊN</div>
+          <p class="doc-bullet">- Bên A có trách nhiệm thanh toán số tiền còn lại sau khi đối trừ các khoản tạm ứng cho Bên B theo bảng quyết toán chi tiết dưới đây:</p>
 
           <table class="doc-table">
             <thead>
@@ -1306,16 +1337,14 @@
             <tbody id="settlementTableBody"></tbody>
           </table>
 
-          <p style="margin: 6px 0; font-weight: bold;">(Bằng chữ: <span class="val-final-rem-words">Không đồng chẵn./.</span>)</p>
-          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- <strong>Thời hạn thanh toán:</strong> Bên A đồng ý thanh toán dứt điểm số tiền còn lại trên cho Bên B sau khi hai bên ký biên bản thanh lý hợp đồng và Bên B cung cấp đầy đủ chứng từ thanh toán hợp pháp, hợp lệ như trong Điều 3 của Hợp đồng số: <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong>.</p>
+          <p class="doc-words"><strong>(Bằng chữ: <span class="val-final-rem-words">Không đồng chẵn./.</span>)</strong></p>
+          <p class="doc-bullet">- <strong>Thời hạn thanh toán:</strong> Bên A đồng ý thanh toán dứt điểm số tiền còn lại trên cho Bên B ngay sau khi hai bên ký Biên bản thanh lý hợp đồng và Bên B cung cấp đầy đủ chứng từ thanh toán hợp pháp, hợp lệ như trong Điều 3 của Hợp đồng số: <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong>.</p>
 
-          <div style="font-weight: bold; margin-top: 12px; font-size: 13pt;">ĐIỀU 4: ĐIỀU KHOẢN THI HÀNH</div>
-          <div style="font-size: 12.5pt; line-height: 1.5; margin-top: 4px; text-align: justify;">
-            <p style="margin: 4px 0 4px 18px; text-indent: -18px;">- Hai bên cam kết tiếp tục thực hiện đầy đủ những nghĩa vụ tài chính còn lại nêu tại Điều 3 của Biên bản này.</p>
-            <p style="margin: 4px 0 4px 18px; text-indent: -18px;">- Hợp đồng kinh tế số <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong> sẽ chính thức hết hiệu lực và mặc nhiên được thanh lý kể từ ngày Bên A thanh toán đầy đủ 100% nghĩa vụ của mình.</p>
-            <p style="margin: 4px 0 4px 18px; text-indent: -18px;">- Nghĩa vụ bảo hành đối với sản phẩm vẫn tiếp tục có hiệu lực theo đúng cam kết tại Điều 5 của Hợp đồng.</p>
-            <p style="margin: 4px 0 4px 18px; text-indent: -18px;">- Biên bản được lập thành 02 bản, giao cho bên A giữ 01 bản, bên B giữ 01 bản và có giá trị pháp lý như nhau.</p>
-          </div>
+          <div class="doc-article-title">ĐIỀU 4: ĐIỀU KHOẢN THI HÀNH</div>
+          <p class="doc-bullet">- Hai bên cam kết tiếp tục thực hiện đầy đủ những nghĩa vụ tài chính còn lại nêu tại Điều 3 của Biên bản này.</p>
+          <p class="doc-bullet">- Hợp đồng kinh tế số <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong> sẽ chính thức hết hiệu lực và mặc nhiên được thanh lý kể từ ngày Bên A thanh toán đầy đủ 100% nghĩa vụ của mình.</p>
+          <p class="doc-bullet">- Nghĩa vụ bảo hành đối với sản phẩm vẫn tiếp tục có hiệu lực theo đúng cam kết tại Điều 5 của Hợp đồng.</p>
+          <p class="doc-bullet">- Biên bản được lập thành 02 bản, giao cho bên A giữ 01 bản, bên B giữ 01 bản và có giá trị pháp lý như nhau.</p>
 
           <table style="width: 100%; border: none; border-collapse: collapse; margin-top: 30px;" border="0" cellspacing="0" cellpadding="0">
             <tr>
@@ -1979,7 +2008,7 @@
         }
 
         clausesHtml += `
-          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">
+          <p class="doc-subbullet">
             - <strong>${dotName}:</strong> ${clauseContent}
           </p>
         `;

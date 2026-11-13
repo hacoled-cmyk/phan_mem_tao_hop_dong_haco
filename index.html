@@ -186,7 +186,7 @@
           </label>
           <span class="text-xs text-slate-500">Zalo, Email hoặc MST</span>
         </div>
-        <textarea id="smartPasteInput" rows="3" placeholder="Copy & dán thông tin Bên Mua (Tên cty, địa chỉ, MST, điện thoại, đại diện...) vào đây rồi bấm 'Tự động trích xuất'." class="w-full text-xs p-2.5 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition resize-none"></textarea>
+        <textarea id="smartPasteInput" rows="3" placeholder="Copy & dán thông tin Bên Mua (Công ty, Hộ kinh doanh HKD, MST, Địa chỉ, SĐT, Đại diện, STK...) vào đây rồi bấm 'Tự động trích xuất'." class="w-full text-xs p-2.5 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition resize-none"></textarea>
         <button onclick="parseSmartInput()" class="mt-2 w-full py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition flex items-center justify-center gap-1.5">
           <span>✨</span> Tự động trích xuất & Sinh số HĐ
         </button>
@@ -207,8 +207,8 @@
 
           <div class="space-y-2 text-xs">
             <div>
-              <label class="block text-slate-600 font-medium mb-1">Tên công ty / Đơn vị:</label>
-              <input type="text" id="buyerName" oninput="onBuyerNameChange()" class="w-full p-2 border border-slate-200 rounded-md font-medium text-slate-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="CÔNG TY TNHH...">
+              <label class="block text-slate-600 font-medium mb-1">Tên công ty / Đơn vị / Hộ kinh doanh:</label>
+              <input type="text" id="buyerName" oninput="onBuyerNameChange()" class="w-full p-2 border border-slate-200 rounded-md font-medium text-slate-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="CÔNG TY..., HỘ KINH DOANH (HKD)...">
             </div>
             <div>
               <label class="block text-slate-600 font-medium mb-1">Địa chỉ trụ sở:</label>
@@ -549,11 +549,7 @@
               <td>:</td>
               <td><span class="val-buyer-tax">0317300612</span></td>
             </tr>
-            <tr>
-              <td>Số tài khoản</td>
-              <td>:</td>
-              <td><span class="val-buyer-bank">0317300612 - Ngân hàng TMCP Á Châu (ACB) - Chi nhánh Đông Hoà</span></td>
-            </tr>
+            <tr class="row-buyer-bank"><td>Số tài khoản</td><td>:</td><td><span class="val-buyer-bank">0317300612 - Ngân hàng TMCP Á Châu (ACB) - Chi nhánh Đông Hoà</span></td></tr>
             <tr>
               <td>Đại diện</td>
               <td>:</td>
@@ -630,33 +626,32 @@
           <p style="margin: 2px 0 10px 0; font-style: italic;">Chi phí trên đã bao gồm thuế GTGT <span class="val-vat-rate">8</span>%.</p>
 
           <!-- ĐIỀU 2 -->
-          <div style="font-weight: bold; margin-top: 14px;">ĐIỀU 2: THỜI GIAN BÀN GIAO VÀ ĐỊA ĐIỂM THI CÔNG</div>
-          <p style="margin: 3px 0; text-align: justify;">Sau khi Bên A kí hợp đồng với Bên B, Bên B sẽ thi công, cài đặt màn LED trong vòng 05-07 ngày kể từ ngày kí hợp đồng và nhận thanh toán Đợt 1.</p>
-          <p style="margin: 3px 0;">Địa điểm thi công: Theo yêu cầu bên A</p>
+          <div style="font-weight: bold; margin-top: 14px; font-size: 13pt;">ĐIỀU 2: THỜI GIAN BÀN GIAO VÀ ĐỊA ĐIỂM THI CÔNG</div>
+          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- <strong>Thời gian thi công & bàn giao:</strong> Sau khi Bên A ký hợp đồng với Bên B, Bên B sẽ thi công, lắp đặt hoàn thiện màn hình LED trong vòng 05-07 ngày kể từ ngày ký hợp đồng và nhận được tiền tạm ứng Đợt 1.</p>
+          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- <strong>Địa điểm thi công:</strong> Theo yêu cầu của Bên A.</p>
 
           <!-- ĐIỀU 3 -->
-          <div style="font-weight: bold; margin-top: 14px;">ĐIỀU 3: NGHIỆM THU VÀ THANH TOÁN</div>
+          <div style="font-weight: bold; margin-top: 14px; font-size: 13pt;">ĐIỀU 3: NGHIỆM THU VÀ THANH TOÁN</div>
           <p style="margin: 3px 0; font-weight: bold;">3.1. Nghiệm thu sản phẩm:</p>
-          <p style="margin: 3px 0;">Bên A phối hợp với Bên B nghiệm thu sản phẩm tại vị trí thi công.</p>
+          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- Bên A phối hợp với Bên B tổ chức nghiệm thu sản phẩm tại vị trí thi công sau khi hoàn tất lắp đặt.</p>
           
-          <p style="margin: 5px 0 3px 0; font-weight: bold;">3.2. Tiến độ thanh toán và phương thức thanh toán:</p>
-          <p style="margin: 2px 0;">Tổng giá trị hợp đồng: <strong><span class="val-grand-total">0</span> VNĐ</strong></p>
-          <p style="margin: 2px 0;">(Bằng chữ: <i><span class="val-grand-words">Không đồng chẵn./.</span></i>)</p>
-          <p style="margin: 4px 0;">Bên A sẽ tạm ứng và thanh toán cho Bên B bằng hình thức chuyển khoản qua Ngân hàng và chia làm các đợt sau:</p>
+          <p style="margin: 8px 0 3px 0; font-weight: bold;">3.2. Tiến độ thanh toán và phương thức thanh toán:</p>
+          <p style="margin: 4px 0 4px 18px; text-indent: -18px; line-height: 1.5;">- <strong>Tổng giá trị hợp đồng:</strong> <strong><span class="val-grand-total">0</span> VNĐ</strong> (Bằng chữ: <i><span class="val-grand-words">Không đồng chẵn./.</span></i>).</p>
+          <p style="margin: 4px 0 4px 18px; text-indent: -18px; line-height: 1.5;">- <strong>Phương thức thanh toán:</strong> Bên A sẽ tạm ứng và thanh toán cho Bên B bằng hình thức chuyển khoản qua Ngân hàng theo các đợt sau:</p>
           
           <!-- Dynamic payment clauses -->
           <div id="contractPaymentClauses" style="margin: 4px 0;"></div>
           
-          <p style="margin: 6px 0 2px 0;">Hồ sơ thanh toán gồm:</p>
-          <ul style="margin: 0; padding-left: 25px;">
-            <li>Giấy đề nghị thanh toán;</li>
-            <li>Hóa đơn giá trị gia tăng;</li>
-            <li>Biên bản nghiệm thu;</li>
-            <li>CO, CQ sản phẩm.</li>
-          </ul>
-          <p style="margin: 4px 0;">Đồng tiền thanh toán: Đồng Việt Nam.</p>
-          <p style="margin: 3px 0; text-align: justify;">Trường hợp chậm thanh toán (nguyên nhân không do lỗi của Bên B), Bên A sẽ phải trả lãi đối với số tiền chậm trả theo lãi suất cơ bản do Ngân hàng Nhà nước công bố tương ứng với thời gian chậm trả tại thời điểm thanh toán. Sau thời hạn thanh toán 15 ngày, nếu Bên A không hoàn thành nghĩa vụ thanh toán, Bên B có quyền tháo dỡ và thu hồi hàng hóa, có phải báo trước để tránh ảnh hưởng đến hoạt động của Bên A.</p>
-          <p style="margin: 3px 0; text-align: justify;">Quyền sở hữu đối với toàn bộ hàng hóa/thiết bị nêu trên vẫn thuộc về Bên B (Bên bán) cho đến khi Bên A (Bên mua) hoàn tất 100% nghĩa vụ thanh toán theo Hợp đồng.</p>
+          <p style="margin: 6px 0 2px 18px; text-indent: -18px; line-height: 1.5;">- <strong>Hồ sơ đề nghị thanh toán gồm:</strong></p>
+          <div style="margin-left: 20px;">
+            <p style="margin: 2px 0 2px 16px; text-indent: -16px; line-height: 1.45;">+ Giấy đề nghị thanh toán / tạm ứng;</p>
+            <p style="margin: 2px 0 2px 16px; text-indent: -16px; line-height: 1.45;">+ Hóa đơn giá trị gia tăng (VAT);</p>
+            <p style="margin: 2px 0 2px 16px; text-indent: -16px; line-height: 1.45;">+ Biên bản nghiệm thu và bàn giao đưa vào sử dụng;</p>
+            <p style="margin: 2px 0 2px 16px; text-indent: -16px; line-height: 1.45;">+ Chứng nhận xuất xứ và chất lượng (CO, CQ) sản phẩm.</p>
+          </div>
+          <p style="margin: 4px 0 4px 18px; text-indent: -18px; line-height: 1.5;">- <strong>Đồng tiền thanh toán:</strong> Đồng Việt Nam (VNĐ).</p>
+          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- <strong>Trường hợp chậm thanh toán:</strong> Trường hợp Bên A chậm thanh toán (nguyên nhân không do lỗi của Bên B), Bên A sẽ phải trả lãi đối với số tiền chậm trả theo lãi suất cơ bản do Ngân hàng Nhà nước công bố tương ứng với thời gian chậm trả tại thời điểm thanh toán. Sau thời hạn thanh toán 15 ngày, nếu Bên A không hoàn thành nghĩa vụ thanh toán, Bên B có quyền tháo dỡ và thu hồi hàng hóa, có thông báo trước để tránh ảnh hưởng đến hoạt động của Bên A.</p>
+          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- <strong>Quyền sở hữu tài sản:</strong> Quyền sở hữu đối với toàn bộ hàng hóa/thiết bị nêu trên vẫn thuộc về Bên B (Bên bán) cho đến khi Bên A (Bên mua) hoàn tất 100% nghĩa vụ thanh toán theo Hợp đồng.</p>
 
           <!-- ĐIỀU 4 (100% NGUYÊN VĂN GỐC) -->
           <div style="font-weight: bold; margin-top: 14px;">ĐIỀU 4. CAM KẾT VÀ TRÁCH NHIỆM CỦA MỖI BÊN</div>
@@ -685,25 +680,26 @@
             <li style="margin: 2px 0;">Thời gian hoàn thành thi công chậm so quy định của hợp đồng thì Bên B phải chịu phạt một khoản 0.05%/ngày/giá trị hợp đồng nhân với số ngày chậm tiến độ. Thời gian chậm hoàn thành không được quá 15 ngày, nếu thời gian hoàn thi công chậm quá 15 so với thời gian trong hợp đồng thì Bên A có quyền đơn phương chấm dứt hợp đồng và Bên B hoàn trả lại số tiền tạm ứng cho Bên A đồng thời phải trả cho Bên A thêm một khoản phạt tương ứng số tiền Bên A đã tạm ứng trước đó.</li>
           </ul>
 
-          <!-- ĐIỀU 5 (100% NGUYÊN VĂN GỐC) -->
-          <div style="font-weight: bold; margin-top: 14px;">ĐIỀU 5: CHẾ ĐỘ BẢO HÀNH</div>
-          <p style="margin: 3px 0; text-align: justify;">Sản phẩm được bảo hành 12 tháng tính từ thời gian bàn giao đưa vào sử dụng.</p>
-          <p style="margin: 3px 0; text-align: justify;">Khi nhận được thông báo về bảo hành sản phẩm, Bên B có trách nhiệm cử cán bộ kỹ thuật tiến hành tiếp nhận bảo hành thiết bị cho Bên A, thời gian xử lý bảo hành chậm nhất không quá 24h kể từ khi nhận được thông báo của Bên A qua zalo/sms/điện thoại/mail hoặc bằng các hình thức thông báo tương tự.</p>
-          <p style="margin: 3px 0; text-align: justify;">Nội dung bảo hành bao gồm khắc phục, sửa chữa khiếm khuyết, lỗi, hỏng do việc thi công của Bên B gây ra hoặc do hỏng, khiếm khuyết của sản phẩm do lỗi của nhà sản xuất mà không do Bên A. Bên B chịu toàn bộ chi phí liên quan đến việc bảo hành.</p>
-          <p style="margin: 3px 0; text-align: justify;">Trong thời gian bảo hành, nếu màn hình LED bị hỏng, khiếm khuyết thuộc trách nhiệm của Bên B mà Bên B không tiến hành bảo hành hoặc bảo hành chậm, không đúng thời gian yêu cầu thì Bên A sẽ thuê sửa chữa và có quyền yêu cầu Bên B trả chi phí.</p>
-          <p style="margin: 3px 0; text-align: justify;">Bên B có trách nhiệm thay thế, sửa chữa miễn phí những vật tư, thiết bị theo đúng thông số kỹ thuật trong Hợp đồng trong thời hạn bảo hành. Vật tư sẽ một đổi một sau khi nhận được sản phẩm bảo hành từ Bên A, trừ trường hợp các bên có thỏa thuận khác.</p>
-          <p style="margin: 3px 0; text-align: justify;">Bên B từ chối bảo hành sản phẩm trong những trường hợp sau: Điều khoản thanh toán không được thực hiện đúng, chập cháy do nguồn điện, thiên tai lũ lụt gây hỏng hóc, cài đặt mật khẩu hoặc tự ý tháo lắp thay đổi kết cấu của thiết bị mà không có sự đồng ý bằng văn bản của Bên B.</p>
+          <!-- ĐIỀU 5: CHẾ ĐỘ BẢO HÀNH -->
+          <div style="font-weight: bold; margin-top: 14px; font-size: 13pt;">ĐIỀU 5: CHẾ ĐỘ BẢO HÀNH</div>
+          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- <strong>Thời hạn bảo hành:</strong> Sản phẩm được bảo hành 12 tháng tính từ thời gian bàn giao đưa vào sử dụng.</p>
+          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- <strong>Tiếp nhận bảo hành:</strong> Khi nhận được thông báo về bảo hành sản phẩm, Bên B có trách nhiệm cử cán bộ kỹ thuật tiến hành tiếp nhận bảo hành thiết bị cho Bên A, thời gian xử lý bảo hành chậm nhất không quá 24h kể từ khi nhận được thông báo của Bên A qua Zalo / SMS / Điện thoại / Email hoặc bằng các hình thức thông báo tương tự.</p>
+          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- <strong>Phạm vi bảo hành:</strong> Nội dung bảo hành bao gồm khắc phục, sửa chữa khiếm khuyết, lỗi, hỏng do việc thi công của Bên B gây ra hoặc do hỏng, khiếm khuyết của sản phẩm do lỗi của nhà sản xuất mà không do Bên A. Bên B chịu toàn bộ chi phí liên quan đến việc bảo hành.</p>
+          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- <strong>Trách nhiệm bảo hành:</strong> Trong thời gian bảo hành, nếu màn hình LED bị hỏng, khiếm khuyết thuộc trách nhiệm của Bên B mà Bên B không tiến hành bảo hành hoặc bảo hành chậm, không đúng thời gian yêu cầu thì Bên A sẽ thuê sửa chữa và có quyền yêu cầu Bên B trả chi phí.</p>
+          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- <strong>Vật tư thay thế:</strong> Bên B có trách nhiệm thay thế, sửa chữa miễn phí những vật tư, thiết bị theo đúng thông số kỹ thuật trong Hợp đồng trong thời hạn bảo hành. Vật tư sẽ một đổi một sau khi nhận được sản phẩm bảo hành từ Bên A, trừ trường hợp các bên có thỏa thuận khác.</p>
+          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- <strong>Từ chối bảo hành:</strong> Bên B từ chối bảo hành sản phẩm trong những trường hợp sau: Điều khoản thanh toán không được thực hiện đúng; chập cháy do nguồn điện không ổn định; thiên tai lũ lụt gây hỏng hóc; cài đặt mật khẩu hoặc tự ý tháo lắp thay đổi kết cấu của thiết bị mà không có sự đồng ý bằng văn bản của Bên B.</p>
 
-          <!-- ĐIỀU 6 (100% NGUYÊN VĂN GỐC) -->
-          <div style="font-weight: bold; margin-top: 14px;">ĐIỀU 6: TRÁCH NHIỆM THỰC HIỆN HỢP ĐỒNG VÀ PHẠT VI PHẠM</div>
-          <p style="margin: 3px 0; text-align: justify;">Hai Bên cam kết thực hiện đầy đủ, thiện chí các nghĩa vụ tại Hợp đồng này. Nếu Bên nào không thực hiện một hoặc một số trách nhiệm đã cam kết và/hoặc cố tình kéo dài thời gian, gây thiệt hại cho Bên kia trong quá trình thực hiện Hợp đồng thì phải bồi thường thiệt hại cho Bên kia theo quy định của pháp luật và chịu mức phạt vi phạm là 8% phần giá trị Hợp đồng.</p>
+          <!-- ĐIỀU 6 -->
+          <div style="font-weight: bold; margin-top: 14px; font-size: 13pt;">ĐIỀU 6: TRÁCH NHIỆM THỰC HIỆN HỢP ĐỒNG VÀ PHẠT VI PHẠM</div>
+          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- Hai Bên cam kết thực hiện đầy đủ, thiện chí các nghĩa vụ tại Hợp đồng này.</p>
+          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- Nếu Bên nào không thực hiện một hoặc một số trách nhiệm đã cam kết và/hoặc cố tình kéo dài thời gian, gây thiệt hại cho Bên kia trong quá trình thực hiện Hợp đồng thì phải bồi thường thiệt hại cho Bên kia theo quy định của pháp luật và chịu mức phạt vi phạm là 8% phần giá trị Hợp đồng theo quy định của Luật Thương mại.</p>
 
-          <!-- ĐIỀU 7 (100% NGUYÊN VĂN GỐC) -->
-          <div style="font-weight: bold; margin-top: 14px;">ĐIỀU 7: ĐIỀU KHOẢN CHUNG</div>
-          <p style="margin: 3px 0; text-align: justify;">Mọi bất đồng, tranh chấp liên quan đến Hợp đồng này hai bên sẽ giải quyết trên cơ sở thương lượng với tinh thần thiện chí, tôn trọng quyền và nghĩa vụ hợp pháp của mỗi bên. Trong trường hợp hai bên không đạt được sự thống nhất, một trong hai bên hoặc cả hai bên đều có quyền làm đơn khởi kiện yêu cầu Tòa án có thẩm quyền giải quyết. Phán quyết của Tòa án là phán quyết cuối cùng các bên phải tuân theo. Mọi chi phí cho việc giải quyết tranh chấp tại Tòa án sẽ do bên thua kiện chịu, trừ khi có thỏa thuận khác.</p>
-          <p style="margin: 3px 0; text-align: justify;">Những bổ sung điều chỉnh hợp đồng phải được sự đồng ý của hai bên bằng văn bản hoặc phụ lục hợp đồng (được coi là bộ phận không tách rời của Hợp đồng).</p>
-          <p style="margin: 3px 0; text-align: justify;">Hợp đồng này có hiệu lực kể từ ngày bên A chuyển tiền tạm ứng đợt 1 cho bên B, và hết hiệu lực khi hai bên hoàn thành tất cả nghĩa vụ đối với bên còn lại.</p>
-          <p style="margin: 3px 0; text-align: justify;">Hợp đồng này gồm 07 Điều, được lập thành 04 (bốn) bản có nội dung và giá trị pháp lý như nhau, mỗi bên giữ 02 (hai) bản.</p>
+          <!-- ĐIỀU 7 -->
+          <div style="font-weight: bold; margin-top: 14px; font-size: 13pt;">ĐIỀU 7: ĐIỀU KHOẢN CHUNG</div>
+          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- <strong>Giải quyết tranh chấp:</strong> Mọi bất đồng, tranh chấp liên quan đến Hợp đồng này hai bên sẽ giải quyết trên cơ sở thương lượng với tinh thần thiện chí, tôn trọng quyền và nghĩa vụ hợp pháp của mỗi bên. Trong trường hợp hai bên không đạt được sự thống nhất, một trong hai bên hoặc cả hai bên đều có quyền làm đơn khởi kiện yêu cầu Tòa án có thẩm quyền giải quyết. Phán quyết của Tòa án là phán quyết cuối cùng các bên phải tuân theo. Mọi chi phí cho việc giải quyết tranh chấp tại Tòa án sẽ do bên thua kiện chịu, trừ khi có thỏa thuận khác.</p>
+          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- <strong>Sửa đổi bổ sung:</strong> Những bổ sung điều chỉnh hợp đồng phải được sự đồng ý của hai bên bằng văn bản hoặc phụ lục hợp đồng (được coi là bộ phận không tách rời của Hợp đồng).</p>
+          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- <strong>Hiệu lực hợp đồng:</strong> Hợp đồng này có hiệu lực kể từ ngày bên A chuyển tiền tạm ứng Đợt 1 cho bên B, và hết hiệu lực khi hai bên hoàn thành tất cả nghĩa vụ đối với bên còn lại.</p>
+          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- <strong>Số bản phát hành:</strong> Hợp đồng này gồm 07 Điều, được lập thành 04 (bốn) bản có nội dung và giá trị pháp lý như nhau, mỗi bên giữ 02 (hai) bản.</p>
 
           <!-- Chữ ký 2 bên -->
           <table style="width: 100%; border: none; border-collapse: collapse; margin-top: 30px;" border="0" cellspacing="0" cellpadding="0">
@@ -937,11 +933,7 @@
               <td>:</td>
               <td><span class="val-buyer-tax">0317300612</span></td>
             </tr>
-            <tr>
-              <td>Số tài khoản</td>
-              <td>:</td>
-              <td><span class="val-buyer-bank">0317300612 - Ngân hàng TMCP Á Châu (ACB) - Chi nhánh Đông Hoà</span></td>
-            </tr>
+            <tr class="row-buyer-bank"><td>Số tài khoản</td><td>:</td><td><span class="val-buyer-bank">0317300612 - Ngân hàng TMCP Á Châu (ACB) - Chi nhánh Đông Hoà</span></td></tr>
             <tr>
               <td>Đại diện</td>
               <td>:</td>
@@ -1007,9 +999,14 @@
             </tfoot>
           </table>
 
-          <div style="font-weight: bold; margin-top: 16px; font-size: 13pt;">Điều 2: Kết luận</div>
-          <p style="margin: 4px 0; text-align: justify;">Màn hình lắp đặt đúng kích thước như hợp đồng, hoạt động đạt yêu cầu. Chấp nhận nghiệm thu hoàn thành theo Hợp đồng kinh tế số <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong>, ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ Haco Việt Nam.</p>
-          <p style="margin: 6px 0;">Biên bản được thành lập 02 bản, mỗi bên giữ 01 bản và có giá trị pháp lý như nhau.</p>
+          <div style="font-weight: bold; margin-top: 16px; font-size: 13pt;">Điều 2: Đánh giá và Kết luận</div>
+          <div style="font-size: 12.5pt; line-height: 1.5; margin-top: 6px; text-align: justify;">
+            <p style="margin: 4px 0 4px 18px; text-indent: -18px;">- <strong>Về quy cách lắp đặt:</strong> Màn hình LED và hệ thống phụ trợ được lắp đặt đúng kích thước, vị trí và thẩm mỹ theo Hợp đồng kinh tế số <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong>, ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ Haco Việt Nam.</p>
+            <p style="margin: 4px 0 4px 18px; text-indent: -18px;">- <strong>Về chất lượng kỹ thuật:</strong> Thiết bị hoạt động ổn định, đạt yêu cầu kỹ thuật, hình ảnh sắc nét, độ sáng và màu sắc đồng đều.</p>
+            <p style="margin: 4px 0 4px 18px; text-indent: -18px;">- <strong>Bàn giao vận hành:</strong> Bên B đã hoàn tất việc chuyển giao phần mềm điều khiển và hướng dẫn chi tiết quy trình vận hành cho Bên A.</p>
+            <p style="margin: 4px 0 4px 18px; text-indent: -18px;">- <strong>Kết luận nghiệm thu:</strong> Hai bên thống nhất chấp nhận nghiệm thu hoàn thành toàn bộ công việc và chính thức bàn giao công trình đưa vào sử dụng.</p>
+            <p style="margin: 4px 0 4px 18px; text-indent: -18px;">- <strong>Hiệu lực biên bản:</strong> Biên bản được lập thành 02 bản có giá trị pháp lý như nhau, mỗi bên giữ 01 bản để làm căn cứ xuất hóa đơn GTGT, thực hiện các thủ tục quyết toán, thanh lý hợp đồng và tính thời hạn bảo hành công trình.</p>
+          </div>
 
           <table style="width: 100%; border: none; border-collapse: collapse; margin-top: 30px;" border="0" cellspacing="0" cellpadding="0">
             <tr>
@@ -1067,11 +1064,7 @@
               <td>:</td>
               <td><span class="val-buyer-tax">0317300612</span></td>
             </tr>
-            <tr>
-              <td>Số tài khoản</td>
-              <td>:</td>
-              <td><span class="val-buyer-bank">0317300612 - Ngân hàng TMCP Á Châu (ACB) - Chi nhánh Đông Hoà</span></td>
-            </tr>
+            <tr class="row-buyer-bank"><td>Số tài khoản</td><td>:</td><td><span class="val-buyer-bank">0317300612 - Ngân hàng TMCP Á Châu (ACB) - Chi nhánh Đông Hoà</span></td></tr>
             <tr>
               <td>Đại diện</td>
               <td>:</td>
@@ -1246,11 +1239,7 @@
               <td>:</td>
               <td><span class="val-buyer-tax">0317300612</span></td>
             </tr>
-            <tr>
-              <td>Số tài khoản</td>
-              <td>:</td>
-              <td><span class="val-buyer-bank">0317300612 - Ngân hàng TMCP Á Châu (ACB) - Chi nhánh Đông Hoà</span></td>
-            </tr>
+            <tr class="row-buyer-bank"><td>Số tài khoản</td><td>:</td><td><span class="val-buyer-bank">0317300612 - Ngân hàng TMCP Á Châu (ACB) - Chi nhánh Đông Hoà</span></td></tr>
             <tr>
               <td>Đại diện</td>
               <td>:</td>
@@ -1292,14 +1281,19 @@
           <p style="margin: 10px 0;">Hai bên cùng thống nhất ký biên bản thanh lý hợp đồng số <strong class="val-bbtl-num">120626/BBTLHD/TOANTHANG-HACO</strong> ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ Haco Việt Nam với các nội dung như sau:</p>
 
           <div style="font-weight: bold; margin-top: 12px; font-size: 13pt;">ĐIỀU 1: THỎA THUẬN CHẤM DỨT HỢP ĐỒNG</div>
-          <p style="margin: 3px 0; text-align: justify;">Sau khi nhận thấy những mục đích và lợi ích khi ký kết hợp đồng đã đầy đủ, các bên đồng ý thỏa thuận chấm dứt hợp đồng kể từ ngày các bên đồng ký kết vào Biên bản này.</p>
-          <p style="margin: 3px 0; text-align: justify;">Các bên được giải phóng khỏi những quy định theo hợp đồng số <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong> ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ Haco Việt Nam.</p>
+          <div style="font-size: 12.5pt; line-height: 1.5; margin-top: 4px; text-align: justify;">
+            <p style="margin: 4px 0 4px 18px; text-indent: -18px;">- Sau khi nhận thấy những mục đích và lợi ích khi ký kết hợp đồng đã được thực hiện đầy đủ, các bên đồng ý thỏa thuận chấm dứt hợp đồng kể từ ngày các bên cùng ký kết vào Biên bản này.</p>
+            <p style="margin: 4px 0 4px 18px; text-indent: -18px;">- Các bên được giải phóng khỏi những quy định theo Hợp đồng số <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong> ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ Haco Việt Nam (ngoại trừ trách nhiệm bảo hành theo Điều 5 của Hợp đồng).</p>
+          </div>
 
           <div style="font-weight: bold; margin-top: 12px; font-size: 13pt;">ĐIỀU 2: NGHĨA VỤ ĐÃ HOÀN THÀNH</div>
-          <p style="margin: 3px 0; text-align: justify;">Bên B đã hoàn tất việc giao hàng đúng theo đơn hàng của Hợp đồng số <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong> ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ Haco Việt Nam..</p>
+          <div style="font-size: 12.5pt; line-height: 1.5; margin-top: 4px; text-align: justify;">
+            <p style="margin: 4px 0 4px 18px; text-indent: -18px;">- Bên B đã hoàn tất việc giao hàng, thi công lắp đặt và bàn giao đúng theo đơn hàng của Hợp đồng số <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong>.</p>
+            <p style="margin: 4px 0 4px 18px; text-indent: -18px;">- Bên A đã nghiệm thu, tiếp nhận toàn bộ công trình và đưa vào khai thác sử dụng.</p>
+          </div>
 
           <div style="font-weight: bold; margin-top: 12px; font-size: 13pt;">ĐIỀU 3: NGHĨA VỤ CÒN LẠI CỦA CÁC BÊN</div>
-          <p style="margin: 3px 0;">Bên A có trách nhiệm thanh toán đến 100% giá trị của hợp đồng sau khi trừ khoản tạm ứng cho Bên B. Giá trị quyết toán như sau:</p>
+          <p style="margin: 4px 0 4px 18px; text-indent: -18px; line-height: 1.5;">- Bên A có trách nhiệm thanh toán số tiền còn lại sau khi đối trừ các khoản tạm ứng cho Bên B theo bảng quyết toán chi tiết dưới đây:</p>
 
           <table class="doc-table">
             <thead>
@@ -1313,12 +1307,15 @@
           </table>
 
           <p style="margin: 6px 0; font-weight: bold;">(Bằng chữ: <span class="val-final-rem-words">Không đồng chẵn./.</span>)</p>
-          <p style="margin: 4px 0; text-align: justify;">Bên A đồng ý thanh toán số tiền còn lại trên cho Bên B sau khi hai bên ký biên bản thanh lý hợp đồng và có đầy đủ chứng từ thanh toán hợp pháp, hợp lệ như trong Điều 3 của hợp đồng số: <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong> ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ Haco Việt Nam.</p>
+          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">- <strong>Thời hạn thanh toán:</strong> Bên A đồng ý thanh toán dứt điểm số tiền còn lại trên cho Bên B sau khi hai bên ký biên bản thanh lý hợp đồng và Bên B cung cấp đầy đủ chứng từ thanh toán hợp pháp, hợp lệ như trong Điều 3 của Hợp đồng số: <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong>.</p>
 
           <div style="font-weight: bold; margin-top: 12px; font-size: 13pt;">ĐIỀU 4: ĐIỀU KHOẢN THI HÀNH</div>
-          <p style="margin: 3px 0; text-align: justify;">Hai bên cam kết tiếp tục thực hiện những nghĩa vụ còn lại trong Hợp đồng số: <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong> ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ Haco Việt Nam theo thỏa thuận tại Điều 3 của Biên bản này.</p>
-          <p style="margin: 3px 0; text-align: justify;">Hợp đồng số: <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong> ký ngày <span class="val-day">12</span> tháng <span class="val-month">06</span> năm <span class="val-year">2026</span> giữa <span class="val-buyer-name">CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO</span> và Công ty Cổ phần Công nghệ Haco Việt Nam sẽ hết hiệu lực và mặc nhiên được thanh lý kể từ ngày hai bên hoàn tất mọi nghĩa vụ của mình.</p>
-          <p style="margin: 3px 0;">Biên bản được lập thành 02 bản, giao cho bên A giữ 01 bản, bên B giữ 01 bản và có giá trị pháp lý như nhau.</p>
+          <div style="font-size: 12.5pt; line-height: 1.5; margin-top: 4px; text-align: justify;">
+            <p style="margin: 4px 0 4px 18px; text-indent: -18px;">- Hai bên cam kết tiếp tục thực hiện đầy đủ những nghĩa vụ tài chính còn lại nêu tại Điều 3 của Biên bản này.</p>
+            <p style="margin: 4px 0 4px 18px; text-indent: -18px;">- Hợp đồng kinh tế số <strong class="val-contract-num">120626/HĐKT/TOANTHANG-HACO</strong> sẽ chính thức hết hiệu lực và mặc nhiên được thanh lý kể từ ngày Bên A thanh toán đầy đủ 100% nghĩa vụ của mình.</p>
+            <p style="margin: 4px 0 4px 18px; text-indent: -18px;">- Nghĩa vụ bảo hành đối với sản phẩm vẫn tiếp tục có hiệu lực theo đúng cam kết tại Điều 5 của Hợp đồng.</p>
+            <p style="margin: 4px 0 4px 18px; text-indent: -18px;">- Biên bản được lập thành 02 bản, giao cho bên A giữ 01 bản, bên B giữ 01 bản và có giá trị pháp lý như nhau.</p>
+          </div>
 
           <table style="width: 100%; border: none; border-collapse: collapse; margin-top: 30px;" border="0" cellspacing="0" cellpadding="0">
             <tr>
@@ -1371,7 +1368,7 @@
       {
         name: "Đợt 2 (Còn lại)",
         percent: 50,
-        condition: "trong vòng 05-07 ngày sau khi hoàn thành, bàn giao công trình đưa vào sử dụng",
+        condition: "giá trị hợp đồng còn lại và các phát sinh (nếu có) sau khi hoàn thành, bàn giao công trình đưa vào sử dụng",
         isDeposit: false
       }
     ];
@@ -1389,7 +1386,7 @@
     function getCompanyShortName(companyName) {
       if (!companyName) return "KH";
       let clean = removeVietnameseDiacritics(companyName);
-      clean = clean.replace(/\b(CONG TY|CTY|TNHH|CO PHAN|CP|MTV|MOT THANH VIEN|THUONG MAI|DICH VU|TMDV|DAU TU|SAN XUAT|XAY DUNG|CONG NGHE|TIN HOC|QUOC TE|TAP DOAN|VA)\b/gi, " ");
+      clean = clean.replace(/\b(CONG TY|CTY|TNHH|CO PHAN|CP|MTV|MOT THANH VIEN|THUONG MAI|DICH VU|TMDV|DAU TU|SAN XUAT|XAY DUNG|CONG NGHE|TIN HOC|QUOC TE|TAP DOAN|HO KINH DOANH|HO KD|HKD|CUA HANG|CO SO|DNTN|DOANH NGHIEP|HOP TAC XA|HTX|BAN QUAN LY|BQL|TRUONG|TRUNG TAM|CHI NHANH|VA)\b/gi, " ");
       clean = clean.replace(/[^a-zA-Z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
       const words = clean.split(" ").filter(w => w.length > 0);
       if (words.length === 0) return "KH";
@@ -1583,7 +1580,7 @@
         "sau khi hợp đồng được ký kết",
         "sau khi tập kết vật tư thiết bị đến chân công trình",
         "sau khi hoàn thiện lắp đặt và chạy thử",
-        "trong vòng 05-07 ngày sau khi ký biên bản nghiệm thu bàn giao",
+        "giá trị hợp đồng còn lại và các phát sinh (nếu có) sau khi hoàn thành, bàn giao công trình đưa vào sử dụng",
         "sau khi hết hạn bảo hành công trình"
       ];
       
@@ -1630,14 +1627,14 @@
         "sau khi hợp đồng được ký kết",
         "sau khi tập kết vật tư thiết bị đến chân công trình",
         "sau khi hoàn thiện lắp đặt và chạy thử",
-        "trong vòng 05-07 ngày sau khi ký biên bản nghiệm thu bàn giao",
+        "giá trị hợp đồng còn lại và các phát sinh (nếu có) sau khi hoàn thành, bàn giao công trình đưa vào sử dụng",
         "sau khi hết hạn bảo hành công trình"
       ];
 
       payments = percentages.map((pct, idx) => ({
         name: idx === 0 ? "Đợt 1 (Tạm ứng)" : (idx === percentages.length - 1 ? `Đợt ${idx + 1} (Còn lại)` : `Đợt ${idx + 1}`),
         percent: pct,
-        condition: defaultConditions[idx] || "theo thỏa thuận của hai bên",
+        condition: (idx === percentages.length - 1 && percentages.length > 1) ? "giá trị hợp đồng còn lại và các phát sinh (nếu có) sau khi hoàn thành, bàn giao công trình đưa vào sử dụng" : (defaultConditions[idx] || "theo thỏa thuận của hai bên"),
         isDeposit: idx === 0
       }));
 
@@ -1792,48 +1789,77 @@
         return;
       }
 
-      // Tax code
-      const taxMatch = text.match(/(?:mã số thuế|mst|tax code|tax)\s*[:：]?\s*([0-9]{10}(?:-[0-9]{3})?|[0-9]{10,13})/i);
+      // 1. Mã số thuế
+      const taxMatch = text.match(/(?:mã\s*số\s*thuế|mst|tax\s*code|tax)\s*[:：]?\s*([0-9]{10}(?:-[0-9]{3})?|[0-9]{10,13})/i);
       if (taxMatch) document.getElementById('buyerTaxCode').value = taxMatch[1].trim();
 
-      // Phone
-      const phoneMatch = text.match(/(?:điện thoại|sđt|tel|phone|hotline)\s*[:：]?\s*([0-9.\s]{9,15})/i);
+      // 2. Số điện thoại
+      const phoneMatch = text.match(/(?:điện\s*thoại|sđt|tel|phone|hotline)\s*[:：]?\s*([0-9.\s]{9,15})/i);
       if (phoneMatch) document.getElementById('buyerPhone').value = phoneMatch[1].trim();
 
-      // Representative
-      const repMatch = text.match(/(?:người đại diện|đại diện|ông|bà|gđ|giám đốc)\s*[:：]?\s*([^\n,;]+?)(?:\s*-\s*chức vụ|\s+chức vụ|\n|$)/i);
+      // 3. Người đại diện
+      const repMatch = text.match(/(?:người\s*đại\s*diện|đại\s*diện|ông|bà|gđ|giám\s*đốc|chủ\s*hộ)\s*[:：]?\s*([^\n,;]+?)(?:\s*[-–]\s*(?:chức\s*vụ|chủ\s*hộ|giám\s*đốc|đại\s*diện)|\s+(?:chức\s*vụ|chủ\s*hộ|giám\s*đốc)|\n|$)/i);
       if (repMatch) document.getElementById('buyerRep').value = repMatch[1].trim();
 
-      // Position
-      const posMatch = text.match(/chức vụ\s*[:：]?\s*([^\n,;]+)/i);
+      // 4. Chức vụ
+      const posMatch = text.match(/chức\s*vụ\s*[:：]?\s*([^\n,;]+)/i);
       if (posMatch) {
         document.getElementById('buyerPosition').value = posMatch[1].trim();
+      } else if (/hộ\s*kinh\s*doanh|hkd/i.test(text)) {
+        document.getElementById('buyerPosition').value = "Chủ hộ";
       } else if (text.toLowerCase().includes("giám đốc")) {
         document.getElementById('buyerPosition').value = "Giám đốc";
       }
 
-      // Company Name
-      const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-      let companyFound = false;
-      for (const line of lines) {
-        if (/^(?:công ty|cty|doanh nghiệp|tổng công ty|tập đoàn|trường|bệnh viện|trung tâm)/i.test(line)) {
-          document.getElementById('buyerName').value = line.replace(/^(?:tên đơn vị|tên công ty|khách hàng)\s*[:：]\s*/i, '').trim();
-          companyFound = true;
-          break;
+      // 5. Tên công ty / Hộ kinh doanh / Đơn vị
+      let detectedName = "";
+      // Cách 1: Tìm theo nhãn nhận diện
+      const labelMatch = text.match(/(?:tên\s*(?:công\s*ty|đơn\s*vị|doanh\s*nghiệp|khách\s*hàng|kh|hộ\s*kinh\s*doanh|hộ\s*kd|hkd)|hộ\s*kinh\s*doanh|hộ\s*kd|hkd|đơn\s*vị|bên\s*mua|bên\s*a|khách\s*hàng)\s*[:：]\s*([^\n]+)/i);
+      if (labelMatch) {
+        let nameCandidate = labelMatch[1].trim();
+        nameCandidate = nameCandidate.replace(/\s*[-–]\s*(?:MST|Mã số thuế|Địa chỉ|Đ\/c|SĐT|Điện thoại).*$/i, '').trim();
+        if (nameCandidate.length > 2) {
+          detectedName = nameCandidate;
         }
       }
-      if (!companyFound) {
-        const compMatch = text.match(/(?:tên đơn vị|tên công ty|bên mua|khách hàng)\s*[:：]?\s*([^\n]+)/i);
-        if (compMatch) document.getElementById('buyerName').value = compMatch[1].trim();
+
+      // Cách 2: Quét từng dòng bắt đầu bằng loại hình pháp lý (Công ty, HKD, Cửa hàng, DNTN, Cơ sở...)
+      if (!detectedName) {
+        const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        for (const line of lines) {
+          if (/^(?:địa\s*chỉ|đ\/c|mã\s*số\s*thuế|mst|tax|điện\s*thoại|sđt|tel|người\s*đại\s*diện|đại\s*diện|stk|số\s*tài\s*khoản|tài\s*khoản|chức\s*vụ)/i.test(line)) {
+            continue;
+          }
+          if (/^(?:công\s*ty|cty|tổng\s*công\s*ty|tập\s*đoàn|doanh\s*nghiệp|dntn|hộ\s*kinh\s*doanh|hộ\s*kd|hkd|cửa\s*hàng|cơ\s*sở|trường|bệnh\s*viện|trung\s*tâm|viện|hợp\s*tác\s*xã|htx|chi\s*nhánh|ban\s*quản\s*lý|phòng|sở|văn\s*phòng)/i.test(line)) {
+            detectedName = line.replace(/^(?:tên đơn vị|tên công ty|khách hàng|đơn vị)\s*[:：]\s*/i, '').trim();
+            break;
+          }
+        }
+
+        // Cách 3: Lấy dòng đầu tiên nếu dòng đó không phải là nhãn phụ
+        if (!detectedName && lines.length > 0) {
+          for (const line of lines) {
+            if (!/^(?:địa\s*chỉ|đ\/c|mã\s*số\s*thuế|mst|tax|điện\s*thoại|sđt|tel|người\s*đại\s*diện|đại\s*diện|stk|số\s*tài\s*khoản|tài\s*khoản|chức\s*vụ|ngày|hợp\s*đồng|kính\s*gửi)/i.test(line) && line.length > 3) {
+              detectedName = line.replace(/^[-*•\s]+/, '').trim();
+              break;
+            }
+          }
+        }
       }
 
-      // Address
-      const addrMatch = text.match(/(?:địa chỉ|đ\/c|address)\s*[:：]?\s*([^\n]+)/i);
+      if (detectedName) {
+        document.getElementById('buyerName').value = detectedName;
+      }
+
+      // 6. Địa chỉ
+      const addrMatch = text.match(/(?:địa\s*chỉ|đ\/c|address)\s*[:：]?\s*([^\n]+)/i);
       if (addrMatch) document.getElementById('buyerAddress').value = addrMatch[1].trim();
 
-      // Bank Account & Bank Name
-      const bankMatch = text.match(/(?:số\s*tài\s*khoản|stk|tài\s*khoản|tk\s*ngân\s*hàng|ngân\s*hàng|tài\s*khoản\s*số)\s*[:：]?\s*([0-9A-Za-z\s.\-–/()]+?)(?=(?:\n|$|mã số thuế|mst|địa chỉ|đại diện|chức vụ|điện thoại|sđt))/i);
-      if (bankMatch) document.getElementById('buyerBank').value = bankMatch[1].trim();
+      // 7. Số tài khoản (STK) & Ngân hàng
+      const bankMatch = text.match(/(?:số\s*tài\s*khoản|stk|tài\s*khoản|tk\s*ngân\s*hàng|ngân\s*hàng|tài\s*khoản\s*số)\s*[:：]?\s*([0-9A-Za-z\s.\-–/()]+?)(?=(?:\n|$|mã\s*số\s*thuế|mst|địa\s*chỉ|đại\s*diện|chức\s*vụ|điện\s*thoại|sđt))/i);
+      if (bankMatch) {
+        document.getElementById('buyerBank').value = bankMatch[1].trim();
+      }
 
       suggestContractNumber(true);
       updateAll(); updateLedgerBadge();
@@ -1890,7 +1916,7 @@
       const buyerAddress = document.getElementById('buyerAddress').value.trim() || '……………………';
       const buyerTaxCode = document.getElementById('buyerTaxCode').value.trim() || '……………………';
       const buyerPhone = document.getElementById('buyerPhone').value.trim() || '……………………';
-      const buyerBank = document.getElementById('buyerBank').value.trim() || '……………………';
+      const buyerBank = document.getElementById('buyerBank').value.trim();
       const buyerRep = document.getElementById('buyerRep').value.trim() || '……………………';
       const buyerPosition = document.getElementById('buyerPosition').value.trim() || '……………………';
 
@@ -1934,9 +1960,28 @@
       let clausesHtml = '';
       payments.forEach((p, idx) => {
         const pAmount = grandTotal * (p.percent / 100);
-        const actionText = idx === 0 ? "tạm ứng cho bên B" : "thanh toán cho bên B";
+        const isFirst = (idx === 0);
+        const isLast = (idx === payments.length - 1 && payments.length > 1);
+
+        let dotName = `Đợt ${idx + 1}`;
+        if (isFirst) dotName += ' (Tạm ứng)';
+        else if (isLast) dotName += ' (Thanh toán lần cuối)';
+
+        let conditionStr = (p.condition || '').trim();
+        let clauseContent = '';
+
+        if (isFirst) {
+          clauseContent = `Bên A tạm ứng cho Bên B ${p.percent}% giá trị hợp đồng (tương đương: <strong>${formatMoney(pAmount)} VNĐ</strong>) ${conditionStr}.`;
+        } else if (isLast) {
+          clauseContent = `Bên A thanh toán cho Bên B ${p.percent}% giá trị hợp đồng (tương đương: <strong>${formatMoney(pAmount)} VNĐ</strong>) - ${conditionStr}.`;
+        } else {
+          clauseContent = `Bên A thanh toán cho Bên B ${p.percent}% giá trị hợp đồng (tương đương: <strong>${formatMoney(pAmount)} VNĐ</strong>) ${conditionStr}.`;
+        }
+
         clausesHtml += `
-          <p style="margin: 3px 0;"><strong>+ Đợt ${idx + 1}:</strong> Bên A ${actionText} ${p.percent}% giá trị hợp đồng (tương đương: <strong>${formatMoney(pAmount)} VNĐ</strong>) ${p.condition}.</p>
+          <p style="margin: 4px 0 4px 18px; text-indent: -18px; text-align: justify; line-height: 1.5;">
+            - <strong>${dotName}:</strong> ${clauseContent}
+          </p>
         `;
       });
       document.getElementById('contractPaymentClauses').innerHTML = clausesHtml;
@@ -2293,7 +2338,7 @@
         {
           name: "Đợt 2 (Còn lại)",
           percent: 50,
-          condition: "trong vòng 05-07 ngày sau khi hoàn thành, bàn giao công trình đưa vào sử dụng",
+          condition: "giá trị hợp đồng còn lại và các phát sinh (nếu có) sau khi hoàn thành, bàn giao công trình đưa vào sử dụng",
           isDeposit: false
         }
       ];
@@ -2368,7 +2413,7 @@
         {
           name: "Đợt 2 (Còn lại)",
           percent: 50,
-          condition: "trong vòng 05-07 ngày sau khi hoàn thành, bàn giao công trình đưa vào sử dụng",
+          condition: "giá trị hợp đồng còn lại và các phát sinh (nếu có) sau khi hoàn thành, bàn giao công trình đưa vào sử dụng",
           isDeposit: false
         }
       ];

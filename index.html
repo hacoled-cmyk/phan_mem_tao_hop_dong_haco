@@ -2951,6 +2951,7 @@
       const modal = document.getElementById('uploadContractModal');
       if (modal) {
         modal.classList.remove('hidden');
+        if (typeof backToUploadInput === 'function') backToUploadInput();
         switchUploadTab(defaultTab);
         setupContractDropZone();
       }
@@ -3222,27 +3223,24 @@
 
         if (result.type === 'json' && result.data) {
           const data = result.data;
-          if (data.contractNumber) document.getElementById('contractNumber').value = data.contractNumber;
-          if (data.contractDate) document.getElementById('contractDate').value = data.contractDate;
-          if (data.buyerName) document.getElementById('buyerName').value = data.buyerName;
-          if (data.buyerAddress) document.getElementById('buyerAddress').value = data.buyerAddress;
-          if (data.buyerTax) document.getElementById('buyerTaxCode').value = data.buyerTax;
-          if (data.buyerPhone) document.getElementById('buyerPhone').value = data.buyerPhone;
-          if (data.buyerBank) document.getElementById('buyerBank').value = data.buyerBank;
-          if (data.buyerRep) document.getElementById('buyerRep').value = data.buyerRep;
-          if (data.buyerPos) document.getElementById('buyerPosition').value = data.buyerPos;
-          if (data.items && Array.isArray(data.items)) {
-            items = data.items;
-            renderItemsForm();
-          }
-          if (data.installments && Array.isArray(data.installments)) {
-            payments = data.installments;
-            renderPaymentsForm();
-          }
-          updateAll(); updateLedgerBadge();
+          showUploadConfirmation({
+            sourceName: fileName,
+            contractNum: data.contractNumber,
+            contractDateStr: data.contractDate,
+            subject: data.contractSubject || 'Cung cấp & lắp đặt màn hình LED',
+            buyerName: data.buyerName,
+            buyerAddress: data.buyerAddress,
+            buyerTaxCode: data.buyerTax,
+            buyerPhone: data.buyerPhone,
+            buyerBank: data.buyerBank,
+            buyerRep: data.buyerRep,
+            buyerPosition: data.buyerPos,
+            vatRate: data.vatRate || 8,
+            totalAmount: 0,
+            parsedItems: data.items || [],
+            parsedPayments: data.installments || []
+          });
           showUploadLoading(false);
-          closeUploadContractModal();
-          showExistingContractBanner(data.contractNumber || 'HĐ đã nạp', data.buyerName || 'Khách hàng Bên A');
           return;
         }
 
@@ -3277,6 +3275,25 @@
       parseContractContent(text, null, 'Văn bản dán trực tiếp');
     }
 
+    // =========================================================================
+    // STATE & LOGIC: BẢNG XÁC NHẬN & KHỚP NỐI THÔNG TIN HỢP ĐỒNG (SMART MAPPING)
+    // =========================================================================
+
+    let cf_currentData = null;
+    let cf_currentPayments = [];
+    let cf_currentItems = [];
+    let cf_itemMode = 'lump'; // 'lump' or 'detail'
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
     // Core Intelligent Parser for Any Existing Contract
     function parseContractContent(text, html, sourceName) {
       if (!text || text.trim().length < 15) {
@@ -3307,17 +3324,28 @@
       }
 
       // 3. Tên công trình / Chủ đề hợp đồng
-      const subjMatch = text.match(/(?:v\/v|về việc|nội dung hợp đồng|hợp đồng)\s*[:：]?\s*([^\n\r]+)/i);
-      let subject = subjMatch ? subjMatch[1].trim() : '';
+      let subject = '';
+      const subjMatch = text.match(/(?:v\/v|về việc|tên công trình|dự án|hạng mục thi công|công trình|nội dung hợp đồng)\s*[:：]?\s*([^\n\r]+)/i);
+      if (subjMatch) {
+        subject = subjMatch[1].trim();
+      } else {
+        const hđMatch = text.match(/(?:hợp\s*đồng\s*kinh\s*tế|hợp\s*đồng)\s*[:：\-]?\s*([^\n\r]+)/i);
+        if (hđMatch && !/số|kinh tế/i.test(hđMatch[1])) {
+          subject = hđMatch[1].trim();
+        }
+      }
+      if (!subject) subject = 'Cung cấp và lắp đặt màn hình LED';
 
       // 4. Bóc tách khu vực Bên A (Bên Mua)
       let partyAText = '';
-      const paMatch = text.match(/(?:BÊN\s*A|BÊN\s*MUA|ĐƠN\s*VỊ\s*MUA)([\s\S]*?)(?:BÊN\s*B|BÊN\s*BÁN|ĐIỀU\s*1)/i);
+      const paMatch = text.match(/(?:BÊN\s*A|BÊN\s*MUA|ĐƠN\s*VỊ\s*MUA|CHỦ\s*ĐẦU\s*TƯ|BÊN\s*ĐẶT\s*HÀNG)([\s\S]*?)(?:BÊN\s*B|BÊN\s*BÁN|BÊN\s*THI\s*CÔNG|ĐIỀU\s*1)/i);
       partyAText = paMatch ? paMatch[1] : text;
 
       // Tên Bên A (Công ty, HKD, Cửa hàng, DNTN...)
       let buyerName = '';
-      const paCleanLines = partyAText.split('\n').map(l => l.replace(/^[\s:：()BÊN MUAa/\-]+/i, '').trim()).filter(l => l.length > 0);
+      const paCleanLines = partyAText.split('\n').map(l => {
+        return l.replace(/^[\s:：\-–]*(?:\((?:bên\s*a|bên\s*mua|bên\s*đặt\s*hàng|chủ\s*đầu\s*tư|khách\s*hàng)\)|\b(?:bên\s*a|bên\s*mua|bên\s*đặt\s*hàng|chủ\s*đầu\s*tư|khách\s*hàng|đơn\s*vị\s*mua)\b)*[\s:：\-–]*/i, '').trim();
+      }).filter(l => l.length > 0);
       for (const l of paCleanLines) {
         if (/^(?:công\s*ty|cty|tổng\s*công\s*ty|tập\s*đoàn|doanh\s*nghiệp|dntn|hộ\s*kinh\s*doanh|hộ\s*kd|hkd|cửa\s*hàng|cơ\s*sở|trường|bệnh\s*viện|trung\s*tâm|viện|hợp\s*tác\s*xã|htx)/i.test(l)) {
           buyerName = l.replace(/^(?:tên đơn vị|tên công ty|khách hàng|đơn vị)\s*[:：]\s*/i, '').trim();
@@ -3377,7 +3405,15 @@
       const vatMatch = text.match(/(?:thuế\s*(?:gtgt|vat)|vat)\s*[:：]?\s*([0-9]{1,2})\s*%/i);
       if (vatMatch) vatRate = parseInt(vatMatch[1]);
 
-      // 6. Bóc tách bảng danh mục hàng hóa / vật tư
+      // 6. Bóc tách tổng giá trị hợp đồng
+      let totalAmount = 0;
+      const amtMatch = text.match(/(?:tổng\s*(?:giá\s*trị|tiền|cộng|thanh\s*toán)|giá\s*trị\s*(?:hợp\s*đồng|gói\s*thầu))\s*[:：]?\s*([0-9.,\s]{5,20})\s*(?:đồng|vnđ|vnd)/i);
+      if (amtMatch) {
+        const digits = amtMatch[1].replace(/[^0-9]/g, '');
+        if (digits) totalAmount = parseInt(digits);
+      }
+
+      // 7. Bóc tách bảng danh mục hàng hóa / vật tư
       let parsedItems = [];
       if (html) {
         const tempDiv = document.createElement('div');
@@ -3429,7 +3465,12 @@
         });
       }
 
-      // 7. Bóc tách tiến độ thanh toán
+      // Nếu có danh mục items và chưa có totalAmount, tính từ items
+      if (parsedItems.length > 0 && totalAmount === 0) {
+        totalAmount = parsedItems.reduce((acc, it) => acc + (it.qty * it.price), 0);
+      }
+
+      // 8. Bóc tách tiến độ thanh toán
       let parsedPayments = [];
       const dotMatches = Array.from(text.matchAll(/(?:[-*•+]?\s*Đợt\s*([0-9]+)[^:\n\r]*[:：]\s*([^\n\r]+))/gi));
       if (dotMatches.length > 0) {
@@ -3447,37 +3488,300 @@
         });
       }
 
-      // NẠP DỮ LIỆU VÀO HỆ THỐNG
+      // Đưa dữ liệu sang BƯỚC 2: BẢNG XÁC NHẬN & KHỚP NỐI THÔNG MINH!
+      showUploadConfirmation({
+        sourceName: sourceName || 'Hợp đồng tải lên',
+        contractNum: contractNum,
+        contractDateStr: contractDateStr,
+        subject: subject,
+        buyerName: buyerName,
+        buyerAddress: buyerAddress,
+        buyerTaxCode: buyerTaxCode,
+        buyerPhone: buyerPhone,
+        buyerBank: buyerBank,
+        buyerRep: buyerRep,
+        buyerPosition: buyerPosition,
+        vatRate: vatRate,
+        totalAmount: totalAmount,
+        parsedItems: parsedItems,
+        parsedPayments: parsedPayments
+      });
+    }
+
+    // Hiển thị bước 2: Xác nhận & Khớp nối
+    function showUploadConfirmation(data) {
+      cf_currentData = data;
+      
+      // Gán vào form khớp nối
+      document.getElementById('cf_sourceBadge').innerText = data.sourceName || 'Hợp đồng tải lên';
+      document.getElementById('cf_contractNum').value = data.contractNum || '';
+      document.getElementById('cf_contractDate').value = data.contractDateStr || new Date().toISOString().slice(0, 10);
+      document.getElementById('cf_buyerName').value = data.buyerName || '';
+      document.getElementById('cf_buyerRep').value = data.buyerRep || '';
+      document.getElementById('cf_buyerPosition').value = data.buyerPosition || (data.buyerName?.toLowerCase().includes('hộ kinh doanh') ? 'Chủ hộ' : 'Giám đốc');
+      document.getElementById('cf_buyerAddress').value = data.buyerAddress || '';
+      document.getElementById('cf_buyerTaxCode').value = data.buyerTaxCode || '';
+      document.getElementById('cf_buyerPhone').value = data.buyerPhone || '';
+      document.getElementById('cf_buyerBank').value = data.buyerBank || '';
+      document.getElementById('cf_contractSubject').value = data.subject || 'Cung cấp & lắp đặt màn hình LED';
+      document.getElementById('cf_vatRate').value = data.vatRate || 8;
+
+      // Xử lý giá trị gói thầu trọn gói
+      const defaultLumpName = data.subject
+        ? (data.subject.toLowerCase().includes('cung cấp') || data.subject.toLowerCase().includes('lắp đặt')
+            ? data.subject
+            : `Cung cấp và thi công ${data.subject}`)
+        : 'Cung cấp và lắp đặt trọn gói theo Hợp đồng';
+      document.getElementById('cf_lumpName').value = defaultLumpName;
+      document.getElementById('cf_lumpPrice').value = data.totalAmount || 0;
+
+      // Chế độ hàng hóa: Mặc định chọn Trọn gói (an toàn nhất cho HĐ ngoài), trừ khi bóc tách được >= 2 dòng vật tư
+      cf_currentItems = data.parsedItems && data.parsedItems.length > 0 ? JSON.parse(JSON.stringify(data.parsedItems)) : [];
+      if (cf_currentItems.length >= 2) {
+        toggleCfItemMode('detail');
+      } else {
+        toggleCfItemMode('lump');
+      }
+
+      // Xử lý các đợt thanh toán
+      if (data.parsedPayments && data.parsedPayments.length > 0) {
+        cf_currentPayments = JSON.parse(JSON.stringify(data.parsedPayments));
+      } else {
+        cf_currentPayments = [
+          { name: "Đợt 1 (Tạm ứng)", percent: 50, condition: "sau khi hợp đồng được ký kết", isDeposit: true },
+          { name: "Đợt 2 (Còn lại)", percent: 50, condition: "sau khi hoàn thành, bàn giao đưa vào sử dụng", isDeposit: false }
+        ];
+      }
+      renderCfPayments();
+      calcCfTotals();
+
+      // Hiển thị view xác nhận, ẩn view tải file
+      document.getElementById('uploadInputView').classList.add('hidden');
+      document.getElementById('uploadConfirmView').classList.remove('hidden');
+      document.getElementById('btnBackToUploadTop').classList.remove('hidden');
+      document.getElementById('uploadModalMainTitle').innerHTML = `XÁC NHẬN & KHỚP NỐI THÔNG TIN <span class="text-xs bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 px-2 py-0.5 rounded-full font-medium">Bước 2/2</span>`;
+      document.getElementById('uploadModalSubtitle').innerText = "Kiểm tra và chỉnh nhanh trong 10 giây để đảm bảo 5 biên bản chuẩn xác 100%";
+      document.getElementById('uploadConfirmView').scrollTop = 0;
+    }
+
+    // Quay lại màn hình tải file
+    function backToUploadInput() {
+      document.getElementById('uploadInputView').classList.remove('hidden');
+      document.getElementById('uploadConfirmView').classList.add('hidden');
+      document.getElementById('btnBackToUploadTop').classList.add('hidden');
+      document.getElementById('uploadModalMainTitle').innerHTML = `NẠP HỢP ĐỒNG CÓ SẴN & TẠO 5 BIÊN BẢN <span class="text-xs bg-indigo-500/30 text-indigo-200 border border-indigo-400/30 px-2 py-0.5 rounded-full font-medium">Khớp nối thông minh</span>`;
+      document.getElementById('uploadModalSubtitle').innerText = "Áp dụng cho mọi hợp đồng đối tác để tự động tạo: BBNT Bàn giao, Thanh lý, Giấy ĐNTT, BBNT Kỹ thuật, Quyết toán & Sổ nợ";
+    }
+
+    // Chuyển đổi chế độ Trọn gói / Chi tiết vật tư
+    function toggleCfItemMode(mode) {
+      cf_itemMode = mode;
+      const lumpBlock = document.getElementById('cf_lumpBlock');
+      const detailBlock = document.getElementById('cf_detailBlock');
+      const radioLump = document.getElementById('cf_radio_lump');
+      const radioDetail = document.getElementById('cf_radio_detail');
+
+      if (mode === 'detail') {
+        if (radioDetail) radioDetail.checked = true;
+        lumpBlock.classList.add('hidden');
+        detailBlock.classList.remove('hidden');
+        renderCfItems();
+      } else {
+        if (radioLump) radioLump.checked = true;
+        lumpBlock.classList.remove('hidden');
+        detailBlock.classList.add('hidden');
+      }
+      calcCfTotals();
+    }
+
+    // Render danh sách vật tư trong bảng khớp nối
+    function renderCfItems() {
+      const container = document.getElementById('cf_itemsTableContainer');
+      if (!container) return;
+      container.innerHTML = '';
+      document.getElementById('cf_itemsCountText').innerText = `Danh sách vật tư (${cf_currentItems.length} hạng mục)`;
+
+      if (cf_currentItems.length === 0) {
+        container.innerHTML = `<div class="p-3 text-center text-slate-400 text-xs italic">Chưa có dòng vật tư nào. Bấm "+ Thêm dòng" để thêm.</div>`;
+        return;
+      }
+
+      cf_currentItems.forEach((it, idx) => {
+        const div = document.createElement('div');
+        div.className = "flex items-center gap-1.5 p-1.5 bg-slate-50 border border-slate-200 rounded text-xs";
+        div.innerHTML = `
+          <input type="text" value="${escapeHtml(it.name)}" oninput="cf_currentItems[${idx}].name = this.value" placeholder="Tên vật tư" class="flex-1 text-xs px-1.5 py-1 border border-slate-300 rounded bg-white">
+          <input type="number" value="${it.qty || 1}" oninput="cf_currentItems[${idx}].qty = parseFloat(this.value)||0; calcCfTotals();" class="w-14 text-xs px-1 py-1 border border-slate-300 rounded bg-white text-center" title="Số lượng">
+          <input type="text" value="${escapeHtml(it.unit || 'Bộ')}" oninput="cf_currentItems[${idx}].unit = this.value" class="w-12 text-xs px-1 py-1 border border-slate-300 rounded bg-white text-center" title="Đơn vị">
+          <input type="number" value="${it.price || 0}" oninput="cf_currentItems[${idx}].price = parseFloat(this.value)||0; calcCfTotals();" class="w-24 text-xs font-semibold px-1.5 py-1 border border-slate-300 rounded bg-white text-right" title="Đơn giá (VNĐ)">
+          <button type="button" onclick="removeCfDetailRow(${idx})" class="text-rose-500 hover:text-rose-700 px-1 font-bold text-sm" title="Xóa dòng">✕</button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function addCfDetailRow() {
+      cf_currentItems.push({ name: '', qty: 1, unit: 'Bộ', price: 0, isIncluded: false });
+      renderCfItems();
+      calcCfTotals();
+    }
+
+    function removeCfDetailRow(idx) {
+      cf_currentItems.splice(idx, 1);
+      renderCfItems();
+      calcCfTotals();
+    }
+
+    // Render danh sách các đợt thanh toán trong bảng khớp nối
+    function renderCfPayments() {
+      const container = document.getElementById('cf_paymentsContainer');
+      if (!container) return;
+      container.innerHTML = '';
+
+      let totalPct = 0;
+      cf_currentPayments.forEach((p, idx) => {
+        totalPct += (p.percent || 0);
+        const row = document.createElement('div');
+        row.className = "flex items-center gap-1.5 p-1.5 bg-slate-50 border border-slate-200 rounded text-xs";
+        row.innerHTML = `
+          <span class="font-bold text-slate-700 w-14 shrink-0">Đợt ${idx + 1}:</span>
+          <div class="flex items-center gap-0.5 w-16 shrink-0">
+            <input type="number" value="${p.percent}" oninput="cf_currentPayments[${idx}].percent = parseInt(this.value)||0; updateCfPaymentBadge();" class="w-12 text-xs font-bold text-indigo-700 px-1 py-1 border border-slate-300 rounded bg-white text-center">
+            <span class="text-xs text-slate-500">%</span>
+          </div>
+          <input type="text" value="${escapeHtml(p.condition)}" oninput="cf_currentPayments[${idx}].condition = this.value" placeholder="Điều kiện thanh toán" class="flex-1 text-xs px-2 py-1 border border-slate-300 rounded bg-white">
+          <button type="button" onclick="removeCfPaymentRow(${idx})" class="text-rose-500 hover:text-rose-700 px-1 font-bold text-sm" title="Xóa đợt này">✕</button>
+        `;
+        container.appendChild(row);
+      });
+
+      updateCfPaymentBadge();
+    }
+
+    function updateCfPaymentBadge() {
+      const totalPct = cf_currentPayments.reduce((acc, p) => acc + (p.percent || 0), 0);
+      const badge = document.getElementById('cf_paymentBadge');
+      if (!badge) return;
+      if (totalPct === 100) {
+        badge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300";
+        badge.innerText = `✓ Tổng: 100% (Chuẩn)`;
+      } else {
+        badge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300";
+        badge.innerText = `⚠ Tổng: ${totalPct}% (Chưa đủ 100%)`;
+      }
+    }
+
+    function addCfPaymentRow() {
+      const nextNum = cf_currentPayments.length + 1;
+      cf_currentPayments.push({
+        name: `Đợt ${nextNum}`,
+        percent: 0,
+        condition: 'sau khi hoàn thành theo thỏa thuận',
+        isDeposit: false
+      });
+      renderCfPayments();
+    }
+
+    function removeCfPaymentRow(idx) {
+      if (cf_currentPayments.length <= 1) {
+        alert("Hợp đồng cần ít nhất 1 đợt thanh toán!");
+        return;
+      }
+      cf_currentPayments.splice(idx, 1);
+      renderCfPayments();
+    }
+
+    function balanceCfPaymentLast() {
+      if (cf_currentPayments.length === 0) return;
+      let sumBefore = 0;
+      for (let i = 0; i < cf_currentPayments.length - 1; i++) {
+        sumBefore += (cf_currentPayments[i].percent || 0);
+      }
+      const remaining = Math.max(0, 100 - sumBefore);
+      cf_currentPayments[cf_currentPayments.length - 1].percent = remaining;
+      renderCfPayments();
+    }
+
+    // Tính toán tổng tiền trong bảng khớp nối
+    function calcCfTotals() {
+      let subtotal = 0;
+      if (cf_itemMode === 'lump') {
+        subtotal = parseFloat(document.getElementById('cf_lumpPrice').value) || 0;
+      } else {
+        subtotal = cf_currentItems.reduce((acc, it) => acc + ((it.qty || 0) * (it.price || 0)), 0);
+      }
+
+      const vatRate = parseInt(document.getElementById('cf_vatRate').value) || 0;
+      const vatAmount = Math.round(subtotal * (vatRate / 100));
+      const grandTotal = subtotal + vatAmount;
+
+      const disp = document.getElementById('cf_totalWithVatDisplay');
+      if (disp) {
+        disp.innerText = formatMoney(grandTotal) + ' đ' + (vatRate > 0 ? ` (đã gồm VAT ${vatRate}%)` : ' (không VAT)');
+      }
+    }
+
+    // ÁP DỤNG DỮ LIỆU ĐÃ XÁC NHẬN VÀO HỆ THỐNG VÀ XUẤT 5 BIÊN BẢN
+    function applyConfirmedContract() {
+      const contractNum = document.getElementById('cf_contractNum').value.trim();
+      const contractDate = document.getElementById('cf_contractDate').value;
+      const buyerName = document.getElementById('cf_buyerName').value.trim();
+      const buyerRep = document.getElementById('cf_buyerRep').value.trim();
+      const buyerPosition = document.getElementById('cf_buyerPosition').value.trim();
+      const buyerAddress = document.getElementById('cf_buyerAddress').value.trim();
+      const buyerTaxCode = document.getElementById('cf_buyerTaxCode').value.trim();
+      const buyerPhone = document.getElementById('cf_buyerPhone').value.trim();
+      const buyerBank = document.getElementById('cf_buyerBank').value.trim();
+      const subject = document.getElementById('cf_contractSubject').value.trim();
+      const vatRate = document.getElementById('cf_vatRate').value;
+
+      // Đổ vào các ô nhập liệu chính của phần mềm
       if (contractNum) document.getElementById('contractNumber').value = contractNum;
-      if (contractDateStr) document.getElementById('contractDate').value = contractDateStr;
-      if (subject) document.getElementById('contractSubject').value = subject;
+      if (contractDate) document.getElementById('contractDate').value = contractDate;
       if (buyerName) document.getElementById('buyerName').value = buyerName;
+      if (buyerRep) document.getElementById('buyerRep').value = buyerRep;
+      if (buyerPosition) document.getElementById('buyerPosition').value = buyerPosition;
       if (buyerAddress) document.getElementById('buyerAddress').value = buyerAddress;
       if (buyerTaxCode) document.getElementById('buyerTaxCode').value = buyerTaxCode;
       if (buyerPhone) document.getElementById('buyerPhone').value = buyerPhone;
       document.getElementById('buyerBank').value = buyerBank;
-      if (buyerRep) document.getElementById('buyerRep').value = buyerRep;
-      if (buyerPosition) document.getElementById('buyerPosition').value = buyerPosition;
+      if (subject) document.getElementById('contractSubject').value = subject;
       document.getElementById('vatRate').value = vatRate;
 
-      if (parsedItems.length > 0) {
-        items = parsedItems;
-        renderItemsForm();
+      // Đổ danh mục hàng hóa
+      if (cf_itemMode === 'lump') {
+        const lumpName = document.getElementById('cf_lumpName').value.trim() || `Cung cấp và thi công hoàn thiện theo Hợp đồng số ${contractNum}`;
+        const lumpPrice = parseFloat(document.getElementById('cf_lumpPrice').value) || 0;
+        items = [
+          {
+            name: lumpName,
+            qty: 1,
+            unit: 'Gói',
+            price: lumpPrice,
+            isIncluded: false
+          }
+        ];
+      } else {
+        if (cf_currentItems.length > 0) {
+          items = JSON.parse(JSON.stringify(cf_currentItems));
+        }
       }
+      renderItemsForm();
 
-      if (parsedPayments.length > 0) {
-        payments = parsedPayments;
-        renderPaymentsForm();
+      // Đổ tiến độ thanh toán
+      if (cf_currentPayments.length > 0) {
+        payments = JSON.parse(JSON.stringify(cf_currentPayments));
       }
+      renderPaymentsForm();
 
+      // Cập nhật toàn bộ hệ thống & Sổ công nợ
       updateAll();
       updateLedgerBadge();
       closeUploadContractModal();
 
-      // Hiển thị thanh thông báo & chuyển ngay sang chế độ hoàn tất 5 biên bản!
+      // Hiển thị thanh trạng thái hợp đồng đã nạp & cuộn xuống xem trước
       showExistingContractBanner(contractNum || 'HĐ đã nạp', buyerName || 'Khách hàng Bên A');
     }
-
     // Hiển thị thanh trạng thái HĐ có sẵn & chuyển đến 5 biên bản
     function showExistingContractBanner(contractNum, buyerName) {
       const banner = document.getElementById('existingContractBanner');
@@ -3837,9 +4141,9 @@
 
 </script>
 
-  <!-- MODAL: TẢI LÊN HỢP ĐỒNG CÓ SẴN (LÀM NỐT CÁC BIÊN BẢN CÒN LẠI) -->
+  <!-- MODAL: TẢI LÊN HỢP ĐỒNG CÓ SẴN & BẢNG XÁC NHẬN KHỚP NỐI (LÀM NỐT 5 BIÊN BẢN) -->
   <div id="uploadContractModal" class="no-print fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-2xl max-h-[92vh] rounded-2xl shadow-2xl flex flex-col border border-slate-300 overflow-hidden">
+    <div class="bg-white w-full max-w-2xl md:max-w-4xl max-h-[94vh] rounded-2xl shadow-2xl flex flex-col border border-slate-300 overflow-hidden transition-all">
       <!-- Modal Header -->
       <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800">
         <div class="flex items-center gap-3">
@@ -3847,92 +4151,269 @@
             📂
           </div>
           <div>
-            <h2 class="text-base font-bold text-white flex items-center gap-2">
-              TẢI LÊN HỢP ĐỒNG CÓ SẴN
-              <span class="text-xs bg-indigo-500/30 text-indigo-200 border border-indigo-400/30 px-2 py-0.5 rounded-full font-medium">Tự động làm 5 biên bản</span>
+            <h2 id="uploadModalMainTitle" class="text-base font-bold text-white flex items-center gap-2">
+              NẠP HỢP ĐỒNG CÓ SẴN & TẠO 5 BIÊN BẢN
+              <span class="text-xs bg-indigo-500/30 text-indigo-200 border border-indigo-400/30 px-2 py-0.5 rounded-full font-medium">Khớp nối thông minh</span>
             </h2>
-            <p class="text-xs text-indigo-300/80">Bóc tách HĐ đã ký để tự động tạo: BBNT Bàn giao, Thanh lý, Giấy ĐNTT, BBNT Kỹ thuật, Quyết toán & Công nợ</p>
+            <p id="uploadModalSubtitle" class="text-xs text-indigo-300/80">Áp dụng cho mọi hợp đồng đối tác để tự động tạo: BBNT Bàn giao, Thanh lý, Giấy ĐNTT, BBNT Kỹ thuật, Quyết toán & Sổ nợ</p>
           </div>
         </div>
-        <button onclick="closeUploadContractModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center font-bold text-lg transition">
-          ✕
-        </button>
-      </div>
-
-      <!-- Tab Buttons -->
-      <div class="flex border-b border-slate-200 bg-slate-50 px-6 pt-3 gap-2">
-        <button id="tabBtnUploadFile" onclick="switchUploadTab('file')" class="px-4 py-2 text-xs font-bold rounded-t-lg border-b-2 border-indigo-600 text-indigo-700 bg-white shadow-2xs flex items-center gap-1.5 transition">
-          <span>📁</span> Chọn file tải lên (.docx, .pdf, .txt, .json)
-        </button>
-        <button id="tabBtnUploadPaste" onclick="switchUploadTab('paste')" class="px-4 py-2 text-xs font-semibold rounded-t-lg text-slate-600 hover:text-slate-900 flex items-center gap-1.5 transition">
-          <span>📋</span> Dán nội dung Hợp đồng
-        </button>
-      </div>
-
-      <!-- Modal Body -->
-      <div class="p-6 overflow-y-auto space-y-4 flex-1">
-        
-        <!-- TAB 1: UPLOAD FILE -->
-        <div id="uploadTabFile" class="space-y-4">
-          <div id="contractDropZone" onclick="triggerContractFileInput(event)" class="border-2 border-dashed border-indigo-300 hover:border-indigo-500 rounded-2xl p-7 text-center bg-indigo-50/30 hover:bg-indigo-50/70 transition cursor-pointer flex flex-col items-center justify-center gap-3">
-            <div class="w-14 h-14 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-3xl shadow-inner">
-              📤
-            </div>
-            <div>
-              <p class="font-bold text-sm text-slate-800">Kéo & thả file Hợp đồng vào đây</p>
-              <p class="text-xs text-slate-500 mt-1">hoặc bấm nút bên dưới để chọn file từ máy tính / điện thoại</p>
-            </div>
-            <button type="button" onclick="triggerContractFileInput(event)" class="mt-1 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-2 cursor-pointer">
-              <span>📂</span> Chọn file Hợp đồng từ máy
-            </button>
-            <div class="flex flex-wrap items-center justify-center gap-1.5 text-[11px] text-slate-600 mt-1">
-              <span class="px-2 py-0.5 bg-blue-100 text-blue-800 font-semibold rounded">Word (.docx, .doc)</span>
-              <span class="px-2 py-0.5 bg-rose-100 text-rose-800 font-semibold rounded">PDF (.pdf)</span>
-              <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 font-semibold rounded">Text (.txt)</span>
-              <span class="px-2 py-0.5 bg-purple-100 text-purple-800 font-semibold rounded">Backup (.json)</span>
-            </div>
-          </div>
-          <input type="file" id="contractFileInput" accept=".docx,.doc,.pdf,.txt,.json,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,text/plain,application/json,*/*" class="hidden" onchange="handleContractFileSelect(this.files)">
-
-          <div id="uploadParsingStatus" class="hidden p-3.5 bg-blue-50 border border-blue-200 rounded-xl text-blue-800 text-xs flex items-center gap-2">
-            <svg class="animate-spin h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
-            <span id="uploadParsingStatusText">Đang phân tích dữ liệu hợp đồng...</span>
-          </div>
-
-          <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 flex items-start gap-2">
-            <span>💡</span>
-            <div>
-              <strong>Mẹo nhỏ:</strong> Bạn có file Word (.docx) hoặc PDF hợp đồng đã ký? Chỉ cần kéo thả vào đây, phần mềm sẽ tự động nhận diện Số HĐ, Bên A, bảng danh mục vật tư, tổng tiền và tiến độ thanh toán để lập ngay các biên bản tiếp theo!
-            </div>
-          </div>
+        <div class="flex items-center gap-2">
+          <button id="btnBackToUploadTop" onclick="backToUploadInput()" class="hidden text-xs bg-slate-800 hover:bg-slate-700 text-indigo-200 px-3 py-1.5 rounded-lg border border-indigo-500/40 flex items-center gap-1 transition">
+            ← Tải file khác
+          </button>
+          <button onclick="closeUploadContractModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center font-bold text-lg transition">
+            ✕
+          </button>
         </div>
+      </div>
 
-        <!-- TAB 2: PASTE RAW TEXT -->
-        <div id="uploadTabPaste" class="hidden space-y-3">
-          <label class="block text-xs font-bold text-slate-700">Dán toàn bộ nội dung hợp đồng có sẵn vào đây:</label>
-          <textarea id="contractPasteText" rows="11" placeholder="Ví dụ copy từ văn bản Word:&#10;HỢP ĐỒNG KINH TẾ&#10;Số: 120626/HĐKT/ABC-HACO&#10;BÊN A: CÔNG TY TNHH...&#10;MST: 0108...&#10;Địa chỉ: ...&#10;ĐIỀU 1. ĐỐI TƯỢNG VÀ GIÁ TRỊ...&#10;Tổng cộng: 100.000.000 VNĐ&#10;ĐIỀU 3. TIẾN ĐỘ THANH TOÁN...&#10;Đợt 1: 50%...&#10;Đợt 2: 50%..." class="w-full text-xs font-mono p-3 rounded-xl border border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition resize-none"></textarea>
-          <button type="button" onclick="handlePasteContractSubmit()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-2">
-            <span>🚀</span> Bóc tách HĐ & Tự động tạo 5 biên bản còn lại
+      <!-- VIEW 1: UPLOAD & PASTE INPUT VIEW -->
+      <div id="uploadInputView" class="flex flex-col flex-1 overflow-hidden">
+        <!-- Tab Buttons -->
+        <div class="flex border-b border-slate-200 bg-slate-50 px-6 pt-3 gap-2">
+          <button id="tabBtnUploadFile" onclick="switchUploadTab('file')" class="px-4 py-2 text-xs font-bold rounded-t-lg border-b-2 border-indigo-600 text-indigo-700 bg-white shadow-2xs flex items-center gap-1.5 transition">
+            <span>📁</span> Chọn file tải lên (.docx, .doc, .pdf, .txt, .json)
+          </button>
+          <button id="tabBtnUploadPaste" onclick="switchUploadTab('paste')" class="px-4 py-2 text-xs font-semibold rounded-t-lg text-slate-600 hover:text-slate-900 flex items-center gap-1.5 transition">
+            <span>📋</span> Dán nội dung Hợp đồng
           </button>
         </div>
 
-        <!-- Quick Sample Testing -->
-        <div class="pt-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2">
-          <span class="text-xs text-slate-500">Hoặc thử nhanh với dữ liệu mẫu:</span>
-          <div class="flex items-center gap-2">
-            <button type="button" onclick="loadSampleToanThang(); closeUploadContractModal(); showExistingContractBanner('120626/HĐKT/TOANTHANG-HACO', 'CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO');" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg border border-slate-300 transition">
-              ⭐ Thử mẫu Toàn Thắng (3 Đợt)
+        <!-- Body -->
+        <div class="p-6 overflow-y-auto space-y-4 flex-1">
+          <!-- TAB 1: UPLOAD FILE -->
+          <div id="uploadTabFile" class="space-y-4">
+            <div id="contractDropZone" onclick="triggerContractFileInput(event)" class="border-2 border-dashed border-indigo-300 hover:border-indigo-500 rounded-2xl p-7 text-center bg-indigo-50/30 hover:bg-indigo-50/70 transition cursor-pointer flex flex-col items-center justify-center gap-3">
+              <div class="w-14 h-14 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-3xl shadow-inner">
+                📤
+              </div>
+              <div>
+                <p class="font-bold text-sm text-slate-800">Kéo & thả file Hợp đồng vào đây</p>
+                <p class="text-xs text-slate-500 mt-1">hoặc bấm nút bên dưới để chọn file từ máy tính / điện thoại</p>
+              </div>
+              <button type="button" onclick="triggerContractFileInput(event)" class="mt-1 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-2 cursor-pointer">
+                <span>📂</span> Chọn file Hợp đồng từ máy
+              </button>
+              <div class="flex flex-wrap items-center justify-center gap-1.5 text-[11px] text-slate-600 mt-1">
+                <span class="px-2 py-0.5 bg-blue-100 text-blue-800 font-semibold rounded">Word (.docx, .doc)</span>
+                <span class="px-2 py-0.5 bg-rose-100 text-rose-800 font-semibold rounded">PDF (.pdf)</span>
+                <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 font-semibold rounded">Text (.txt)</span>
+                <span class="px-2 py-0.5 bg-purple-100 text-purple-800 font-semibold rounded">Backup (.json)</span>
+              </div>
+            </div>
+            <input type="file" id="contractFileInput" accept=".docx,.doc,.pdf,.txt,.json,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,text/plain,application/json,*/*" class="hidden" onchange="handleContractFileSelect(this.files)">
+
+            <div id="uploadParsingStatus" class="hidden p-3.5 bg-blue-50 border border-blue-200 rounded-xl text-blue-800 text-xs flex items-center gap-2">
+              <svg class="animate-spin h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+              <span id="uploadParsingStatusText">Đang phân tích dữ liệu hợp đồng...</span>
+            </div>
+
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 flex items-start gap-2">
+              <span>💡</span>
+              <div>
+                <strong>Cơ chế Khớp nối thông minh:</strong> Dù hợp đồng đối tác có mẫu biểu khác lạ, sau khi tải file lên hệ thống sẽ hiển thị <strong>Bảng xác nhận 7 thông tin cốt lõi</strong> để bạn kiểm tra nhanh trong 10 giây trước khi xuất 5 biên bản, đảm bảo chứng từ luôn chuẩn 100%!
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 2: PASTE RAW TEXT -->
+          <div id="uploadTabPaste" class="hidden space-y-3">
+            <label class="block text-xs font-bold text-slate-700">Dán toàn bộ nội dung hợp đồng có sẵn vào đây:</label>
+            <textarea id="contractPasteText" rows="11" placeholder="Ví dụ copy từ văn bản Word:&#10;HỢP ĐỒNG KINH TẾ&#10;Số: 120626/HĐKT/ABC-HACO&#10;BÊN A: CÔNG TY TNHH...&#10;MST: 0108...&#10;Địa chỉ: ...&#10;ĐIỀU 1. ĐỐI TƯỢNG VÀ GIÁ TRỊ...&#10;Tổng cộng: 100.000.000 VNĐ&#10;ĐIỀU 3. TIẾN ĐỘ THANH TOÁN...&#10;Đợt 1: 50%...&#10;Đợt 2: 50%..." class="w-full text-xs font-mono p-3 rounded-xl border border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition resize-none"></textarea>
+            <button type="button" onclick="handlePasteContractSubmit()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-2">
+              <span>🚀</span> Bóc tách HĐ & Mở Bảng Xác Nhận
             </button>
-            <button type="button" onclick="loadSampleData(); closeUploadContractModal(); showExistingContractBanner('260524/HĐKT/MINHANH-HACO', 'CÔNG TY TNHH MỘT THÀNH VIÊN TM & DV TIN HỌC MINH ANH');" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg border border-slate-300 transition">
-              ⭐ Thử mẫu Minh Anh (2 Đợt)
-            </button>
+          </div>
+
+          <!-- Quick Sample Testing -->
+          <div class="pt-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2">
+            <span class="text-xs text-slate-500">Hoặc thử nhanh với dữ liệu mẫu:</span>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="loadSampleToanThang(); closeUploadContractModal(); showExistingContractBanner('120626/HĐKT/TOANTHANG-HACO', 'CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO');" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg border border-slate-300 transition">
+                ⭐ Thử mẫu Toàn Thắng (3 Đợt)
+              </button>
+              <button type="button" onclick="loadSampleData(); closeUploadContractModal(); showExistingContractBanner('260524/HĐKT/MINHANH-HACO', 'CÔNG TY TNHH MỘT THÀNH VIÊN TM & DV TIN HỌC MINH ANH');" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg border border-slate-300 transition">
+                ⭐ Thử mẫu Minh Anh (2 Đợt)
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 2: SMART CONFIRMATION & MAPPING VIEW -->
+      <div id="uploadConfirmView" class="hidden flex-1 overflow-y-auto p-5 md:p-6 space-y-4">
+        <!-- Banner notice -->
+        <div class="bg-gradient-to-r from-emerald-50 via-teal-50 to-indigo-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3 shadow-2xs">
+          <div class="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-sm">
+            ✓
+          </div>
+          <div class="flex-1 text-xs">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h3 class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+                BƯỚC 2: XÁC THỰC THÔNG TIN TRƯỚC KHI TẠO 5 BIÊN BẢN
+              </h3>
+              <span class="px-2.5 py-0.5 bg-indigo-100 text-indigo-800 rounded font-bold text-[11px]" id="cf_sourceBadge">File hợp đồng</span>
+            </div>
+            <p class="text-slate-600 mt-1">
+              Hệ thống đã tự động trích xuất các thông tin dưới đây. Bạn hãy liếc qua kiểm tra hoặc chỉnh nhanh nếu hợp đồng của đối tác có mẫu lạ. Bấm <strong>"Xác nhận & Tạo 5 Biên bản"</strong> để tạo toàn bộ tài liệu chuẩn 100%!
+            </p>
           </div>
         </div>
 
+        <!-- 2-Column Form -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <!-- CỘT 1: THÔNG TIN PHÁP LÝ & BÊN A -->
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+            <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5 pb-2 border-b border-slate-200">
+              <span>🏢</span> 1. Thông tin Hợp đồng & Bên A (Bên Mua)
+            </h4>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 mb-1">Số Hợp đồng</label>
+                <input type="text" id="cf_contractNum" class="w-full text-xs font-bold px-2.5 py-1.5 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white" placeholder="VD: 15/2026/HĐKT/...">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 mb-1">Ngày ký hợp đồng</label>
+                <input type="date" id="cf_contractDate" class="w-full text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 mb-1">Tên Bên A (Công ty / Hộ KD / Khách hàng)</label>
+              <input type="text" id="cf_buyerName" class="w-full text-xs font-bold text-indigo-900 px-2.5 py-1.5 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white" placeholder="Tên đơn vị mua hàng">
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 mb-1">Người đại diện Bên A</label>
+                <input type="text" id="cf_buyerRep" class="w-full text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white" placeholder="Ông/Bà...">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 mb-1">Chức vụ</label>
+                <input type="text" id="cf_buyerPosition" class="w-full text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white" placeholder="Giám đốc / Chủ hộ...">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 mb-1">Địa chỉ Bên A</label>
+              <input type="text" id="cf_buyerAddress" class="w-full text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white" placeholder="Địa chỉ trụ sở / công trình">
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 mb-1">Mã số thuế</label>
+                <input type="text" id="cf_buyerTaxCode" class="w-full text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white" placeholder="010...">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 mb-1">Điện thoại</label>
+                <input type="text" id="cf_buyerPhone" class="w-full text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white" placeholder="09...">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 mb-1">
+                Số tài khoản Ngân hàng Bên A <span class="text-slate-400 font-normal">(Nếu không có thì để trống)</span>
+              </label>
+              <input type="text" id="cf_buyerBank" class="w-full text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white" placeholder="Để trống nếu HĐ đối tác không có STK">
+            </div>
+          </div>
+
+          <!-- CỘT 2: NỘI DUNG, GIÁ TRỊ & TIẾN ĐỘ THANH TOÁN -->
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+            <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5 pb-2 border-b border-slate-200">
+              <span>💰</span> 2. Nội dung, Giá trị & Tiến độ thanh toán
+            </h4>
+
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 mb-1">Tên công trình / Chủ đề hợp đồng</label>
+              <input type="text" id="cf_contractSubject" class="w-full text-xs font-bold px-2.5 py-1.5 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white" placeholder="Cung cấp & lắp đặt màn hình LED...">
+            </div>
+
+            <!-- Item Mode Selector -->
+            <div class="bg-white border border-slate-200 rounded-lg p-2.5 space-y-2">
+              <label class="block text-[11px] font-bold text-slate-800">Phương thức tính hàng hóa / vật tư:</label>
+              <div class="flex items-center gap-4 text-xs">
+                <label class="inline-flex items-center gap-1.5 cursor-pointer">
+                  <input type="radio" name="cfItemMode" id="cf_radio_lump" value="lump" checked onchange="toggleCfItemMode('lump')" class="text-indigo-600 focus:ring-indigo-500">
+                  <span class="font-bold text-indigo-700">Trọn gói theo HĐ</span>
+                  <span class="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded font-medium">Khuyên dùng</span>
+                </label>
+                <label class="inline-flex items-center gap-1.5 cursor-pointer">
+                  <input type="radio" name="cfItemMode" id="cf_radio_detail" value="detail" onchange="toggleCfItemMode('detail')" class="text-indigo-600 focus:ring-indigo-500">
+                  <span class="font-semibold text-slate-700">Chi tiết từng linh kiện</span>
+                </label>
+              </div>
+
+              <!-- Mode A: Lump Sum -->
+              <div id="cf_lumpBlock" class="pt-2 border-t border-slate-100 space-y-2">
+                <div>
+                  <label class="block text-[10px] font-semibold text-slate-600">Tên hạng mục trọn gói</label>
+                  <input type="text" id="cf_lumpName" class="w-full text-xs px-2 py-1 rounded border border-slate-300 bg-slate-50 focus:bg-white" placeholder="Cung cấp và lắp đặt hoàn thiện màn hình LED...">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-[10px] font-semibold text-slate-600">Giá trị trước thuế (VNĐ)</label>
+                    <input type="number" id="cf_lumpPrice" oninput="calcCfTotals()" class="w-full text-xs font-bold px-2 py-1 rounded border border-slate-300 text-slate-800" placeholder="0">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-semibold text-slate-600">Thuế suất VAT (%)</label>
+                    <select id="cf_vatRate" onchange="calcCfTotals()" class="w-full text-xs font-bold px-2 py-1 rounded border border-slate-300 bg-white text-slate-800">
+                      <option value="8">8%</option>
+                      <option value="10">10%</option>
+                      <option value="0">0% (Không chịu thuế)</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="p-2 bg-indigo-50/60 rounded border border-indigo-100 flex items-center justify-between text-xs">
+                  <span class="text-slate-600">Tổng thanh toán sau VAT:</span>
+                  <span id="cf_totalWithVatDisplay" class="font-bold text-indigo-700 text-sm">0 đ</span>
+                </div>
+              </div>
+
+              <!-- Mode B: Detail Items -->
+              <div id="cf_detailBlock" class="hidden pt-2 border-t border-slate-100 space-y-2">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-bold text-slate-700 text-[11px]" id="cf_itemsCountText">Danh sách vật tư</span>
+                  <button type="button" onclick="addCfDetailRow()" class="text-[11px] text-indigo-600 font-bold hover:underline">+ Thêm dòng</button>
+                </div>
+                <div id="cf_itemsTableContainer" class="max-h-36 overflow-y-auto space-y-1.5 pr-1"></div>
+              </div>
+            </div>
+
+            <!-- Payment Installments -->
+            <div class="bg-white border border-slate-200 rounded-lg p-2.5 space-y-2">
+              <div class="flex items-center justify-between">
+                <label class="text-[11px] font-bold text-slate-800">Tiến độ thanh toán các đợt:</label>
+                <span id="cf_paymentBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">Tổng: 100% (Đạt)</span>
+              </div>
+              <div id="cf_paymentsContainer" class="space-y-1.5 max-h-36 overflow-y-auto pr-1"></div>
+              <div class="flex items-center justify-between pt-1 text-xs">
+                <button type="button" onclick="addCfPaymentRow()" class="text-[11px] text-indigo-600 font-bold hover:underline flex items-center gap-1">+ Thêm đợt thanh toán</button>
+                <button type="button" onclick="balanceCfPaymentLast()" class="text-[11px] text-amber-700 font-bold hover:underline bg-amber-50 px-2 py-0.5 rounded border border-amber-200">⚡ Cân bằng 100% cho đợt cuối</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Actions -->
+        <div class="pt-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="backToUploadInput()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition flex items-center gap-1.5">
+              <span>↩</span> Chọn file khác
+            </button>
+            <button type="button" onclick="closeUploadContractModal()" class="px-3 py-2 text-slate-500 hover:text-slate-800 text-xs">
+              Hủy
+            </button>
+          </div>
+          <button type="button" onclick="applyConfirmedContract()" class="px-6 py-2.5 bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-700 hover:to-indigo-700 active:scale-95 text-white font-bold text-xs rounded-xl shadow-lg transition flex items-center gap-2 cursor-pointer">
+            <span class="text-sm">🎯</span> XÁC NHẬN & TẠO TRỌN BỘ 5 BIÊN BẢN NGAY
+          </button>
+        </div>
       </div>
     </div>
   </div>
-
   <!-- MODAL: SỔ THEO DÕI CÔNG NỢ KẾ TOÁN (DEBT TRACKING LEDGER) -->
   <div id="debtLedgerModal" class="no-print fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-6xl max-h-[92vh] rounded-2xl shadow-2xl flex flex-col border border-slate-300 overflow-hidden">

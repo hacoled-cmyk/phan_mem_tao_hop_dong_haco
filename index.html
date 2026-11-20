@@ -6,6 +6,7 @@
   <title>HACO - Phần mềm Soạn thảo Trọn bộ Hợp đồng & Biên bản tự động</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script>
     if (window.pdfjsLib) {
@@ -2981,26 +2982,46 @@
       }
     }
 
+    function triggerContractFileInput(e) {
+      if (e) {
+        e.stopPropagation();
+      }
+      const input = document.getElementById('contractFileInput');
+      if (input) {
+        input.value = '';
+        input.click();
+      }
+    }
+
     let dropZoneConfigured = false;
     function setupContractDropZone() {
       if (dropZoneConfigured) return;
       const dropZone = document.getElementById('contractDropZone');
       if (!dropZone) return;
 
-      dropZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropZone.classList.add('border-indigo-600', 'bg-indigo-100/60');
+      ['dragenter', 'dragover'].forEach(name => {
+        dropZone.addEventListener(name, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          dropZone.classList.add('border-indigo-600', 'bg-indigo-100/60');
+        }, false);
       });
-      dropZone.addEventListener('dragleave', () => {
-        dropZone.classList.remove('border-indigo-600', 'bg-indigo-100/60');
+
+      ['dragleave', 'drop'].forEach(name => {
+        dropZone.addEventListener(name, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          dropZone.classList.remove('border-indigo-600', 'bg-indigo-100/60');
+        }, false);
       });
+
       dropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('border-indigo-600', 'bg-indigo-100/60');
-        if (e.dataTransfer && e.dataTransfer.files) {
-          handleContractFileSelect(e.dataTransfer.files);
+        const dt = e.dataTransfer;
+        if (dt && dt.files && dt.files.length > 0) {
+          handleContractFileSelect(dt.files);
         }
-      });
+      }, false);
+
       dropZoneConfigured = true;
     }
 
@@ -3016,19 +3037,190 @@
       }
     }
 
-    // Process file upload (docx, pdf, txt, json)
+    // Native DOCX Extractor (Zero-dependency fallback using built-in PKZip + DecompressionStream)
+    async function extractDocxTextNative(arrayBuffer) {
+      try {
+        const bytes = new Uint8Array(arrayBuffer);
+        let pos = 0;
+        while (pos < bytes.length - 30) {
+          if (bytes[pos] === 0x50 && bytes[pos+1] === 0x4b && bytes[pos+2] === 0x03 && bytes[pos+3] === 0x04) {
+            const compression = bytes[pos+8] | (bytes[pos+9] << 8);
+            const compressedSize = bytes[pos+18] | (bytes[pos+19] << 8) | (bytes[pos+20] << 16) | (bytes[pos+21] << 24);
+            const fileNameLen = bytes[pos+26] | (bytes[pos+27] << 8);
+            const extraLen = bytes[pos+28] | (bytes[pos+29] << 8);
+            
+            const fileNameBytes = bytes.slice(pos+30, pos+30+fileNameLen);
+            const fileName = new TextDecoder('utf-8').decode(fileNameBytes);
+            const dataStart = pos + 30 + fileNameLen + extraLen;
+            
+            if (fileName === "word/document.xml") {
+              const fileData = bytes.slice(dataStart, dataStart + compressedSize);
+              let xmlStr = "";
+              if (compression === 0) {
+                xmlStr = new TextDecoder('utf-8').decode(fileData);
+              } else if (compression === 8 && typeof DecompressionStream !== 'undefined') {
+                const ds = new DecompressionStream('deflate-raw');
+                const writer = ds.writable.getWriter();
+                writer.write(fileData);
+                writer.close();
+                const response = new Response(ds.readable);
+                xmlStr = await response.text();
+              }
+              if (xmlStr) {
+                return xmlStr
+                  .replace(/<\/w:p>/g, '\n')
+                  .replace(/<\/w:tr>/g, '\n')
+                  .replace(/<\/w:tc>/g, ' | ')
+                  .replace(/<[^>]+>/g, '')
+                  .replace(/&amp;/g, '&')
+                  .replace(/&lt;/g, '<')
+                  .replace(/&gt;/g, '>')
+                  .replace(/&quot;/g, '"')
+                  .replace(/&#39;/g, "'");
+              }
+            }
+            pos = dataStart + compressedSize;
+          } else {
+            pos++;
+          }
+        }
+      } catch(e) {
+        console.warn('Native DOCX reader exception:', e);
+      }
+      return null;
+    }
+
+    // Binary string decoder for older Word .doc format (Word 97-2003)
+    function extractDocTextBinary(arrayBuffer) {
+      try {
+        const uint8 = new Uint8Array(arrayBuffer);
+        let extracted = '';
+        // Extract UTF-16LE characters common in .doc binary streams
+        for (let i = 0; i < uint8.length - 1; i += 2) {
+          const charCode = uint8[i] | (uint8[i+1] << 8);
+          if ((charCode >= 32 && charCode < 65534 && charCode !== 0xFFFD) || charCode === 10 || charCode === 13) {
+            extracted += String.fromCharCode(charCode);
+          }
+        }
+        if (extracted.trim().length > 30) {
+          return extracted;
+        }
+        // Fallback UTF-8
+        return new TextDecoder('utf-8', { fatal: false }).decode(uint8);
+      } catch(e) {
+        return '';
+      }
+    }
+
+    // Smart multi-layer reader supporting any contract file
+    async function readContractFileSmart(file) {
+      const fileName = file.name;
+      const ext = fileName.split('.').pop().toLowerCase();
+
+      // Case 1: JSON
+      if (ext === 'json') {
+        const text = await file.text();
+        return { type: 'json', data: JSON.parse(text) };
+      }
+
+      // Case 2: DOCX (Word 2007+)
+      if (ext === 'docx') {
+        const arrayBuffer = await file.arrayBuffer();
+
+        // Layer 1: Mammoth
+        if (window.mammoth) {
+          try {
+            const htmlRes = await window.mammoth.convertToHtml({ arrayBuffer: arrayBuffer.slice(0) });
+            const textRes = await window.mammoth.extractRawText({ arrayBuffer: arrayBuffer.slice(0) });
+            if (textRes.value && textRes.value.trim().length > 15) {
+              return { type: 'text', text: textRes.value, html: htmlRes.value };
+            }
+          } catch(err) {
+            console.warn('Mammoth failed, trying native docx extractor...', err);
+          }
+        }
+
+        // Layer 2: Native PKZip unzipper
+        const nativeText = await extractDocxTextNative(arrayBuffer);
+        if (nativeText && nativeText.trim().length > 15) {
+          return { type: 'text', text: nativeText, html: null };
+        }
+
+        // Layer 3: JSZip
+        if (window.JSZip) {
+          try {
+            const zip = await JSZip.loadAsync(arrayBuffer);
+            const docXml = zip.file("word/document.xml");
+            if (docXml) {
+              const xml = await docXml.async("string");
+              const cleanText = xml
+                .replace(/<\/w:p>/g, '\n')
+                .replace(/<\/w:tr>/g, '\n')
+                .replace(/<\/w:tc>/g, ' | ')
+                .replace(/<[^>]+>/g, '')
+                .replace(/&amp;/g, '&')
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&quot;/g, '"')
+                .replace(/&#39;/g, "'");
+              return { type: 'text', text: cleanText, html: null };
+            }
+          } catch(err) {
+            console.warn('JSZip failed...', err);
+          }
+        }
+      }
+
+      // Case 3: DOC (Word 97-2003 binary format)
+      if (ext === 'doc') {
+        const arrayBuffer = await file.arrayBuffer();
+        const docText = extractDocTextBinary(arrayBuffer);
+        if (docText && docText.trim().length > 20) {
+          return { type: 'text', text: docText, html: null };
+        }
+      }
+
+      // Case 4: PDF
+      if (ext === 'pdf') {
+        if (window.pdfjsLib) {
+          try {
+            const arrayBuffer = await file.arrayBuffer();
+            const typedarray = new Uint8Array(arrayBuffer);
+            const pdf = await window.pdfjsLib.getDocument({ data: typedarray }).promise;
+            let fullText = '';
+            for (let i = 1; i <= pdf.numPages; i++) {
+              const page = await pdf.getPage(i);
+              const textContent = await page.getTextContent();
+              const pageText = textContent.items.map(item => item.str).join(' ');
+              fullText += pageText + '\n';
+            }
+            if (fullText.trim().length > 15) {
+              return { type: 'text', text: fullText, html: null };
+            }
+          } catch(err) {
+            console.warn('PDF.js failed...', err);
+          }
+        }
+      }
+
+      // Case 5: Plain text or general fallback
+      const plainText = await file.text();
+      return { type: 'text', text: plainText, html: null };
+    }
+
+    // Process file upload
     async function handleContractFileSelect(files) {
       if (!files || files.length === 0) return;
       const file = files[0];
       const fileName = file.name;
-      const ext = fileName.split('.').pop().toLowerCase();
 
-      showUploadLoading(true, `Đang đọc file: ${fileName}...`);
+      showUploadLoading(true, `Đang phân tích file: ${fileName}...`);
 
       try {
-        if (ext === 'json') {
-          const text = await file.text();
-          const data = JSON.parse(text);
+        const result = await readContractFileSmart(file);
+
+        if (result.type === 'json' && result.data) {
+          const data = result.data;
           if (data.contractNumber) document.getElementById('contractNumber').value = data.contractNumber;
           if (data.contractDate) document.getElementById('contractDate').value = data.contractDate;
           if (data.buyerName) document.getElementById('buyerName').value = data.buyerName;
@@ -3049,53 +3241,28 @@
           updateAll(); updateLedgerBadge();
           showUploadLoading(false);
           closeUploadContractModal();
-          showExistingContractBanner(data.contractNumber || 'HĐ đã nạp', data.buyerName || 'Khách hàng');
+          showExistingContractBanner(data.contractNumber || 'HĐ đã nạp', data.buyerName || 'Khách hàng Bên A');
           return;
         }
 
-        if (ext === 'docx') {
-          if (window.mammoth) {
-            const arrayBuffer = await file.arrayBuffer();
-            const htmlResult = await window.mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
-            const textResult = await window.mammoth.extractRawText({ arrayBuffer: arrayBuffer });
-            parseContractContent(textResult.value, htmlResult.value, fileName);
-          } else {
-            // Fallback plain text read if mammoth not loaded
-            const text = await file.text();
-            parseContractContent(text, null, fileName);
-          }
+        if (!result.text || result.text.trim().length < 15) {
           showUploadLoading(false);
-          return;
-        }
-
-        if (ext === 'pdf') {
-          if (window.pdfjsLib) {
-            const arrayBuffer = await file.arrayBuffer();
-            const typedarray = new Uint8Array(arrayBuffer);
-            const pdf = await window.pdfjsLib.getDocument(typedarray).promise;
-            let fullText = '';
-            for (let i = 1; i <= pdf.numPages; i++) {
-              const page = await pdf.getPage(i);
-              const textContent = await page.getTextContent();
-              const pageText = textContent.items.map(item => item.str).join(' ');
-              fullText += pageText + '\\n';
-            }
-            parseContractContent(fullText, null, fileName);
-          } else {
-            alert("Thư viện đọc PDF chưa sẵn sàng, vui lòng copy văn bản hợp đồng dán vào tab 'Dán nội dung'!");
+          switchUploadTab('paste');
+          const pasteEl = document.getElementById('contractPasteText');
+          if (pasteEl) {
+            pasteEl.placeholder = `File "${fileName}" dường như là file scan / hình ảnh hoặc file nhị phân không có lớp chữ.\nVui lòng copy nội dung chữ của hợp đồng và dán vào đây để hệ thống tiếp tục xử lý tự động!`;
+            pasteEl.focus();
           }
-          showUploadLoading(false);
           return;
         }
 
-        // Plain text (.txt, etc.)
-        const text = await file.text();
-        parseContractContent(text, null, fileName);
+        parseContractContent(result.text, result.html, fileName);
         showUploadLoading(false);
       } catch (err) {
-        console.error(err);
+        console.error('File parsing error:', err);
         showUploadLoading(false);
-        alert("Lỗi khi đọc file: " + err.message + ". Vui lòng thử copy nội dung văn bản và dán vào tab 'Dán nội dung Hợp đồng'!");
+        switchUploadTab('paste');
+        alert(`Không thể đọc trực tiếp file "${fileName}" (${err.message}). Bạn hãy copy nội dung văn bản Hợp đồng và dán vào tab bên cạnh nhé!`);
       }
     }
 
@@ -3111,8 +3278,8 @@
 
     // Core Intelligent Parser for Any Existing Contract
     function parseContractContent(text, html, sourceName) {
-      if (!text || text.trim().length < 20) {
-        alert("Nội dung văn bản quá ngắn, không nhận diện được hợp đồng!");
+      if (!text || text.trim().length < 15) {
+        switchUploadTab('paste');
         return;
       }
 
@@ -3139,7 +3306,7 @@
       }
 
       // 3. Tên công trình / Chủ đề hợp đồng
-      const subjMatch = text.match(/(?:v\/v|về việc|nội dung hợp đồng|hợp đồng)\s*[:：]?\s*([^\n\r)]+)/i);
+      const subjMatch = text.match(/(?:v\/v|về việc|nội dung hợp đồng|hợp đồng)\s*[:：]?\s*([^\n\r]+)/i);
       let subject = subjMatch ? subjMatch[1].trim() : '';
 
       // 4. Bóc tách khu vực Bên A (Bên Mua)
@@ -3263,7 +3430,7 @@
 
       // 7. Bóc tách tiến độ thanh toán
       let parsedPayments = [];
-      const dotMatches = Array.from(text.matchAll(/(?:[-*•+]?\s*Đợt\s*([0-9]+)[^:\n]*[:：]\s*([^\n]+))/gi));
+      const dotMatches = Array.from(text.matchAll(/(?:[-*•+]?\s*Đợt\s*([0-9]+)[^:\n\r]*[:：]\s*([^\n\r]+))/gi));
       if (dotMatches.length > 0) {
         dotMatches.forEach((m, idx) => {
           const dNum = idx + 1;
@@ -3273,7 +3440,7 @@
           parsedPayments.push({
             name: idx === 0 ? 'Đợt 1 (Tạm ứng)' : (idx === dotMatches.length - 1 ? `Đợt ${dNum} (Còn lại)` : `Đợt ${dNum}`),
             percent: pct,
-            condition: desc.replace(/^Bên A (?:tạm ứng|thanh toán) cho Bên B [0-9]+% giá trị hợp đồng\s*(?:\\(tương đương:[^)]+\\))?\s*[-–]?\s*/i, '').trim() || 'theo quy định hợp đồng',
+            condition: desc.replace(/^Bên A (?:tạm ứng|thanh toán) cho Bên B [0-9]+% giá trị hợp đồng\s*(?:\(tương đương:[^)]+\))?\s*[-–]?\s*/i, '').trim() || 'theo quy định hợp đồng',
             isDeposit: idx === 0
           });
         });
@@ -3706,22 +3873,25 @@
         
         <!-- TAB 1: UPLOAD FILE -->
         <div id="uploadTabFile" class="space-y-4">
-          <div id="contractDropZone" class="border-2 border-dashed border-indigo-300 hover:border-indigo-500 rounded-2xl p-8 text-center bg-indigo-50/30 hover:bg-indigo-50/70 transition cursor-pointer flex flex-col items-center justify-center gap-3">
-            <div class="w-16 h-16 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-3xl shadow-inner">
+          <div id="contractDropZone" onclick="triggerContractFileInput(event)" class="border-2 border-dashed border-indigo-300 hover:border-indigo-500 rounded-2xl p-7 text-center bg-indigo-50/30 hover:bg-indigo-50/70 transition cursor-pointer flex flex-col items-center justify-center gap-3">
+            <div class="w-14 h-14 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-3xl shadow-inner">
               📤
             </div>
             <div>
               <p class="font-bold text-sm text-slate-800">Kéo & thả file Hợp đồng vào đây</p>
-              <p class="text-xs text-slate-500 mt-1">hoặc <span class="text-indigo-600 font-semibold underline">nhấp vào đây để chọn file từ máy</span></p>
+              <p class="text-xs text-slate-500 mt-1">hoặc bấm nút bên dưới để chọn file từ máy tính / điện thoại</p>
             </div>
-            <div class="flex flex-wrap items-center justify-center gap-1.5 text-[11px] text-slate-600 mt-2">
-              <span class="px-2 py-0.5 bg-blue-100 text-blue-800 font-semibold rounded">Word (.docx)</span>
+            <button type="button" onclick="triggerContractFileInput(event)" class="mt-1 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-2 cursor-pointer">
+              <span>📂</span> Chọn file Hợp đồng từ máy
+            </button>
+            <div class="flex flex-wrap items-center justify-center gap-1.5 text-[11px] text-slate-600 mt-1">
+              <span class="px-2 py-0.5 bg-blue-100 text-blue-800 font-semibold rounded">Word (.docx, .doc)</span>
               <span class="px-2 py-0.5 bg-rose-100 text-rose-800 font-semibold rounded">PDF (.pdf)</span>
               <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 font-semibold rounded">Text (.txt)</span>
               <span class="px-2 py-0.5 bg-purple-100 text-purple-800 font-semibold rounded">Backup (.json)</span>
             </div>
-            <input type="file" id="contractFileInput" accept=".docx,.pdf,.txt,.json" class="hidden" onchange="handleContractFileSelect(this.files)">
           </div>
+          <input type="file" id="contractFileInput" accept=".docx,.doc,.pdf,.txt,.json,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,text/plain,application/json,*/*" class="hidden" onchange="handleContractFileSelect(this.files)">
 
           <div id="uploadParsingStatus" class="hidden p-3.5 bg-blue-50 border border-blue-200 rounded-xl text-blue-800 text-xs flex items-center gap-2">
             <svg class="animate-spin h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>

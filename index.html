@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HACO - Phần mềm Soạn thảo Trọn bộ Hợp đồng & Biên bản tự động</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    if (window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+  </script>
   <style>
     /* Document preview styling - Authentic Vietnamese Administrative Document Standard */
     .document-page {
@@ -179,6 +186,9 @@
       </div>
 
       <div class="flex items-center gap-2">
+        <button onclick="openUploadContractModal()" class="px-3.5 py-1.5 bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-700 hover:from-indigo-500 hover:to-blue-500 text-white font-bold text-xs rounded-md shadow-sm transition flex items-center gap-1.5 hover:shadow hover:scale-[1.02]">
+          <span>📂</span> Tải lên HĐ có sẵn (Làm 5 biên bản)
+        </button>
         <button onclick="openDebtLedgerModal()" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold text-xs rounded-md shadow transition flex items-center gap-1.5 animate-pulse hover:animate-none">
           <span>📊</span> Sổ Công Nợ Kế Toán <span id="headerLedgerBadge" class="bg-white text-slate-900 px-1.5 py-0.2 rounded-full text-[10px] font-black">2</span>
         </button>
@@ -227,7 +237,30 @@
         </div>
       </div>
 
-      <!-- Smart Paste Box (Full Width) -->
+      <!-- BANNER TÍNH NĂNG MỚI: TẢI LÊN HỢP ĐỒNG CÓ SẴN (LÀM NỐT 5 BIÊN BẢN CÒN LẠI) -->
+      <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-xl shadow-md border border-indigo-500/30 p-4.5 text-white flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center text-2xl shadow-inner shrink-0">
+            📑
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="font-bold text-sm md:text-base text-white">Bạn đã có sẵn Hợp đồng kinh tế?</h3>
+              <span class="text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded-full">Tính năng mới</span>
+            </div>
+            <p class="text-xs text-indigo-200/90 mt-0.5">Tải lên file Word (.docx), PDF, Text hoặc dán HĐ có sẵn — Hệ thống sẽ <strong>tự động bóc tách và làm nốt trọn bộ 5 biên bản còn lại</strong> (Giấy ĐNTT, BBNT Kỹ thuật, BBNT Bàn giao, Bảng Quyết toán, Biên bản Thanh lý & Công nợ)!</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0 w-full md:w-auto">
+          <button type="button" onclick="openUploadContractModal('file')" class="w-full md:w-auto px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg shadow-md transition flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 cursor-pointer">
+            <span>📤</span> Tải lên File (.docx, .pdf, .txt)
+          </button>
+          <button type="button" onclick="openUploadContractModal('paste')" class="w-full md:w-auto px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium rounded-lg border border-slate-700 transition flex items-center justify-center gap-1.5 cursor-pointer">
+            <span>📋</span> Dán nội dung HĐ
+          </button>
+        </div>
+      </div>
+
       <!-- Smart Paste Box -->
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <div class="flex items-center justify-between mb-2">
@@ -2907,6 +2940,434 @@
       );
     }
 
+
+    // =========================================================================
+    // TÍNH NĂNG: TẢI LÊN HỢP ĐỒNG CÓ SẴN -> TỰ ĐỘNG LÀM NỐT 5 BIÊN BẢN CÒN LẠI
+    // =========================================================================
+
+    function openUploadContractModal(defaultTab = 'file') {
+      const modal = document.getElementById('uploadContractModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        switchUploadTab(defaultTab);
+        setupContractDropZone();
+      }
+    }
+
+    function closeUploadContractModal() {
+      const modal = document.getElementById('uploadContractModal');
+      if (modal) modal.classList.add('hidden');
+      const statusEl = document.getElementById('uploadParsingStatus');
+      if (statusEl) statusEl.classList.add('hidden');
+    }
+
+    function switchUploadTab(tab) {
+      const tabFile = document.getElementById('uploadTabFile');
+      const tabPaste = document.getElementById('uploadTabPaste');
+      const btnFile = document.getElementById('tabBtnUploadFile');
+      const btnPaste = document.getElementById('tabBtnUploadPaste');
+
+      if (tab === 'paste') {
+        tabFile.classList.add('hidden');
+        tabPaste.classList.remove('hidden');
+        btnPaste.className = "px-4 py-2 text-xs font-bold rounded-t-lg border-b-2 border-indigo-600 text-indigo-700 bg-white shadow-2xs flex items-center gap-1.5 transition";
+        btnFile.className = "px-4 py-2 text-xs font-semibold rounded-t-lg text-slate-600 hover:text-slate-900 flex items-center gap-1.5 transition";
+        document.getElementById('contractPasteText').focus();
+      } else {
+        tabFile.classList.remove('hidden');
+        tabPaste.classList.add('hidden');
+        btnFile.className = "px-4 py-2 text-xs font-bold rounded-t-lg border-b-2 border-indigo-600 text-indigo-700 bg-white shadow-2xs flex items-center gap-1.5 transition";
+        btnPaste.className = "px-4 py-2 text-xs font-semibold rounded-t-lg text-slate-600 hover:text-slate-900 flex items-center gap-1.5 transition";
+      }
+    }
+
+    let dropZoneConfigured = false;
+    function setupContractDropZone() {
+      if (dropZoneConfigured) return;
+      const dropZone = document.getElementById('contractDropZone');
+      if (!dropZone) return;
+
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('border-indigo-600', 'bg-indigo-100/60');
+      });
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('border-indigo-600', 'bg-indigo-100/60');
+      });
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('border-indigo-600', 'bg-indigo-100/60');
+        if (e.dataTransfer && e.dataTransfer.files) {
+          handleContractFileSelect(e.dataTransfer.files);
+        }
+      });
+      dropZoneConfigured = true;
+    }
+
+    function showUploadLoading(show, message = 'Đang phân tích dữ liệu hợp đồng...') {
+      const statusEl = document.getElementById('uploadParsingStatus');
+      const textEl = document.getElementById('uploadParsingStatusText');
+      if (!statusEl) return;
+      if (show) {
+        statusEl.classList.remove('hidden');
+        if (textEl) textEl.innerText = message;
+      } else {
+        statusEl.classList.add('hidden');
+      }
+    }
+
+    // Process file upload (docx, pdf, txt, json)
+    async function handleContractFileSelect(files) {
+      if (!files || files.length === 0) return;
+      const file = files[0];
+      const fileName = file.name;
+      const ext = fileName.split('.').pop().toLowerCase();
+
+      showUploadLoading(true, `Đang đọc file: ${fileName}...`);
+
+      try {
+        if (ext === 'json') {
+          const text = await file.text();
+          const data = JSON.parse(text);
+          if (data.contractNumber) document.getElementById('contractNumber').value = data.contractNumber;
+          if (data.contractDate) document.getElementById('contractDate').value = data.contractDate;
+          if (data.buyerName) document.getElementById('buyerName').value = data.buyerName;
+          if (data.buyerAddress) document.getElementById('buyerAddress').value = data.buyerAddress;
+          if (data.buyerTax) document.getElementById('buyerTaxCode').value = data.buyerTax;
+          if (data.buyerPhone) document.getElementById('buyerPhone').value = data.buyerPhone;
+          if (data.buyerBank) document.getElementById('buyerBank').value = data.buyerBank;
+          if (data.buyerRep) document.getElementById('buyerRep').value = data.buyerRep;
+          if (data.buyerPos) document.getElementById('buyerPosition').value = data.buyerPos;
+          if (data.items && Array.isArray(data.items)) {
+            items = data.items;
+            renderItemsTable();
+          }
+          if (data.installments && Array.isArray(data.installments)) {
+            payments = data.installments;
+            renderPaymentsForm();
+          }
+          updateAll(); updateLedgerBadge();
+          showUploadLoading(false);
+          closeUploadContractModal();
+          showExistingContractBanner(data.contractNumber || 'HĐ đã nạp', data.buyerName || 'Khách hàng');
+          return;
+        }
+
+        if (ext === 'docx') {
+          if (window.mammoth) {
+            const arrayBuffer = await file.arrayBuffer();
+            const htmlResult = await window.mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
+            const textResult = await window.mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+            parseContractContent(textResult.value, htmlResult.value, fileName);
+          } else {
+            // Fallback plain text read if mammoth not loaded
+            const text = await file.text();
+            parseContractContent(text, null, fileName);
+          }
+          showUploadLoading(false);
+          return;
+        }
+
+        if (ext === 'pdf') {
+          if (window.pdfjsLib) {
+            const arrayBuffer = await file.arrayBuffer();
+            const typedarray = new Uint8Array(arrayBuffer);
+            const pdf = await window.pdfjsLib.getDocument(typedarray).promise;
+            let fullText = '';
+            for (let i = 1; i <= pdf.numPages; i++) {
+              const page = await pdf.getPage(i);
+              const textContent = await page.getTextContent();
+              const pageText = textContent.items.map(item => item.str).join(' ');
+              fullText += pageText + '\\n';
+            }
+            parseContractContent(fullText, null, fileName);
+          } else {
+            alert("Thư viện đọc PDF chưa sẵn sàng, vui lòng copy văn bản hợp đồng dán vào tab 'Dán nội dung'!");
+          }
+          showUploadLoading(false);
+          return;
+        }
+
+        // Plain text (.txt, etc.)
+        const text = await file.text();
+        parseContractContent(text, null, fileName);
+        showUploadLoading(false);
+      } catch (err) {
+        console.error(err);
+        showUploadLoading(false);
+        alert("Lỗi khi đọc file: " + err.message + ". Vui lòng thử copy nội dung văn bản và dán vào tab 'Dán nội dung Hợp đồng'!");
+      }
+    }
+
+    // Process pasted contract text
+    function handlePasteContractSubmit() {
+      const text = document.getElementById('contractPasteText').value.trim();
+      if (!text) {
+        alert("Vui lòng dán nội dung hợp đồng có sẵn vào ô!");
+        return;
+      }
+      parseContractContent(text, null, 'Văn bản dán trực tiếp');
+    }
+
+    // Core Intelligent Parser for Any Existing Contract
+    function parseContractContent(text, html, sourceName) {
+      if (!text || text.trim().length < 20) {
+        alert("Nội dung văn bản quá ngắn, không nhận diện được hợp đồng!");
+        return;
+      }
+
+      // 1. Số Hợp đồng
+      const numMatch = text.match(/(?:số|hđkt\s*số|hợp\s*đồng\s*kinh\s*tế\s*số|hđ\s*số|số\s*hđ)\s*[:：]?\s*([0-9A-Za-zĐđ\/\-_.]+)/i);
+      let contractNum = numMatch ? numMatch[1].trim() : '';
+
+      // 2. Ngày tháng năm
+      let contractDateStr = '';
+      const dateMatch = text.match(/ngày\s*([0-9]{1,2})\s*tháng\s*([0-9]{1,2})\s*năm\s*([0-9]{4})/i);
+      if (dateMatch) {
+        const d = String(dateMatch[1]).padStart(2, '0');
+        const m = String(dateMatch[2]).padStart(2, '0');
+        const y = dateMatch[3];
+        contractDateStr = `${y}-${m}-${d}`;
+      } else {
+        const slashDate = text.match(/([0-9]{1,2})[\/\.-]([0-9]{1,2})[\/\.-]([0-9]{4})/);
+        if (slashDate) {
+          const d = String(slashDate[1]).padStart(2, '0');
+          const m = String(slashDate[2]).padStart(2, '0');
+          const y = slashDate[3];
+          contractDateStr = `${y}-${m}-${d}`;
+        }
+      }
+
+      // 3. Tên công trình / Chủ đề hợp đồng
+      const subjMatch = text.match(/(?:v\/v|về việc|nội dung hợp đồng|hợp đồng)\s*[:：]?\s*([^\n\r)]+)/i);
+      let subject = subjMatch ? subjMatch[1].trim() : '';
+
+      // 4. Bóc tách khu vực Bên A (Bên Mua)
+      let partyAText = '';
+      const paMatch = text.match(/(?:BÊN\s*A|BÊN\s*MUA|ĐƠN\s*VỊ\s*MUA)([\s\S]*?)(?:BÊN\s*B|BÊN\s*BÁN|ĐIỀU\s*1)/i);
+      partyAText = paMatch ? paMatch[1] : text;
+
+      // Tên Bên A (Công ty, HKD, Cửa hàng, DNTN...)
+      let buyerName = '';
+      const paCleanLines = partyAText.split('\n').map(l => l.replace(/^[\s:：()BÊN MUAa/\-]+/i, '').trim()).filter(l => l.length > 0);
+      for (const l of paCleanLines) {
+        if (/^(?:công\s*ty|cty|tổng\s*công\s*ty|tập\s*đoàn|doanh\s*nghiệp|dntn|hộ\s*kinh\s*doanh|hộ\s*kd|hkd|cửa\s*hàng|cơ\s*sở|trường|bệnh\s*viện|trung\s*tâm|viện|hợp\s*tác\s*xã|htx)/i.test(l)) {
+          buyerName = l.replace(/^(?:tên đơn vị|tên công ty|khách hàng|đơn vị)\s*[:：]\s*/i, '').trim();
+          break;
+        }
+      }
+      if (!buyerName) {
+        const labelMatch = partyAText.match(/(?:tên\s*(?:công\s*ty|đơn\s*vị|doanh\s*nghiệp|khách\s*hàng|hộ\s*kinh\s*doanh|hkd)|hộ\s*kinh\s*doanh|hộ\s*kd|hkd|đơn\s*vị|bên\s*mua|bên\s*a|khách\s*hàng)\s*[:：]\s*([^\n\r]+)/i);
+        if (labelMatch) {
+          buyerName = labelMatch[1].replace(/\s*[-–]\s*(?:MST|Mã số thuế|Địa chỉ|Đ\/c|SĐT).*$/i, '').trim();
+        }
+      }
+
+      // Địa chỉ Bên A
+      let buyerAddress = '';
+      const addrMatch = partyAText.match(/(?:địa\s*chỉ|đ\/c|trụ\s*sở)\s*[:：]?\s*([^\n\r]+)/i);
+      if (addrMatch) buyerAddress = addrMatch[1].trim();
+
+      // MST Bên A
+      let buyerTaxCode = '';
+      const taxMatch = partyAText.match(/(?:mã\s*số\s*thuế|mst|tax)\s*[:：]?\s*([0-9]{10}(?:-[0-9]{3})?|[0-9]{10,13})/i);
+      if (taxMatch) buyerTaxCode = taxMatch[1].trim();
+
+      // SĐT Bên A
+      let buyerPhone = '';
+      const phoneMatch = partyAText.match(/(?:điện\s*thoại|sđt|tel|phone)\s*[:：]?\s*([0-9.\s]{9,15})/i);
+      if (phoneMatch) buyerPhone = phoneMatch[1].trim();
+
+      // STK Ngân hàng Bên A (Nếu có)
+      let buyerBank = '';
+      const bankMatch = partyAText.match(/(?:số\s*tài\s*khoản|stk|tài\s*khoản|tk\s*ngân\s*hàng|ngân\s*hàng)\s*[:：]?\s*([^\n\r]+)/i);
+      if (bankMatch) {
+        let b = bankMatch[1].trim();
+        if (!/đại diện|chức vụ|giám đốc|mst|mã số thuế/i.test(b)) {
+          buyerBank = b;
+        }
+      }
+
+      // Người đại diện Bên A
+      let buyerRep = '';
+      const repMatch = partyAText.match(/(?:(?:^|[\s,;:])(?:người\s*đại\s*diện|đại\s*diện|ông|bà))\s*[:：]?\s*([^\n\r,;]+?)(?:\s*[-–]\s*(?:chức\s*vụ|chủ\s*hộ|giám\s*đốc|đại\s*diện)|\s+(?:chức\s*vụ|chủ\s*hộ|giám\s*đốc)|\n|$)/i);
+      if (repMatch) buyerRep = repMatch[1].trim();
+
+      // Chức vụ Bên A
+      let buyerPosition = '';
+      const posMatch = partyAText.match(/chức\s*vụ\s*[:：]?\s*([^\n\r,;]+)/i);
+      if (posMatch) {
+        buyerPosition = posMatch[1].trim();
+      } else if (/hộ\s*kinh\s*doanh|hkd/i.test(buyerName)) {
+        buyerPosition = 'Chủ hộ';
+      } else if (buyerName) {
+        buyerPosition = 'Giám đốc';
+      }
+
+      // 5. Thuế suất VAT
+      let vatRate = 8;
+      const vatMatch = text.match(/(?:thuế\s*(?:gtgt|vat)|vat)\s*[:：]?\s*([0-9]{1,2})\s*%/i);
+      if (vatMatch) vatRate = parseInt(vatMatch[1]);
+
+      // 6. Bóc tách bảng danh mục hàng hóa / vật tư
+      let parsedItems = [];
+      if (html) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        const tables = tempDiv.querySelectorAll('table');
+        tables.forEach(table => {
+          const rows = Array.from(table.querySelectorAll('tr'));
+          rows.forEach(tr => {
+            const cells = Array.from(tr.querySelectorAll('td, th')).map(c => c.innerText.trim());
+            if (cells.length >= 4) {
+              const rowText = cells.join(' ').toLowerCase();
+              if (rowText.includes('tên vật tư') || rowText.includes('hàng hóa') || rowText.includes('tổng cộng') || rowText.includes('vat')) {
+                return;
+              }
+              let textCells = cells.filter(c => c.length > 2 && !/^[0-9.,\s]+$/.test(c));
+              if (textCells.length > 0) {
+                let itemName = textCells.sort((a,b) => b.length - a.length)[0];
+                let itemUnit = 'Bộ';
+                const unitCandidate = cells.find(c => ['m2', 'm²', 'bộ', 'cái', 'chiếc', 'gói', 'tấm', 'mét', 'kg', 'hộp', 'chuyến'].includes(c.toLowerCase()));
+                if (unitCandidate) itemUnit = unitCandidate;
+
+                let numericCells = [];
+                cells.forEach(c => {
+                  let clean = c.replace(/[^0-9]/g, '');
+                  if (clean.length > 0) numericCells.push({ raw: c, num: parseInt(clean) });
+                });
+
+                let itemQty = 1;
+                let itemPrice = 0;
+                if (numericCells.length >= 2) {
+                  itemQty = numericCells[0].num;
+                  itemPrice = numericCells[1].num;
+                } else if (numericCells.length === 1) {
+                  itemPrice = numericCells[0].num;
+                }
+
+                if (itemName && itemName.length > 2) {
+                  parsedItems.push({
+                    name: itemName,
+                    qty: itemQty || 1,
+                    unit: itemUnit,
+                    price: itemPrice || 0,
+                    isIncluded: (itemPrice === 0)
+                  });
+                }
+              }
+            }
+          });
+        });
+      }
+
+      // 7. Bóc tách tiến độ thanh toán
+      let parsedPayments = [];
+      const dotMatches = Array.from(text.matchAll(/(?:[-*•+]?\s*Đợt\s*([0-9]+)[^:\n]*[:：]\s*([^\n]+))/gi));
+      if (dotMatches.length > 0) {
+        dotMatches.forEach((m, idx) => {
+          const dNum = idx + 1;
+          const desc = m[2].trim();
+          const pctM = desc.match(/([0-9]{1,2})\s*%/);
+          const pct = pctM ? parseInt(pctM[1]) : (idx === 0 ? 50 : 50);
+          parsedPayments.push({
+            name: idx === 0 ? 'Đợt 1 (Tạm ứng)' : (idx === dotMatches.length - 1 ? `Đợt ${dNum} (Còn lại)` : `Đợt ${dNum}`),
+            percent: pct,
+            condition: desc.replace(/^Bên A (?:tạm ứng|thanh toán) cho Bên B [0-9]+% giá trị hợp đồng\s*(?:\\(tương đương:[^)]+\\))?\s*[-–]?\s*/i, '').trim() || 'theo quy định hợp đồng',
+            isDeposit: idx === 0
+          });
+        });
+      }
+
+      // NẠP DỮ LIỆU VÀO HỆ THỐNG
+      if (contractNum) document.getElementById('contractNumber').value = contractNum;
+      if (contractDateStr) document.getElementById('contractDate').value = contractDateStr;
+      if (subject) document.getElementById('contractSubject').value = subject;
+      if (buyerName) document.getElementById('buyerName').value = buyerName;
+      if (buyerAddress) document.getElementById('buyerAddress').value = buyerAddress;
+      if (buyerTaxCode) document.getElementById('buyerTaxCode').value = buyerTaxCode;
+      if (buyerPhone) document.getElementById('buyerPhone').value = buyerPhone;
+      document.getElementById('buyerBank').value = buyerBank;
+      if (buyerRep) document.getElementById('buyerRep').value = buyerRep;
+      if (buyerPosition) document.getElementById('buyerPosition').value = buyerPosition;
+      document.getElementById('vatRate').value = vatRate;
+
+      if (parsedItems.length > 0) {
+        items = parsedItems;
+        renderItemsTable();
+      }
+
+      if (parsedPayments.length > 0) {
+        payments = parsedPayments;
+        renderPaymentsForm();
+      }
+
+      updateAll();
+      updateLedgerBadge();
+      closeUploadContractModal();
+
+      // Hiển thị thanh thông báo & chuyển ngay sang chế độ hoàn tất 5 biên bản!
+      showExistingContractBanner(contractNum || 'HĐ đã nạp', buyerName || 'Khách hàng Bên A');
+    }
+
+    // Hiển thị thanh trạng thái HĐ có sẵn & chuyển đến 5 biên bản
+    function showExistingContractBanner(contractNum, buyerName) {
+      const banner = document.getElementById('existingContractBanner');
+      if (banner) {
+        banner.classList.remove('hidden');
+        document.getElementById('bannerContractCode').innerText = 'Số: ' + contractNum;
+        document.getElementById('bannerBuyerName').innerText = '• Bên A: ' + buyerName;
+      }
+      
+      // Chuyển tab xem trước sang Biên bản Nghiệm thu Bàn giao (hoặc Giấy ĐNTT)
+      switchTab('bbnt');
+      scrollToPreview();
+    }
+
+    // Tải về trọn bộ 5 biên bản còn lại (Word .doc)
+    function downloadRemaining5Docs() {
+      const contractNum = document.getElementById('contractNumber').value.trim() || 'HACO';
+      const safeNum = contractNum.replace(/[\/\\?%*:|"<>]/g, '-');
+
+      const queue = [];
+      const originalSelected = selectedPaymentDocIndex;
+
+      // 1. Giấy Đề Nghị Thanh Toán (Tất cả các đợt)
+      payments.forEach((p, idx) => {
+        const dotNum = idx + 1;
+        const prefix = idx === 0 ? 'DNTU' : 'DNTT';
+        queue.push({
+          id: 'preview_dntt',
+          name: `1.${dotNum}_${prefix}_Dot_${dotNum}_${safeNum}.doc`,
+          executeBefore: () => {
+            selectedPaymentDocIndex = idx;
+            updateDnttPreview();
+          }
+        });
+      });
+
+      // 2. BBNT Kỹ thuật
+      queue.push({ id: 'preview_bbnt_kt', name: `2. BBNT_Ky_Thuat_${safeNum}.doc` });
+      // 3. BBNT Bàn giao sử dụng
+      queue.push({ id: 'preview_bbnt', name: `3. BBNT_Su_Dung_${safeNum}.doc` });
+      // 4. Bảng quyết toán
+      queue.push({ id: 'preview_quyet_toan', name: `4. Bang_Quyet_Toan_${safeNum}.doc` });
+      // 5. Biên bản thanh lý
+      queue.push({ id: 'preview_thanhly', name: `5. Thanh_Ly_Hop_Dong_${safeNum}.doc` });
+
+      queue.forEach((item, index) => {
+        setTimeout(() => {
+          if (item.executeBefore) item.executeBefore();
+          exportToWord(item.id, item.name);
+          if (index === queue.length - 1) {
+            selectedPaymentDocIndex = originalSelected;
+            updateDnttPreview();
+          }
+        }, index * 400);
+      });
+    }
+
+
     function openDebtLedgerModal() {
       renderDebtLedgerTable();
       const modal = document.getElementById('debtLedgerModal');
@@ -3207,6 +3668,99 @@
     }
 
 </script>
+
+  <!-- MODAL: TẢI LÊN HỢP ĐỒNG CÓ SẴN (LÀM NỐT CÁC BIÊN BẢN CÒN LẠI) -->
+  <div id="uploadContractModal" class="no-print fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-2xl max-h-[92vh] rounded-2xl shadow-2xl flex flex-col border border-slate-300 overflow-hidden">
+      <!-- Modal Header -->
+      <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center font-bold text-white text-xl shadow">
+            📂
+          </div>
+          <div>
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              TẢI LÊN HỢP ĐỒNG CÓ SẴN
+              <span class="text-xs bg-indigo-500/30 text-indigo-200 border border-indigo-400/30 px-2 py-0.5 rounded-full font-medium">Tự động làm 5 biên bản</span>
+            </h2>
+            <p class="text-xs text-indigo-300/80">Bóc tách HĐ đã ký để tự động tạo: BBNT Bàn giao, Thanh lý, Giấy ĐNTT, BBNT Kỹ thuật, Quyết toán & Công nợ</p>
+          </div>
+        </div>
+        <button onclick="closeUploadContractModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center font-bold text-lg transition">
+          ✕
+        </button>
+      </div>
+
+      <!-- Tab Buttons -->
+      <div class="flex border-b border-slate-200 bg-slate-50 px-6 pt-3 gap-2">
+        <button id="tabBtnUploadFile" onclick="switchUploadTab('file')" class="px-4 py-2 text-xs font-bold rounded-t-lg border-b-2 border-indigo-600 text-indigo-700 bg-white shadow-2xs flex items-center gap-1.5 transition">
+          <span>📁</span> Chọn file tải lên (.docx, .pdf, .txt, .json)
+        </button>
+        <button id="tabBtnUploadPaste" onclick="switchUploadTab('paste')" class="px-4 py-2 text-xs font-semibold rounded-t-lg text-slate-600 hover:text-slate-900 flex items-center gap-1.5 transition">
+          <span>📋</span> Dán nội dung Hợp đồng
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 overflow-y-auto space-y-4 flex-1">
+        
+        <!-- TAB 1: UPLOAD FILE -->
+        <div id="uploadTabFile" class="space-y-4">
+          <div id="contractDropZone" class="border-2 border-dashed border-indigo-300 hover:border-indigo-500 rounded-2xl p-8 text-center bg-indigo-50/30 hover:bg-indigo-50/70 transition cursor-pointer flex flex-col items-center justify-center gap-3">
+            <div class="w-16 h-16 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-3xl shadow-inner">
+              📤
+            </div>
+            <div>
+              <p class="font-bold text-sm text-slate-800">Kéo & thả file Hợp đồng vào đây</p>
+              <p class="text-xs text-slate-500 mt-1">hoặc <span class="text-indigo-600 font-semibold underline">nhấp vào đây để chọn file từ máy</span></p>
+            </div>
+            <div class="flex flex-wrap items-center justify-center gap-1.5 text-[11px] text-slate-600 mt-2">
+              <span class="px-2 py-0.5 bg-blue-100 text-blue-800 font-semibold rounded">Word (.docx)</span>
+              <span class="px-2 py-0.5 bg-rose-100 text-rose-800 font-semibold rounded">PDF (.pdf)</span>
+              <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 font-semibold rounded">Text (.txt)</span>
+              <span class="px-2 py-0.5 bg-purple-100 text-purple-800 font-semibold rounded">Backup (.json)</span>
+            </div>
+            <input type="file" id="contractFileInput" accept=".docx,.pdf,.txt,.json" class="hidden" onchange="handleContractFileSelect(this.files)">
+          </div>
+
+          <div id="uploadParsingStatus" class="hidden p-3.5 bg-blue-50 border border-blue-200 rounded-xl text-blue-800 text-xs flex items-center gap-2">
+            <svg class="animate-spin h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+            <span id="uploadParsingStatusText">Đang phân tích dữ liệu hợp đồng...</span>
+          </div>
+
+          <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 flex items-start gap-2">
+            <span>💡</span>
+            <div>
+              <strong>Mẹo nhỏ:</strong> Bạn có file Word (.docx) hoặc PDF hợp đồng đã ký? Chỉ cần kéo thả vào đây, phần mềm sẽ tự động nhận diện Số HĐ, Bên A, bảng danh mục vật tư, tổng tiền và tiến độ thanh toán để lập ngay các biên bản tiếp theo!
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: PASTE RAW TEXT -->
+        <div id="uploadTabPaste" class="hidden space-y-3">
+          <label class="block text-xs font-bold text-slate-700">Dán toàn bộ nội dung hợp đồng có sẵn vào đây:</label>
+          <textarea id="contractPasteText" rows="11" placeholder="Ví dụ copy từ văn bản Word:&#10;HỢP ĐỒNG KINH TẾ&#10;Số: 120626/HĐKT/ABC-HACO&#10;BÊN A: CÔNG TY TNHH...&#10;MST: 0108...&#10;Địa chỉ: ...&#10;ĐIỀU 1. ĐỐI TƯỢNG VÀ GIÁ TRỊ...&#10;Tổng cộng: 100.000.000 VNĐ&#10;ĐIỀU 3. TIẾN ĐỘ THANH TOÁN...&#10;Đợt 1: 50%...&#10;Đợt 2: 50%..." class="w-full text-xs font-mono p-3 rounded-xl border border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition resize-none"></textarea>
+          <button type="button" onclick="handlePasteContractSubmit()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-2">
+            <span>🚀</span> Bóc tách HĐ & Tự động tạo 5 biên bản còn lại
+          </button>
+        </div>
+
+        <!-- Quick Sample Testing -->
+        <div class="pt-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2">
+          <span class="text-xs text-slate-500">Hoặc thử nhanh với dữ liệu mẫu:</span>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="loadSampleToanThang(); closeUploadContractModal(); showExistingContractBanner('120626/HĐKT/TOANTHANG-HACO', 'CÔNG TY TNHH THƯƠNG MẠI ĐẦU TƯ TOÀN THẮNG AUDIO');" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg border border-slate-300 transition">
+              ⭐ Thử mẫu Toàn Thắng (3 Đợt)
+            </button>
+            <button type="button" onclick="loadSampleData(); closeUploadContractModal(); showExistingContractBanner('260524/HĐKT/MINHANH-HACO', 'CÔNG TY TNHH MỘT THÀNH VIÊN TM & DV TIN HỌC MINH ANH');" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg border border-slate-300 transition">
+              ⭐ Thử mẫu Minh Anh (2 Đợt)
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
 
   <!-- MODAL: SỔ THEO DÕI CÔNG NỢ KẾ TOÁN (DEBT TRACKING LEDGER) -->
   <div id="debtLedgerModal" class="no-print fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">

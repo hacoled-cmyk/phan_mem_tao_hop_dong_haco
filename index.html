@@ -1779,6 +1779,7 @@
         container.appendChild(row);
       });
     }
+    const renderItemsTable = function() { renderItemsForm(); };
 
     function toggleIncluded(index, isChecked) {
       items[index].isIncluded = isChecked;
@@ -3232,7 +3233,7 @@
           if (data.buyerPos) document.getElementById('buyerPosition').value = data.buyerPos;
           if (data.items && Array.isArray(data.items)) {
             items = data.items;
-            renderItemsTable();
+            renderItemsForm();
           }
           if (data.installments && Array.isArray(data.installments)) {
             payments = data.installments;
@@ -3461,7 +3462,7 @@
 
       if (parsedItems.length > 0) {
         items = parsedItems;
-        renderItemsTable();
+        renderItemsForm();
       }
 
       if (parsedPayments.length > 0) {

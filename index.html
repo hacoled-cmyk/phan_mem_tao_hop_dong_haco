@@ -2510,102 +2510,395 @@
     }
 
     // Export to Word Document
+    // =========================================================================
+    // XUẤT FILE WORD CHUẨN MSO (CHỐNG NHẢY ĐỊNH DẠNG, CHUẨN A4 NGHỊ ĐỊNH 30)
+    // =========================================================================
+
     function exportToWord(elementId, filename) {
       const el = document.getElementById(elementId);
       if (!el) return;
 
+      // 1. Nhân bản DOM để xử lý chuẩn hóa dành riêng cho Microsoft Word
       const clone = el.cloneNode(true);
+      
+      // Xóa tất cả các nút bấm, thanh công cụ web không in
       clone.querySelectorAll('.no-print').forEach(node => node.remove());
 
-      const header = `
-        <html xmlns:o='urn:schemas-microsoft-com:office:office' 
-              xmlns:w='urn:schemas-microsoft-com:office:word' 
-              xmlns='http://www.w3.org/TR/REC-html40'>
-        <head>
-          <meta charset='utf-8'>
-          <title>${filename}</title>
-          <!--[if gte mso 9]>
-          <xml>
-            <w:WordDocument>
-              <w:View>Print</w:View>
-              <w:Zoom>100</w:Zoom>
-              <w:DoNotOptimizeForBrowser/>
-            </w:WordDocument>
-          </xml>
-          <![endif]-->
-          <style>
-            @page Section1 {
-              size: 21.0cm 29.7cm; /* A4 */
-              margin: 2.0cm 2.0cm 2.0cm 3.0cm; /* Standard VN: Top 2cm, Right 2cm, Bottom 2cm, Left 3cm */
-              mso-header-margin: 36.0pt;
-              mso-footer-margin: 36.0pt;
-              mso-paper-source: 0;
-            }
-            div.Section1 { page: Section1; }
-            body {
-              font-family: 'Times New Roman', serif;
-              font-size: 13pt;
-              line-height: 1.35;
-              color: #000;
-              text-align: justify;
-              text-justify: inter-word;
-            }
-            p {
-              margin: 0 0 5pt 0;
-              line-height: 1.35;
-              text-align: justify;
-              text-justify: inter-word;
-              font-size: 13pt;
-              font-family: 'Times New Roman', serif;
-            }
-            table {
-              border-collapse: collapse;
-              mso-table-lspace: 0pt;
-              mso-table-rspace: 0pt;
-              width: 100%;
-            }
-            .doc-table {
-              border: 1.0pt solid windowtext;
-              margin: 8pt 0;
-            }
-            .doc-table th {
-              border: 1.0pt solid windowtext;
-              background-color: #f2f2f2;
-              font-weight: bold;
-              text-align: center;
-              padding: 4pt 6pt;
-              font-size: 12pt;
-              font-family: 'Times New Roman', serif;
-            }
-            .doc-table td {
-              border: 1.0pt solid windowtext;
-              padding: 4pt 6pt;
-              font-size: 12pt;
-              vertical-align: middle;
-              font-family: 'Times New Roman', serif;
-            }
-            .doc-party-table {
-              border: none !important;
-              margin: 6pt 0;
-            }
-            .doc-party-table td {
-              border: none !important;
-              padding: 2pt 4pt;
-              font-size: 12.5pt;
-              vertical-align: top;
-              font-family: 'Times New Roman', serif;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="Section1">
-            ${clone.innerHTML}
-          </div>
-        </body>
-        </html>
+      // Gỡ bỏ các thuộc tính web editor và style khung A4 web
+      clone.removeAttribute('contenteditable');
+      clone.removeAttribute('spellcheck');
+      clone.classList.remove('document-page', 'edit-mode-active');
+      clone.style.width = '100%';
+      clone.style.padding = '0';
+      clone.style.margin = '0';
+      clone.style.boxShadow = 'none';
+      clone.style.display = 'block';
+
+      // 2. Chuẩn hóa khoảng cách chữ ký (Khắc phục lỗi Word nuốt mất chỗ ký và đóng dấu)
+      clone.querySelectorAll('div').forEach(d => {
+        const h = d.style.height;
+        if (h && (h.includes('70') || h.includes('75') || h.includes('60') || h.includes('80'))) {
+          const p = document.createElement('p');
+          p.className = 'sig-space';
+          p.style.marginTop = '55.0pt';
+          p.style.marginBottom = '0cm';
+          p.style.fontSize = '1pt';
+          p.style.lineHeight = '1pt';
+          p.innerHTML = '&nbsp;';
+          d.parentNode.replaceChild(p, d);
+        }
+      });
+
+      // 3. Chuẩn hóa Quốc hiệu, Tiêu ngữ và Tiêu đề (Khắc phục lỗi giãn cách dòng quá xa trong Word)
+      clone.querySelectorAll('div[style*="text-align: center"]').forEach(ctr => {
+        ctr.querySelectorAll('div').forEach(line => {
+          line.style.marginTop = '0cm';
+          line.style.marginBottom = '2.0pt';
+          line.style.lineHeight = '120%';
+          line.style.fontFamily = "'Times New Roman', serif";
+        });
+      });
+
+      // 4. Chuẩn hóa tất cả các bảng (Khắc phục lỗi vỡ cột, nhảy bảng, viền đen đôi)
+      clone.querySelectorAll('table').forEach(tbl => {
+        tbl.setAttribute('width', '100%');
+        tbl.style.width = '100%';
+        tbl.style.fontFamily = "'Times New Roman', serif";
+        
+        if (tbl.classList.contains('doc-party-table')) {
+          // Bảng thông tin Bên A / Bên B không viền
+          tbl.setAttribute('border', '0');
+          tbl.setAttribute('cellspacing', '0');
+          tbl.setAttribute('cellpadding', '0');
+          tbl.style.border = 'none';
+          tbl.style.borderCollapse = 'collapse';
+          tbl.style.marginTop = '4.0pt';
+          tbl.style.marginBottom = '6.0pt';
+          tbl.querySelectorAll('td').forEach(td => {
+            td.style.border = 'none';
+            td.style.padding = '2.0pt 3.0pt';
+            td.style.verticalAlign = 'top';
+            td.style.fontFamily = "'Times New Roman', serif";
+            td.style.fontSize = '12.5pt';
+            td.style.lineHeight = '125%';
+          });
+        } else if (tbl.classList.contains('doc-table')) {
+          // Bảng danh mục hàng hóa / chi phí có viền nét đơn chuẩn
+          tbl.setAttribute('border', '1');
+          tbl.setAttribute('cellspacing', '0');
+          tbl.setAttribute('cellpadding', '0');
+          tbl.style.borderCollapse = 'collapse';
+          tbl.style.border = 'none';
+          tbl.style.marginTop = '6.0pt';
+          tbl.style.marginBottom = '6.0pt';
+          tbl.querySelectorAll('th').forEach(th => {
+            th.style.border = '0.5pt solid #000000';
+            th.style.backgroundColor = '#F2F2F2';
+            th.style.padding = '4.0pt 5.0pt';
+            th.style.textAlign = 'center';
+            th.style.fontWeight = 'bold';
+            th.style.fontFamily = "'Times New Roman', serif";
+            th.style.fontSize = '12.0pt';
+            th.style.verticalAlign = 'middle';
+          });
+          tbl.querySelectorAll('td').forEach(td => {
+            td.style.border = '0.5pt solid #000000';
+            td.style.padding = '3.5pt 5.0pt';
+            td.style.fontFamily = "'Times New Roman', serif";
+            td.style.fontSize = '12.0pt';
+            td.style.verticalAlign = 'middle';
+          });
+        } else if (tbl.style.marginTop && tbl.style.marginTop.includes('30')) {
+          // Bảng chữ ký 2 bên
+          tbl.setAttribute('border', '0');
+          tbl.setAttribute('cellspacing', '0');
+          tbl.setAttribute('cellpadding', '0');
+          tbl.style.border = 'none';
+          tbl.style.borderCollapse = 'collapse';
+          tbl.style.marginTop = '20.0pt';
+          tbl.style.pageBreakInside = 'avoid';
+          tbl.querySelectorAll('td').forEach(td => {
+            td.style.border = 'none';
+            td.style.textAlign = 'center';
+            td.style.verticalAlign = 'top';
+            td.style.padding = '0';
+            td.style.fontFamily = "'Times New Roman', serif";
+          });
+        }
+      });
+
+      // 5. Chuẩn hóa tiêu đề điều khoản (Tránh bị cắt đôi sang trang mới)
+      clone.querySelectorAll('.doc-article-title').forEach(h => {
+        h.style.pageBreakAfter = 'avoid';
+        h.style.fontWeight = 'bold';
+        h.style.fontSize = '13.0pt';
+        h.style.textTransform = 'uppercase';
+        h.style.marginTop = '9.0pt';
+        h.style.marginBottom = '3.0pt';
+        h.style.fontFamily = "'Times New Roman', serif";
+      });
+      clone.querySelectorAll('.doc-sub-title').forEach(h => {
+        h.style.pageBreakAfter = 'avoid';
+        h.style.fontWeight = 'bold';
+        h.style.fontSize = '13.0pt';
+        h.style.marginTop = '6.0pt';
+        h.style.marginBottom = '2.0pt';
+        h.style.fontFamily = "'Times New Roman', serif";
+      });
+
+      // 6. Chuẩn hóa thụt đầu dòng đoạn văn và dấu gạch đầu dòng (Nghị định 30)
+      clone.querySelectorAll('.doc-bullet').forEach(b => {
+        b.style.marginLeft = '21.3pt';
+        b.style.textIndent = '-21.3pt';
+        b.style.textAlign = 'justify';
+        b.style.lineHeight = '130%';
+        b.style.marginTop = '0cm';
+        b.style.marginBottom = '3.0pt';
+        b.style.fontFamily = "'Times New Roman', serif";
+        b.style.fontSize = '13.0pt';
+      });
+      clone.querySelectorAll('.doc-subbullet').forEach(b => {
+        b.style.marginLeft = '35.4pt';
+        b.style.textIndent = '-14.15pt';
+        b.style.textAlign = 'justify';
+        b.style.lineHeight = '130%';
+        b.style.marginTop = '0cm';
+        b.style.marginBottom = '2.0pt';
+        b.style.fontFamily = "'Times New Roman', serif";
+        b.style.fontSize = '13.0pt';
+      });
+      clone.querySelectorAll('.doc-p').forEach(p => {
+        p.style.textIndent = '28.35pt'; // Đúng chuẩn 1.0cm
+        p.style.textAlign = 'justify';
+        p.style.lineHeight = '130%';
+        p.style.marginTop = '0cm';
+        p.style.marginBottom = '4.0pt';
+        p.style.fontFamily = "'Times New Roman', serif";
+        p.style.fontSize = '13.0pt';
+      });
+      clone.querySelectorAll('.doc-words').forEach(p => {
+        p.style.fontStyle = 'italic';
+        p.style.fontSize = '12.0pt';
+        p.style.marginTop = '2.0pt';
+        p.style.marginBottom = '5.0pt';
+        p.style.fontFamily = "'Times New Roman', serif";
+      });
+
+      // 7. Tạo tài liệu MSO WordHTML Hoàn chỉnh (Mở đúng Print Layout chuẩn A4)
+      const wordDocument = `
+<html xmlns:v="urn:schemas-microsoft-com:vml"
+xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns:m="http://schemas.microsoft.com/office/2004/12/omml"
+xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="ProgId" content="Word.Document">
+  <meta name="Generator" content="Microsoft Word 15">
+  <meta name="Originator" content="Microsoft Word 15">
+  <title>${escapeHtml(filename)}</title>
+  <!--[if gte mso 9]>
+  <xml>
+    <w:WordDocument>
+      <w:View>Print</w:View>
+      <w:Zoom>100</w:Zoom>
+      <w:DoNotOptimizeForBrowser/>
+      <w:TrackMoves>false</w:TrackMoves>
+      <w:TrackFormatting/>
+      <w:ValidateAgainstSchemas/>
+      <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
+      <w:IgnoreMixedContent>false</w:IgnoreMixedContent>
+      <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
+      <w:DoNotPromoteQF/>
+      <w:LidThemeOther>EN-US</w:LidThemeOther>
+      <w:LidThemeAsian>X-NONE</w:LidThemeAsian>
+      <w:LidThemeComplexScript>X-NONE</w:LidThemeComplexScript>
+      <w:Compatibility>
+        <w:BreakWrappedTables/>
+        <w:SnapToGridInCell/>
+        <w:WrapTextWithPunct/>
+        <w:UseAsianBreakRules/>
+        <w:DontGrowAutofit/>
+        <w:SplitPgBreakAndParaMark/>
+        <w:EnableOpenTypeKerning/>
+        <w:DontFlipMirrorIndents/>
+        <w:OverrideTableStyleHps/>
+      </w:Compatibility>
+    </w:WordDocument>
+  </xml>
+  <![endif]-->
+  <style>
+    /* Thiết lập khổ giấy A4 và lề chuẩn theo Nghị định 30/2020/NĐ-CP */
+    @page Section1 {
+      size: 595.3pt 841.9pt; /* A4: 21.0cm x 29.7cm */
+      margin: 56.7pt 56.7pt 56.7pt 85.05pt; /* Trên 2.0cm, Dưới 2.0cm, Phải 2.0cm, Trái 3.0cm */
+      mso-header-margin: 35.4pt;
+      mso-footer-margin: 35.4pt;
+      mso-paper-source: 0;
+    }
+    div.Section1 {
+      page: Section1;
+    }
+
+    body {
+      font-family: 'Times New Roman', serif;
+      font-size: 13.0pt;
+      line-height: 1.3;
+      mso-line-height-rule: exactly;
+      color: #000000;
+      text-align: justify;
+      text-justify: inter-ideograph;
+    }
+
+    p, div, li {
+      font-family: 'Times New Roman', serif;
+      font-size: 13.0pt;
+      line-height: 1.3;
+      mso-line-height-rule: exactly;
+      margin-top: 0cm;
+      margin-bottom: 4.0pt;
+      color: #000000;
+    }
+
+    .doc-article-title {
+      font-family: 'Times New Roman', serif;
+      font-weight: bold;
+      font-size: 13.0pt;
+      text-transform: uppercase;
+      margin-top: 9.0pt;
+      margin-bottom: 3.0pt;
+      page-break-after: avoid;
+      mso-pagination: lines-together;
+    }
+
+    .doc-sub-title {
+      font-family: 'Times New Roman', serif;
+      font-weight: bold;
+      font-size: 13.0pt;
+      margin-top: 6.0pt;
+      margin-bottom: 2.0pt;
+      page-break-after: avoid;
+    }
+
+    .doc-p {
+      margin-top: 0cm;
+      margin-bottom: 4.0pt;
+      text-indent: 28.35pt !important;
+      mso-char-indent-count: 2.0;
+      line-height: 1.3;
+      mso-line-height-rule: exactly;
+      text-align: justify;
+      font-size: 13.0pt;
+      font-family: 'Times New Roman', serif;
+    }
+
+    .doc-bullet {
+      margin-top: 0cm;
+      margin-bottom: 3.0pt;
+      margin-left: 21.3pt !important;
+      text-indent: -21.3pt !important;
+      mso-para-margin-left: 21.3pt;
+      line-height: 1.3;
+      mso-line-height-rule: exactly;
+      text-align: justify;
+      font-size: 13.0pt;
+      font-family: 'Times New Roman', serif;
+    }
+
+    .doc-subbullet {
+      margin-top: 0cm;
+      margin-bottom: 2.0pt;
+      margin-left: 35.4pt !important;
+      text-indent: -14.15pt !important;
+      mso-para-margin-left: 35.4pt;
+      line-height: 1.3;
+      mso-line-height-rule: exactly;
+      text-align: justify;
+      font-size: 13.0pt;
+      font-family: 'Times New Roman', serif;
+    }
+
+    .doc-words {
+      font-style: italic;
+      font-size: 12.0pt;
+      margin-top: 2.0pt;
+      margin-bottom: 5.0pt;
+      text-indent: 0cm;
+      font-family: 'Times New Roman', serif;
+    }
+
+    table {
+      border-collapse: collapse;
+      mso-table-lspace: 0pt;
+      mso-table-rspace: 0pt;
+      width: 100%;
+    }
+
+    table.doc-table {
+      border: none;
+      mso-border-alt: solid windowtext .5pt;
+      mso-table-layout-alt: fixed;
+      margin-top: 6.0pt;
+      margin-bottom: 6.0pt;
+      width: 100%;
+    }
+
+    table.doc-table th {
+      border: 0.5pt solid windowtext;
+      mso-border-alt: solid windowtext .5pt;
+      background: #F2F2F2;
+      padding: 4.0pt 5.0pt;
+      text-align: center;
+      font-weight: bold;
+      font-size: 12.0pt;
+      font-family: 'Times New Roman', serif;
+      vertical-align: middle;
+    }
+
+    table.doc-table td {
+      border: 0.5pt solid windowtext;
+      mso-border-alt: solid windowtext .5pt;
+      padding: 3.5pt 5.0pt;
+      font-size: 12.0pt;
+      font-family: 'Times New Roman', serif;
+      vertical-align: middle;
+    }
+
+    table.doc-party-table {
+      border: none !important;
+      mso-border-alt: none !important;
+      margin-top: 3.0pt;
+      margin-bottom: 5.0pt;
+      width: 100%;
+    }
+
+    table.doc-party-table td {
+      border: none !important;
+      mso-border-alt: none !important;
+      padding: 1.5pt 3.0pt;
+      font-size: 12.5pt;
+      font-family: 'Times New Roman', serif;
+      vertical-align: top;
+    }
+
+    .sig-space {
+      margin-top: 55.0pt;
+      margin-bottom: 0cm;
+      font-size: 1pt;
+      line-height: 1pt;
+    }
+  </style>
+</head>
+<body>
+  <div class="Section1">
+    ${clone.innerHTML}
+  </div>
+</body>
+</html>
       `;
 
-      const blob = new Blob(['\ufeff', header], { type: 'application/msword;charset=utf-8' });
+      // 8. Xuất file với BOM UTF-8 chuẩn
+      const blob = new Blob(['\ufeff', wordDocument], { type: 'application/msword;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
